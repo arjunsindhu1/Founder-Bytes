@@ -1,0 +1,22 @@
+User-agent: *
+Allow: /
+
+# Googlebot-News specific directives
+User-agent: Googlebot-News
+Allow: /
+Allow: /news/
+Allow: /startups/
+Allow: /business/
+Allow: /technology/
+Allow: /ai/
+Allow: /funding/
+Allow: /founders/
+Allow: /companies/
+
+# Prevent indexing of search query parameter URLs
+Disallow: /*?search=*
+Disallow: /*?q=*
+
+# Sitemaps
+Sitemap: https://founderbytes.in/sitemap.xml
+Sitemap: https://founderbytes.in/news-sitemap.xml

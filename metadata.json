@@ -1,0 +1,6 @@
+{
+  "name": "FOUNDER BYTES - India's Business & Startup Magazine",
+  "description": "India's premier digital business, startup news, and founder intelligence publication. The digital home of The Founder Magazine.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

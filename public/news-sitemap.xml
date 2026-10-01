@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
+  <url>
+    <loc>https://founderbytes.in/news/amazon-quick-commerce-expansion-india</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-01T20:15:00+05:30</news:publication_date>
+      <news:title>Amazon Accelerates Quick-Commerce Rollout in India as Ultra-Fast Grocery War Intensifies</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/startups/moneyview-public-listing-fintech-profitability</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-01T19:30:00+05:30</news:publication_date>
+      <news:title>Fintech Lender Moneyview Debuts on Indian Bourses Following Strong Margin Expansion</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/ai/indic-llms-deeptech-enterprise-adoption</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-01T18:45:00+05:30</news:publication_date>
+      <news:title>How Sovereign AI and Indic Language Models Are Reshaping Enterprise Software in India</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/funding/bengaluru-deeptech-semiconductor-fund-series-b</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-01T17:15:00+05:30</news:publication_date>
+      <news:title>Fabless Semiconductor Startups Secure $180M as India Pushes Silicon Self-Reliance</news:title>
+    </news:news>
+  </url>
+</urlset>

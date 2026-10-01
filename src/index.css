@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Newsreader', Georgia, 'Times New Roman', serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --color-brand-yellow: #F5B800;
+  --color-brand-yellow-dark: #DF9E00;
+  --color-brand-black: #111111;
+}
+
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    color: #111111;
+    background-color: #FFFFFF;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, .editorial-heading {
+    text-wrap: balance;
+  }
+}
+
+/* Custom editorial styles */
+.editorial-serif {
+  font-family: var(--font-serif);
+}
+
+.editorial-dropcap::first-letter {
+  font-family: var(--font-serif);
+  font-size: 3.5rem;
+  line-height: 0.9;
+  float: left;
+  margin-top: 0.15rem;
+  margin-right: 0.75rem;
+  font-weight: 700;
+  color: #111111;
+}
+
+/* Newspaper Hairline Dividers */
+.news-rule {
+  border-bottom: 1px solid #E5E5E5;
+}
+
+.news-col-divider {
+  border-right: 1px solid #E5E5E5;
+}
+
+/* Real Seamless Infinite Marquee Ticker */
+@keyframes tickerScroll {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-fb-ticker {
+  display: flex;
+  width: max-content;
+  animation: tickerScroll 38s linear infinite;
+  will-change: transform;
+}
+
+.animate-fb-ticker:hover {
+  animation-play-state: paused;
+}
+
+/* Hide scrollbars completely while keeping content accessible */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
