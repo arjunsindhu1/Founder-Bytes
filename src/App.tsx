@@ -240,8 +240,9 @@ export default function App() {
   // Lead hero resolution
   const featuredArticles = mappedArticles.filter((a) => a.isLeadHero);
   const leadHeroArticle = featuredArticles[0] || mappedArticles[0];
-  const subLeadArticles = mappedArticles.filter((a) => a.id !== leadHeroArticle?.id).slice(0, 2);
-  const secondaryHeroArticles = mappedArticles.filter((a) => a.id !== leadHeroArticle?.id).slice(2, 6);
+  const nonLeadArticles = mappedArticles.filter((a) => a.id !== leadHeroArticle?.id);
+  const subLeadArticles = nonLeadArticles.slice(0, 2);
+  const secondaryHeroArticles = nonLeadArticles.slice(2, 8);
 
   const trendingArticles = mappedArticles.filter((a) => a.isTrending);
 

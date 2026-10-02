@@ -385,6 +385,47 @@ export const ContentService = {
     });
   },
 
+  // Helper to map Mock Article into CMSArticle format
+  mapMockToCMS(art: any): CMSArticle {
+    return {
+      id: art.id,
+      slug: art.slug,
+      title: art.title,
+      subtitle: art.dek,
+      category_id: `cat-${art.categorySlug}`,
+      category_name: art.category,
+      category_slug: art.categorySlug,
+      sub_category: art.subCategory,
+      author_id: 'author-arjun-sindhu',
+      author_name: 'Arjun Sindhu',
+      author_role: 'Founder & Editor-in-Chief',
+      author_avatar: AUTHORS['arjun-sindhu'].avatar,
+      featured_image: art.featuredImage,
+      image_caption: art.imageCaption,
+      image_credit: art.imageCredit,
+      content_blocks: art.content.map((p: string, i: number) => ({
+        id: `block-${art.id}-${i}`,
+        block_type: 'paragraph' as const,
+        position: i,
+        content: p,
+      })),
+      raw_paragraphs: art.content,
+      status: (art.status as any) || 'published',
+      published_at: art.publishedAt,
+      reading_time_minutes: art.readingTimeMinutes,
+      tags: art.tags || [],
+      source_name: art.sources?.[0]?.name,
+      source_url: art.sources?.[0]?.url,
+      is_featured: Boolean(art.isLeadHero),
+      is_trending: Boolean(art.isTrending),
+      is_breaking: false,
+      is_editor_pick: Boolean(art.isEditorPick),
+      priority: art.isLeadHero ? 100 : 0,
+      seo_title: art.seoTitle || art.title,
+      seo_description: art.seoDescription || art.dek,
+    };
+  },
+
   // 1. ARTICLES
   async getArticles(filter?: {
     category?: string;
@@ -452,8 +493,36 @@ export const ContentService = {
             is_sponsored: Boolean(d.is_sponsored),
             sponsor_name: d.sponsor_name,
           }));
+
+          // Merge any verified default articles not yet in Supabase
+          for (const art of ARTICLES) {
+            if (!mapped.some((m) => m.slug === art.slug || m.id === art.id)) {
+              const cmsArt = this.mapMockToCMS(art);
+              mapped.push(cmsArt);
+              this.saveArticle(cmsArt).catch(() => {});
+            }
+          }
+
+          mapped.sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime());
           localStorage.setItem(STORAGE_KEYS.ARTICLES, JSON.stringify(mapped));
-          return mapped;
+          
+          let filteredMapped = mapped;
+          if (filter?.status && filter.status !== 'all') {
+            filteredMapped = filteredMapped.filter((a) => a.status === filter.status);
+          }
+          if (filter?.category && filter.category !== 'all') {
+            filteredMapped = filteredMapped.filter((a) => a.category_slug === filter.category);
+          }
+          if (filter?.is_trending) {
+            filteredMapped = filteredMapped.filter((a) => a.is_trending);
+          }
+          if (filter?.is_featured) {
+            filteredMapped = filteredMapped.filter((a) => a.is_featured);
+          }
+          if (filter?.limit) {
+            filteredMapped = filteredMapped.slice(0, filter.limit);
+          }
+          return filteredMapped;
         }
       } catch (err) {
         console.warn('Supabase getArticles error, using local storage:', err);
@@ -464,49 +533,26 @@ export const ContentService = {
     const stored = localStorage.getItem(STORAGE_KEYS.ARTICLES);
     let all: CMSArticle[] = [];
     if (!stored) {
-      all = ARTICLES.map((art) => ({
-        id: art.id,
-        slug: art.slug,
-        title: art.title,
-        subtitle: art.dek,
-        category_id: `cat-${art.categorySlug}`,
-        category_name: art.category,
-        category_slug: art.categorySlug,
-        sub_category: art.subCategory,
-        author_id: 'author-arjun-sindhu',
-        author_name: 'Arjun Sindhu',
-        author_role: 'Founder & Editor-in-Chief',
-        author_avatar: AUTHORS['arjun-sindhu'].avatar,
-        featured_image: art.featuredImage,
-        image_caption: art.imageCaption,
-        image_credit: art.imageCredit,
-        content_blocks: art.content.map((p, i) => ({
-          id: `block-${art.id}-${i}`,
-          block_type: 'paragraph',
-          position: i,
-          content: p,
-        })),
-        raw_paragraphs: art.content,
-        status: (art.status as any) || 'published',
-        published_at: art.publishedAt,
-        reading_time_minutes: art.readingTimeMinutes,
-        tags: art.tags,
-        source_name: art.sources?.[0]?.name,
-        source_url: art.sources?.[0]?.url,
-        is_featured: Boolean(art.isLeadHero),
-        is_trending: Boolean(art.isTrending),
-        is_breaking: false,
-        is_editor_pick: Boolean(art.isEditorPick),
-        priority: art.isLeadHero ? 100 : 0,
-        seo_title: art.title,
-        seo_description: art.dek,
-      }));
+      all = ARTICLES.map((art) => this.mapMockToCMS(art));
+      all.sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime());
       localStorage.setItem(STORAGE_KEYS.ARTICLES, JSON.stringify(all));
     } else {
       try {
         all = JSON.parse(stored);
+        let updated = false;
+        for (const art of ARTICLES) {
+          if (!all.some((a) => a.id === art.id || a.slug === art.slug)) {
+            all.push(this.mapMockToCMS(art));
+            updated = true;
+          }
+        }
+        all.sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime());
+        if (updated) {
+          localStorage.setItem(STORAGE_KEYS.ARTICLES, JSON.stringify(all));
+        }
       } catch {
-        all = [];
+        all = ARTICLES.map((art) => this.mapMockToCMS(art));
+        all.sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime());
       }
     }
 

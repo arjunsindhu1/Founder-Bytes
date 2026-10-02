@@ -1,4 +1,5 @@
 import { Article, Author, BreakingNewsItem, Category, MagazineIssue } from '../types';
+import { VERIFIED_RECENT_ARTICLES } from './verifiedRecentArticles';
 
 export const AUTHORS: Record<string, Author> = {
   'arjun-sindhu': {
@@ -381,6 +382,7 @@ export const ARTICLES: Article[] = [
     ],
     canonicalUrl: 'https://founderbytes.in/founders/ananya-deshmukh-kisangrid-agricultural-robotics',
   },
+  ...VERIFIED_RECENT_ARTICLES,
 ];
 
 export const CURRENT_MAGAZINE_ISSUE: MagazineIssue = {

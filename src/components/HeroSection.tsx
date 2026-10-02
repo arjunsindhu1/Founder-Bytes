@@ -155,12 +155,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             </div>
 
             {/* Vertical list of stories */}
-            <div className="divide-y divide-neutral-200 flex-1 flex flex-col justify-between">
-              {secondaryArticles.slice(0, 4).map((story) => (
+            <div className="divide-y divide-neutral-200 border-b border-neutral-200">
+              {secondaryArticles.slice(0, 6).map((story) => (
                 <article
                   key={story.id}
                   onClick={() => onSelectArticle(story.slug)}
-                  className="group py-3.5 first:pt-0 last:pb-0 cursor-pointer flex gap-3.5 items-start"
+                  className="group py-2.5 sm:py-3 cursor-pointer flex gap-3.5 items-start"
                 >
                   {/* Small Real Thumbnail */}
                   <div className="w-24 h-18 bg-neutral-100 shrink-0 overflow-hidden">
@@ -194,7 +194,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             </div>
 
             {/* Quick Market Sentiment / Pulse Box at base of column */}
-            <div className="mt-6 p-3.5 bg-neutral-100 border border-neutral-300 font-mono text-xs">
+            <div className="mt-5 p-3.5 bg-neutral-100 border border-neutral-300 font-mono text-xs">
               <div className="text-[10px] font-bold text-neutral-600 uppercase tracking-widest mb-1">
                 VENTURE TRACKER · OCT 2026
               </div>
