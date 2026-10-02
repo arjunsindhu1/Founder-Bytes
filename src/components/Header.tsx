@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { FounderBytesLogo } from './FounderBytesLogo';
 import { getCurrentISTDate } from '../utils/dateUtils';
 import { Search, Menu, X, ArrowUpRight, TrendingUp, Twitter, Linkedin, Instagram } from 'lucide-react';
-import { CATEGORIES } from '../data/mockData';
 import { PolicyPageType } from './PolicyPage';
 
 interface HeaderProps {

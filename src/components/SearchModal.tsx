@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { ARTICLES, AUTHORS } from '../data/mockData';
+import { Article } from '../types';
 import { Search, X, Calendar, User, ArrowRight } from 'lucide-react';
 import { formatISTDateTime } from '../utils/dateUtils';
 
@@ -8,6 +8,7 @@ interface SearchModalProps {
   onClose: () => void;
   onSelectArticle: (slug: string) => void;
   onSelectAuthor: (authorSlug: string) => void;
+  articles?: Article[];
 }
 
 export const SearchModal: React.FC<SearchModalProps> = ({
@@ -15,6 +16,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
   onClose,
   onSelectArticle,
   onSelectAuthor,
+  articles = [],
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
@@ -38,28 +40,38 @@ export const SearchModal: React.FC<SearchModalProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  // Filter articles and authors
+  // Filter articles
   const filteredArticles = useMemo(() => {
     if (!debouncedQuery) return [];
     const q = debouncedQuery.toLowerCase();
-    return ARTICLES.filter((art) => {
+    return articles.filter((art) => {
       return (
         art.title.toLowerCase().includes(q) ||
         art.dek.toLowerCase().includes(q) ||
         art.category.toLowerCase().includes(q) ||
         art.author.name.toLowerCase().includes(q) ||
-        art.tags.some((t) => t.toLowerCase().includes(q))
+        art.tags?.some((t) => t.toLowerCase().includes(q))
       );
     });
-  }, [debouncedQuery]);
+  }, [debouncedQuery, articles]);
 
   const matchedAuthors = useMemo(() => {
     if (!debouncedQuery) return [];
     const q = debouncedQuery.toLowerCase();
-    return Object.values(AUTHORS).filter(
-      (a) => a.name.toLowerCase().includes(q) || a.role.toLowerCase().includes(q)
-    );
+    if ('arjun sindhu'.includes(q) || 'editor'.includes(q) || 'founder'.includes(q)) {
+      return [
+        {
+          id: 'a925a3a4-abd9-4ebb-8966-b5fed4592371',
+          name: 'Arjun Sindhu',
+          slug: 'arjun-sindhu',
+          role: 'Founder & Editor-in-Chief',
+          avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+        },
+      ];
+    }
+    return [];
   }, [debouncedQuery]);
+
 
   if (!isOpen) return null;
 
@@ -109,7 +121,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                 POPULAR TOPICS ACROSS FOUNDER BYTES
               </p>
               <div className="flex flex-wrap justify-center gap-2 mt-3">
-                {['Quick Commerce', 'Fintech IPOs', 'Indic AI', 'Semiconductors', 'Venture Capital', 'Ather Energy'].map((topic) => (
+                {['Electric Vehicles', 'Vernacular AI', 'Deeptech', 'Semiconductors', 'Venture Capital', 'OptoSAR'].map((topic) => (
                   <button
                     key={topic}
                     onClick={() => setSearchTerm(topic)}

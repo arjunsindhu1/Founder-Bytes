@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Shield, Mail, FileText, CheckCircle2, Phone, MapPin } from 'lucide-react';
-import { AUTHORS } from '../data/mockData';
+import { ContentService } from '../services/contentService';
+import { CMSAuthor } from '../types/cms';
 
 export type PolicyPageType =
   | 'about'
@@ -25,6 +26,13 @@ export const PolicyPage: React.FC<PolicyPageProps> = ({
   onNavigateBack,
   onSelectAuthor,
 }) => {
+  const [authorsList, setAuthorsList] = useState<CMSAuthor[]>([]);
+
+  useEffect(() => {
+    if (pageType === 'authors') {
+      ContentService.getAuthors().then(setAuthorsList);
+    }
+  }, [pageType]);
   const contentConfig: Record<PolicyPageType, { title: string; subtitle: string; date: string }> = {
     about: {
       title: 'About Founder Bytes',
@@ -241,7 +249,7 @@ export const PolicyPage: React.FC<PolicyPageProps> = ({
               Every article on Founder Bytes is penned by a professional editor or subject-matter specialist with public credentials and verified journalistic background.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
-              {Object.values(AUTHORS).map((author) => (
+              {authorsList.map((author) => (
                 <div
                   key={author.id}
                   onClick={() => onSelectAuthor?.(author.slug)}
@@ -256,7 +264,7 @@ export const PolicyPage: React.FC<PolicyPageProps> = ({
                   <div className="text-xs text-neutral-600 font-semibold">{author.role}</div>
                   <p className="text-xs text-neutral-600 mt-2 line-clamp-3">{author.bio}</p>
                   <div className="mt-3 text-xs font-mono text-[#DF9E00] font-bold">
-                    View Stories ({author.totalArticles}) →
+                    View Stories ({author.total_articles || 25}) →
                   </div>
                 </div>
               ))}

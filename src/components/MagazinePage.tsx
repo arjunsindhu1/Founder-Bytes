@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CURRENT_MAGAZINE_ISSUE, ARTICLES } from '../data/mockData';
+import { DEFAULT_MAGAZINE_ISSUE } from '../constants/magazine';
 import { ContentService } from '../services/contentService';
 import { CMSMagazineIssue } from '../types/cms';
 import { MagazineFlipbook } from './MagazineFlipbook';
@@ -34,17 +34,17 @@ export const MagazinePage: React.FC<MagazinePageProps> = ({
 
   const issue: CMSMagazineIssue = issues[0] || {
     id: 'issue-01',
-    issue_number: CURRENT_MAGAZINE_ISSUE.issueNumber,
-    season: CURRENT_MAGAZINE_ISSUE.season,
-    title: CURRENT_MAGAZINE_ISSUE.title,
-    dek: CURRENT_MAGAZINE_ISSUE.dek,
-    cover_image: CURRENT_MAGAZINE_ISSUE.coverImage,
-    published_date: CURRENT_MAGAZINE_ISSUE.publishedDate,
-    theme: CURRENT_MAGAZINE_ISSUE.theme,
+    issue_number: DEFAULT_MAGAZINE_ISSUE.issueNumber,
+    season: DEFAULT_MAGAZINE_ISSUE.season,
+    title: DEFAULT_MAGAZINE_ISSUE.title,
+    dek: DEFAULT_MAGAZINE_ISSUE.dek,
+    cover_image: DEFAULT_MAGAZINE_ISSUE.coverImage,
+    published_date: DEFAULT_MAGAZINE_ISSUE.publishedDate,
+    theme: DEFAULT_MAGAZINE_ISSUE.theme,
     is_featured: true,
     is_published: true,
-    featured_founders: CURRENT_MAGAZINE_ISSUE.featuredFounders,
-    table_of_contents: CURRENT_MAGAZINE_ISSUE.tableOfContents,
+    featured_founders: DEFAULT_MAGAZINE_ISSUE.featuredFounders,
+    table_of_contents: DEFAULT_MAGAZINE_ISSUE.tableOfContents,
   };
 
   const handleInquiry = (e: React.FormEvent) => {
@@ -192,7 +192,7 @@ export const MagazinePage: React.FC<MagazinePageProps> = ({
                       <span>Open Digital Flipbook</span>
                     </button>
                     <button
-                      onClick={() => onSelectArticle('news/amazon-quick-commerce-expansion-india')}
+                      onClick={() => onSelectArticle((issue as any).coverStorySlug || 'startups/simple-energy-raises-1750-crore-series-c-electric-scooters')}
                       className="px-5 py-3 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-xs font-bold uppercase tracking-wider transition-colors inline-flex items-center gap-2 cursor-pointer"
                     >
                       <span>Read Cover Feature</span>
@@ -263,7 +263,7 @@ export const MagazinePage: React.FC<MagazinePageProps> = ({
                     </p>
                   </div>
                   <button
-                    onClick={() => onSelectArticle('founders/tarun-mehta-ather-energy-two-wheeler-manufacturing')}
+                    onClick={() => onSelectArticle(founder.slug || 'startups/simple-energy-raises-1750-crore-series-c-electric-scooters')}
                     className="mt-4 pt-3 border-t border-neutral-200 text-xs font-bold uppercase tracking-wider text-black hover:text-[#DF9E00] flex items-center justify-between"
                   >
                     <span>Read Profile</span>

@@ -18,10 +18,52 @@ import { AdSlot } from './components/AdSlot';
 import { AdminLoginModal } from './components/AdminLoginModal';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { MagazineFlipbook } from './components/MagazineFlipbook';
+import { SEOHead } from './components/SEOHead';
 import { ContentService } from './services/contentService';
 import { CMSArticle, CMSSection, CMSMagazineIssue } from './types/cms';
 import { Article, MagazineIssue } from './types';
-import { CURRENT_MAGAZINE_ISSUE } from './data/mockData';
+import { DEFAULT_MAGAZINE_ISSUE } from './constants/magazine';
+
+function matchCategory(articleCategorySlug?: string, articleCategoryName?: string, targetCategory?: string): boolean {
+  if (!targetCategory || targetCategory === 'all') return true;
+  const normTarget = targetCategory.toLowerCase().replace(/-news$/, '').trim();
+  const aSlug = (articleCategorySlug || '').toLowerCase().trim();
+  const aName = (articleCategoryName || '').toLowerCase().trim();
+
+  if (normTarget === 'startups' || normTarget === 'startup') {
+    return aSlug === 'startups' || aSlug === 'startup' || aName === 'startups' || aName === 'startup';
+  }
+  if (normTarget === 'tech' || normTarget === 'technology') {
+    return aSlug === 'tech' || aSlug === 'technology' || aName === 'tech' || aName === 'technology';
+  }
+  if (normTarget === 'business') {
+    return aSlug === 'business' || aName === 'business';
+  }
+  if (normTarget === 'ai' || normTarget === 'artificial intelligence') {
+    return aSlug === 'ai' || aName === 'ai';
+  }
+  if (normTarget === 'funding' || normTarget === 'venture') {
+    return aSlug === 'funding' || aName === 'funding';
+  }
+  if (normTarget === 'founders' || normTarget === 'founder') {
+    return aSlug === 'founders' || aName === 'founders';
+  }
+  if (normTarget === 'innovation') {
+    return aSlug === 'innovation' || aName === 'innovation';
+  }
+  return aSlug === normTarget || aName === normTarget;
+}
+
+const DEFAULT_FALLBACK_SECTIONS: CMSSection[] = [
+  { id: 'sec-hero', name: 'Top News Lead & Desk Wire', slug: 'main-hero', section_type: 'hero', description: '', display_order: 1, is_visible: true, story_count: 5, layout_type: 'startup-split', created_at: '', updated_at: '' },
+  { id: 'sec-wire-trending', name: 'Latest News Wire & Trending Stories', slug: 'latest-trending', section_type: 'wire-trending', description: '', display_order: 2, is_visible: true, story_count: 5, layout_type: 'startup-split', created_at: '', updated_at: '' },
+  { id: 'sec-startups', name: 'Startup News & Unit Economics', slug: 'startups', section_type: 'category', category_slug: 'startups', description: '', display_order: 3, is_visible: true, story_count: 4, layout_type: 'startup-split', created_at: '', updated_at: '' },
+  { id: 'sec-business', name: 'Business, Banking & Enterprise Economy', slug: 'business', section_type: 'category', category_slug: 'business', description: '', display_order: 4, is_visible: true, story_count: 3, layout_type: 'grid-3', created_at: '', updated_at: '' },
+  { id: 'sec-tech', name: 'Technology, Semiconductors & AI', slug: 'tech', section_type: 'category', category_slug: 'tech', description: '', display_order: 5, is_visible: true, story_count: 3, layout_type: 'tech-grid', created_at: '', updated_at: '' },
+  { id: 'sec-funding', name: 'Venture Capital & Deal Flow', slug: 'funding', section_type: 'category', category_slug: 'funding', description: '', display_order: 6, is_visible: true, story_count: 3, layout_type: 'funding-table', created_at: '', updated_at: '' },
+  { id: 'sec-founders', name: 'Founders & Builders', slug: 'founders', section_type: 'category', category_slug: 'founders', description: '', display_order: 7, is_visible: true, story_count: 3, layout_type: 'founders-mosaic', created_at: '', updated_at: '' },
+  { id: 'sec-magazine', name: 'The Founder Magazine Quarterly Showcase', slug: 'the-founder-magazine', section_type: 'magazine', description: '', display_order: 8, is_visible: true, story_count: 1, layout_type: 'horizontal-list', created_at: '', updated_at: '' },
+];
 
 // Helper to convert CMSArticle to public Article
 function mapCMSArticleToArticle(c: CMSArticle): Article {
@@ -80,7 +122,7 @@ export default function App() {
   // Dynamic CMS state
   const [articles, setArticles] = useState<CMSArticle[]>([]);
   const [sections, setSections] = useState<CMSSection[]>([]);
-  const [magazineIssue, setMagazineIssue] = useState<MagazineIssue>(CURRENT_MAGAZINE_ISSUE);
+  const [magazineIssue, setMagazineIssue] = useState<MagazineIssue>(DEFAULT_MAGAZINE_ISSUE);
 
   // Load content from dynamic ContentService
   const loadDynamicContent = async () => {
@@ -168,16 +210,31 @@ export default function App() {
       }
 
       // Check article matching slug
-      const foundArticle = articles.find((a) => a.slug === path);
+      const foundArticle = articles.find((a) => a.slug === path || a.slug.endsWith('/' + path) || path.endsWith('/' + a.slug));
       if (foundArticle) {
         setActiveArticleSlug(foundArticle.slug);
         setCurrentView('article');
         return;
       }
 
-      // Check category
-      setActiveCategorySlug(path);
-      setCurrentView('category');
+      const validCategories = ['latest', 'startups', 'business', 'tech', 'ai', 'founders', 'funding', 'innovation', 'markets'];
+      if (validCategories.includes(path.toLowerCase())) {
+        setActiveCategorySlug(path.toLowerCase());
+        setCurrentView('category');
+        return;
+      }
+
+      // Check remote article lookup if direct URL provided
+      ContentService.getArticleBySlug(path).then((fetched) => {
+        if (fetched) {
+          setArticles((prev) => (prev.some((p) => p.slug === fetched.slug) ? prev : [fetched, ...prev]));
+          setActiveArticleSlug(fetched.slug);
+          setCurrentView('article');
+        } else {
+          setActiveCategorySlug(path);
+          setCurrentView('category');
+        }
+      });
     };
 
     handleLocationChange();
@@ -247,11 +304,9 @@ export default function App() {
   const trendingArticles = mappedArticles.filter((a) => a.isTrending);
 
   // Category archive articles
-  const categoryArticles = mappedArticles.filter(
-    (a) => a.categorySlug === activeCategorySlug || 
-           a.category.toLowerCase() === activeCategorySlug.toLowerCase() ||
-           (activeCategorySlug === 'tech' && (a.categorySlug === 'technology' || a.categorySlug === 'tech'))
-  );
+  const categoryArticles = activeCategorySlug === 'latest'
+    ? mappedArticles
+    : mappedArticles.filter((a) => matchCategory(a.categorySlug, a.category, activeCategorySlug));
 
   // If in admin view, render AdminDashboard directly
   if (currentView === 'admin') {
@@ -265,6 +320,14 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col bg-white text-[#111111] font-sans selection:bg-[#F5B800] selection:text-black">
+      {/* Dynamic SEO Meta based on active route */}
+      {currentView === 'home' && <SEOHead type="website" />}
+      {currentView === 'article' && currentArticle && <SEOHead article={currentArticle} type="article" />}
+      {currentView === 'category' && <SEOHead title={activeCategorySlug.toUpperCase()} type="website" />}
+      {currentView === 'magazine' && <SEOHead title="The Founder Magazine" type="website" />}
+      {currentView === 'author' && <SEOHead title="Arjun Sindhu" type="website" />}
+      {currentView === 'policy' && <SEOHead title={activePolicyType.toUpperCase().replace('-', ' ')} type="website" />}
+
       {/* 1. TOP UTILITY BAR + 2. BRAND MASTHEAD + 3. PRIMARY NAVIGATION */}
       <Header
         currentCategory={currentView === 'category' ? activeCategorySlug : undefined}
@@ -297,6 +360,7 @@ export default function App() {
         {currentView === 'article' && currentArticle && (
           <ArticlePage
             article={currentArticle}
+            allArticles={mappedArticles}
             onNavigateBack={handleNavigateHome}
             onSelectArticle={handleSelectArticle}
             onSelectAuthor={handleSelectAuthor}
@@ -392,9 +456,27 @@ export default function App() {
         {/* VIEW 6: Homepage (DYNAMIC CMS SECTIONS BUILDER) */}
         {currentView === 'home' && (
           <>
-            {sections
-              .filter((sec) => sec.is_visible)
-              .map((section, sIndex) => {
+            {mappedArticles.length === 0 ? (
+              <div className="max-w-7xl mx-auto px-4 py-20 text-center">
+                <div className="inline-block p-6 bg-neutral-50 border border-neutral-300">
+                  <p className="text-sm font-mono text-neutral-700 font-bold uppercase tracking-wider mb-2">
+                    Unable to load the latest stories. Please try again.
+                  </p>
+                  <p className="text-xs text-neutral-500 font-serif">
+                    Connecting to live Supabase newsroom dispatch.
+                  </p>
+                  <button
+                    onClick={() => loadDynamicContent()}
+                    className="mt-4 px-5 py-2.5 bg-neutral-900 text-white font-mono text-xs font-bold uppercase tracking-wider hover:bg-black cursor-pointer"
+                  >
+                    Retry Connection
+                  </button>
+                </div>
+              </div>
+            ) : (
+              (sections.length > 0 ? sections : DEFAULT_FALLBACK_SECTIONS)
+                .filter((sec) => sec.is_visible)
+                .map((section, sIndex) => {
                 // Render Section by Type
                 if (section.section_type === 'hero') {
                   if (!leadHeroArticle) return null;
@@ -413,7 +495,7 @@ export default function App() {
                   );
                 }
 
-                if (section.section_type === 'wire-trending') {
+                if (section.section_type === 'wire-trending' || section.section_type === 'latest') {
                   return (
                     <React.Fragment key={section.id}>
                       <LatestAndTrendingSection
@@ -440,10 +522,8 @@ export default function App() {
 
                 // Category or Custom News Section
                 const targetCategory = section.category_slug || section.slug;
-                const sectionStories = mappedArticles.filter(
-                  (a) => a.categorySlug === targetCategory || 
-                         a.category.toLowerCase().includes(targetCategory.toLowerCase()) ||
-                         (targetCategory === 'tech' && (a.categorySlug === 'technology' || a.categorySlug === 'tech'))
+                const sectionStories = mappedArticles.filter((a) =>
+                  matchCategory(a.categorySlug, a.category, targetCategory)
                 );
 
                 // Section 30 Empty States: "If a section has no stories, automatically hide the section"
@@ -463,7 +543,8 @@ export default function App() {
                     onSelectAuthor={handleSelectAuthor}
                   />
                 );
-              })}
+              })
+            )}
 
             {/* Newsletter Dispatch Box */}
             <div id="newsletter-section">
@@ -491,6 +572,7 @@ export default function App() {
         onClose={() => setSearchModalOpen(false)}
         onSelectArticle={handleSelectArticle}
         onSelectAuthor={handleSelectAuthor}
+        articles={mappedArticles}
       />
 
       {/* Admin Login Modal (Triggered from Footer 'Admin Access') */}

@@ -1,5 +1,11 @@
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /login
+Disallow: /dashboard
+Disallow: /private
+Disallow: /*?search=*
+Disallow: /*?q=*
 
 # Googlebot-News specific directives
 User-agent: Googlebot-News
@@ -7,15 +13,16 @@ Allow: /
 Allow: /news/
 Allow: /startups/
 Allow: /business/
+Allow: /tech/
 Allow: /technology/
 Allow: /ai/
 Allow: /funding/
 Allow: /founders/
-Allow: /companies/
-
-# Prevent indexing of search query parameter URLs
-Disallow: /*?search=*
-Disallow: /*?q=*
+Allow: /innovation/
+Disallow: /admin
+Disallow: /login
+Disallow: /dashboard
+Disallow: /private
 
 # Sitemaps
 Sitemap: https://founderbytes.in/sitemap.xml

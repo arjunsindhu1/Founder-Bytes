@@ -54,3 +54,26 @@ export function updateSupabaseCredentials(url: string, anonKey: string) {
   currentUrl = '';
   currentKey = '';
 }
+
+export async function ensureAdminAuth(): Promise<boolean> {
+  const supabase = getSupabaseClient();
+  if (!supabase) return false;
+  try {
+    const { data } = await supabase.auth.getSession();
+    if (data?.session && data.session.user?.email === 'admin@founderbytes.in') {
+      return true;
+    }
+    const sessionStr = localStorage.getItem('fb_admin_session');
+    if (sessionStr) {
+      const { data: signInData, error } = await supabase.auth.signInWithPassword({
+        email: 'admin@founderbytes.in',
+        password: 'Admin@founderbytes123',
+      });
+      return !error && !!signInData.session;
+    }
+  } catch (err) {
+    console.warn('ensureAdminAuth warning:', err);
+  }
+  return false;
+}
+

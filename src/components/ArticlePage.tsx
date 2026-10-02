@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Article } from '../types';
-import { ARTICLES } from '../data/mockData';
 import { formatISTDateTime, getRelativeTime } from '../utils/dateUtils';
 import { ArticleCard } from './ArticleCard';
 import { NewsletterBox } from './NewsletterBox';
 import { AdSlot } from './AdSlot';
+import { SEOHead } from './SEOHead';
 import { 
   Share2, 
   Check, 
@@ -19,6 +19,7 @@ import {
 
 interface ArticlePageProps {
   article: Article;
+  allArticles?: Article[];
   onNavigateBack: () => void;
   onSelectArticle: (slug: string) => void;
   onSelectAuthor: (authorSlug: string) => void;
@@ -27,6 +28,7 @@ interface ArticlePageProps {
 
 export const ArticlePage: React.FC<ArticlePageProps> = ({
   article,
+  allArticles = [],
   onNavigateBack,
   onSelectArticle,
   onSelectAuthor,
@@ -60,11 +62,15 @@ export const ArticlePage: React.FC<ArticlePageProps> = ({
     window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(fullUrl)}`, '_blank');
   };
 
-  const relatedArticles = ARTICLES.filter((a) => a.id !== article.id).slice(0, 3);
-  const trendingArticles = ARTICLES.filter((a) => a.isTrending && a.id !== article.id).slice(0, 4);
+  const categoryMatches = allArticles.filter((a) => a.id !== article.id && a.categorySlug === article.categorySlug);
+  const otherStories = allArticles.filter((a) => a.id !== article.id);
+  const relatedArticles = categoryMatches.length > 0 ? categoryMatches.slice(0, 3) : otherStories.slice(0, 3);
+  const trendingArticles = allArticles.filter((a) => a.isTrending && a.id !== article.id).slice(0, 4);
 
   return (
     <article className="w-full bg-white pb-16">
+      <SEOHead article={article} type="article" />
+
       {/* Schema.org NewsArticle Structured Data for SEO / Google News */}
       <script
         type="application/ld+json"

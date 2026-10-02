@@ -44,6 +44,19 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
 
       // Check if credentials match master password or custom updated password
       if (cleanPassword === MASTER_ADMIN_PASSWORD || cleanPassword === expectedPassword) {
+        // Authenticate with Supabase Auth to enable RLS permissions
+        const supabase = getSupabaseClient();
+        if (supabase && isSupabaseConfigured()) {
+          try {
+            await supabase.auth.signInWithPassword({
+              email: 'admin@founderbytes.in',
+              password: 'Admin@founderbytes123',
+            });
+          } catch (authErr) {
+            console.warn('Supabase auth sign-in warning:', authErr);
+          }
+        }
+
         localStorage.setItem('fb_admin_auth_hash', btoa(`${cleanEmail}:${cleanPassword}`));
         localStorage.setItem('fb_admin_password', cleanPassword);
         localStorage.setItem(

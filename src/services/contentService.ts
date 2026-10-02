@@ -8,175 +8,10 @@ import {
   CMSCategory, 
   CMSSiteSettings,
   RealtimeStatus,
-  AdPageType
+  AdPageType,
+  SectionLayoutType
 } from '../types/cms';
-import { getSupabaseClient, isSupabaseConfigured } from '../lib/supabase';
-import { ARTICLES, AUTHORS, BREAKING_NEWS_ITEMS, CURRENT_MAGAZINE_ISSUE, CATEGORIES } from '../data/mockData';
-
-// Storage keys for persistent caching and local fallback
-const STORAGE_KEYS = {
-  ARTICLES: 'fb_cms_articles',
-  SECTIONS: 'fb_cms_sections',
-  BREAKING_NEWS: 'fb_cms_breaking_news',
-  ADS: 'fb_cms_ads',
-  MAGAZINE: 'fb_cms_magazine',
-  AUTHORS: 'fb_cms_authors',
-  CATEGORIES: 'fb_cms_categories',
-  SETTINGS: 'fb_cms_settings',
-};
-
-// Initial default sections for homepage builder (all completely customizable and reorderable via CMS)
-const DEFAULT_SECTIONS: CMSSection[] = [
-  {
-    id: 'sec-hero',
-    name: 'Top News Lead & Desk Wire',
-    slug: 'main-hero',
-    section_type: 'hero',
-    description: 'Main editorial hero story plus top developments wire',
-    display_order: 1,
-    is_visible: true,
-    story_count: 5,
-    layout_type: 'startup-split',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: 'sec-wire-trending',
-    name: 'Latest News Wire & Trending Stories',
-    slug: 'latest-trending',
-    section_type: 'wire-trending',
-    description: 'Real-time timestamped news feed paired with numbered trending stories',
-    display_order: 2,
-    is_visible: true,
-    story_count: 5,
-    layout_type: 'startup-split',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: 'sec-startups',
-    name: 'Startup News & Unit Economics',
-    slug: 'startups',
-    section_type: 'category',
-    category_slug: 'startups',
-    description: 'Venture scaling, operating models, and unit economics',
-    display_order: 3,
-    is_visible: true,
-    story_count: 4,
-    layout_type: 'startup-split',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: 'sec-business',
-    name: 'Business, Banking & Enterprise Economy',
-    slug: 'business',
-    section_type: 'category',
-    category_slug: 'business',
-    description: 'Macro corporate developments, RBI policy, and enterprise growth',
-    display_order: 4,
-    is_visible: true,
-    story_count: 3,
-    layout_type: 'grid-3',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: 'sec-tech',
-    name: 'Technology, Semiconductors & AI',
-    slug: 'tech',
-    section_type: 'category',
-    category_slug: 'tech',
-    description: 'Deeptech engineering, silicon fabrication, and sovereign models',
-    display_order: 5,
-    is_visible: true,
-    story_count: 3,
-    layout_type: 'tech-grid',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: 'sec-funding',
-    name: 'Venture Capital & Deal Flow',
-    slug: 'funding',
-    section_type: 'category',
-    category_slug: 'funding',
-    description: 'Audited funding rounds and institutional syndicates',
-    display_order: 6,
-    is_visible: true,
-    story_count: 3,
-    layout_type: 'funding-table',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: 'sec-founders',
-    name: 'Founders & Builders',
-    slug: 'founders',
-    section_type: 'category',
-    category_slug: 'founders',
-    description: 'Exclusive on-site interviews, field visits, and founder profiles',
-    display_order: 7,
-    is_visible: true,
-    story_count: 3,
-    layout_type: 'founders-mosaic',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: 'sec-magazine',
-    name: 'The Founder Magazine Quarterly Showcase',
-    slug: 'the-founder-magazine',
-    section_type: 'magazine',
-    description: 'Showcase of current print & digital quarterly edition with digital flipbook',
-    display_order: 8,
-    is_visible: true,
-    story_count: 1,
-    layout_type: 'horizontal-list',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-];
-
-// Initial advertisements matching page-specific slots
-const DEFAULT_ADS: CMSAdvertisement[] = [
-  {
-    id: 'ad-startups-1',
-    name: 'Karnataka Digital Economy Mission - Innovate in Bengaluru',
-    advertiser: 'KDEM Bengaluru',
-    image_url: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1200&q=80',
-    destination_url: 'https://founderbytes.in',
-    page: 'startups',
-    placement: 'startups-primary',
-    ad_type: 'banner',
-    start_date: new Date(Date.now() - 86400000).toISOString(),
-    is_active: true,
-  },
-  {
-    id: 'ad-business-1',
-    name: 'India Global Innovation Summit 2026',
-    advertiser: 'FICCI Tech Forum',
-    image_url: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200&q=80',
-    destination_url: 'https://founderbytes.in',
-    page: 'business',
-    placement: 'business-primary',
-    ad_type: 'banner',
-    start_date: new Date(Date.now() - 86400000).toISOString(),
-    is_active: true,
-  },
-  {
-    id: 'ad-news-1',
-    name: 'National DeepTech Capital Initiative',
-    advertiser: 'MeitY Innovation Hub',
-    image_url: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=80',
-    destination_url: 'https://founderbytes.in',
-    page: 'news',
-    placement: 'news-primary',
-    ad_type: 'banner',
-    start_date: new Date(Date.now() - 86400000).toISOString(),
-    is_active: true,
-  },
-];
+import { getSupabaseClient, isSupabaseConfigured, ensureAdminAuth } from '../lib/supabase';
 
 // In-memory subscribers
 type ContentListener = () => void;
@@ -188,7 +23,7 @@ let currentRealtimeStatus: RealtimeStatus = 'LOCAL';
 let broadcastChannel: BroadcastChannel | null = null;
 let realtimeChannel: any = null;
 
-// Initialize cross-tab broadcast channel
+// Initialize cross-tab broadcast channel for instant multi-tab sync
 try {
   if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
     broadcastChannel = new BroadcastChannel('fb_realtime_bus');
@@ -198,16 +33,8 @@ try {
       }
     };
   }
-
-  if (typeof window !== 'undefined') {
-    window.addEventListener('storage', (e) => {
-      if (e.key?.startsWith('fb_cms_')) {
-        notifySubscribersLocalOnly();
-      }
-    });
-  }
 } catch {
-  // Graceful fallback for non-supporting environments
+  // Graceful fallback
 }
 
 function notifySubscribersLocalOnly() {
@@ -262,17 +89,13 @@ export function initSupabaseRealtime() {
   try {
     const channel = supabase.channel('founder-bytes-realtime');
 
-    // Subscribe to all public tables required by the publication
     const tables = [
       'articles',
       'article_blocks',
-      'sections',
-      'homepage_section_items',
+      'homepage_sections',
       'breaking_news',
       'advertisements',
-      'ad_slots',
       'magazine_issues',
-      'magazine_stories',
       'categories',
       'authors',
       'site_settings'
@@ -282,8 +105,7 @@ export function initSupabaseRealtime() {
       channel.on(
         'postgres_changes',
         { event: '*', schema: 'public', table },
-        (payload) => {
-          // Invalidate affected data and notify public site immediately
+        () => {
           notifySubscribers();
         }
       );
@@ -306,14 +128,77 @@ export function initSupabaseRealtime() {
   }
 }
 
-// Auto-initialize realtime when this module is evaluated
+// Auto-initialize realtime on client load
 if (typeof window !== 'undefined') {
   setTimeout(() => {
     initSupabaseRealtime();
   }, 100);
 }
 
-// Main Content Service
+// Helper to map Supabase article row with joined tables to CMSArticle
+function mapDbRowToCMSArticle(d: any): CMSArticle {
+  const blocks = (d.article_blocks || []).sort(
+    (a: any, b: any) => (a.display_order ?? a.position ?? 0) - (b.display_order ?? b.position ?? 0)
+  );
+
+  const rawParagraphs = blocks
+    .filter((b: any) => b.block_type === 'paragraph' && b.content)
+    .map((b: any) => b.content);
+
+  const categoryName = d.categories?.name || 'Startups';
+  const categorySlug = d.categories?.slug || 'startups';
+  const authorName = d.authors?.name || 'Arjun Sindhu';
+  const authorRole = d.authors?.designation || 'Founder & Editor-in-Chief';
+  const authorAvatar =
+    d.authors?.photo_url ||
+    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
+
+  return {
+    id: d.id,
+    slug: d.slug,
+    title: d.title,
+    subtitle: d.subtitle || d.excerpt || '',
+    category_id: d.category_id || '',
+    category_name: categoryName,
+    category_slug: categorySlug,
+    sub_category: d.sub_category,
+    author_id: d.author_id || 'author-arjun-sindhu',
+    author_name: authorName,
+    author_role: authorRole,
+    author_avatar: authorAvatar,
+    featured_image: d.featured_image_url || 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1200&q=80',
+    image_caption: d.featured_image_caption || '',
+    image_credit: d.featured_image_credit || 'Founder Bytes',
+    content_blocks: blocks.map((b: any) => ({
+      id: b.id,
+      block_type: (b.block_type as any) || 'paragraph',
+      position: b.display_order ?? b.position ?? 0,
+      content: b.content || '',
+      image_url: b.image_url,
+      image_caption: b.image_caption,
+      image_credit: b.image_credit,
+      attribution: b.quote_author,
+    })),
+    raw_paragraphs: rawParagraphs.length > 0 ? rawParagraphs : [d.subtitle || d.excerpt || d.title],
+    status: (d.status as any) || 'published',
+    published_at: d.published_at || d.created_at || new Date().toISOString(),
+    reading_time_minutes: d.reading_time || 4,
+    tags: d.tags || [categoryName],
+    source_name: d.source_name || 'Founder Bytes Newsroom',
+    source_url: d.source_url || `https://founderbytes.in/${d.slug}`,
+    is_featured: Boolean(d.is_featured),
+    is_trending: Boolean(d.is_trending),
+    is_breaking: false,
+    is_editor_pick: Boolean(d.is_featured),
+    priority: d.is_featured ? 100 : 0,
+    seo_title: d.seo_title || d.title,
+    seo_description: d.seo_description || d.subtitle || d.excerpt || '',
+    quote_text: d.quote_text,
+    quote_author: d.quote_author,
+    is_sponsored: false,
+  };
+}
+
 export const ContentService = {
   // Subscription API
   subscribe(listener: ContentListener): () => void {
@@ -331,7 +216,7 @@ export const ContentService = {
     return currentRealtimeStatus;
   },
 
-  // Storage Upload to Supabase Storage
+  // Media Upload to Supabase Storage
   async uploadMedia(
     file: File, 
     bucket: 'article-images' | 'author-images' | 'magazine-covers' | 'advertisements' | 'site-assets',
@@ -343,6 +228,7 @@ export const ContentService = {
 
     if (supabase && isSupabaseConfigured()) {
       try {
+        await ensureAdminAuth();
         const { data, error } = await supabase.storage
           .from(bucket)
           .upload(storagePath, file, {
@@ -361,15 +247,12 @@ export const ContentService = {
             name: file.name,
             size: file.size,
           };
-        } else if (error) {
-          console.warn(`Supabase Storage upload warning (${bucket}):`, error.message);
         }
       } catch (err) {
         console.warn('Supabase storage upload error:', err);
       }
     }
 
-    // High-fidelity local persistent fallback (converts to optimized dataURL so preview & render are instant)
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => {
@@ -385,48 +268,7 @@ export const ContentService = {
     });
   },
 
-  // Helper to map Mock Article into CMSArticle format
-  mapMockToCMS(art: any): CMSArticle {
-    return {
-      id: art.id,
-      slug: art.slug,
-      title: art.title,
-      subtitle: art.dek,
-      category_id: `cat-${art.categorySlug}`,
-      category_name: art.category,
-      category_slug: art.categorySlug,
-      sub_category: art.subCategory,
-      author_id: 'author-arjun-sindhu',
-      author_name: 'Arjun Sindhu',
-      author_role: 'Founder & Editor-in-Chief',
-      author_avatar: AUTHORS['arjun-sindhu'].avatar,
-      featured_image: art.featuredImage,
-      image_caption: art.imageCaption,
-      image_credit: art.imageCredit,
-      content_blocks: art.content.map((p: string, i: number) => ({
-        id: `block-${art.id}-${i}`,
-        block_type: 'paragraph' as const,
-        position: i,
-        content: p,
-      })),
-      raw_paragraphs: art.content,
-      status: (art.status as any) || 'published',
-      published_at: art.publishedAt,
-      reading_time_minutes: art.readingTimeMinutes,
-      tags: art.tags || [],
-      source_name: art.sources?.[0]?.name,
-      source_url: art.sources?.[0]?.url,
-      is_featured: Boolean(art.isLeadHero),
-      is_trending: Boolean(art.isTrending),
-      is_breaking: false,
-      is_editor_pick: Boolean(art.isEditorPick),
-      priority: art.isLeadHero ? 100 : 0,
-      seo_title: art.seoTitle || art.title,
-      seo_description: art.seoDescription || art.dek,
-    };
-  },
-
-  // 1. ARTICLES
+  // 1. ARTICLES: Fetch directly from Supabase
   async getArticles(filter?: {
     category?: string;
     status?: string;
@@ -435,407 +277,352 @@ export const ContentService = {
     limit?: number;
   }): Promise<CMSArticle[]> {
     const supabase = getSupabaseClient();
-    if (supabase && isSupabaseConfigured()) {
-      try {
-        let query = supabase.from('articles').select('*');
-        if (filter?.status && filter.status !== 'all') {
-          query = query.eq('status', filter.status);
-        }
-        if (filter?.category && filter.category !== 'all') {
-          query = query.eq('category_slug', filter.category);
-        }
-        if (filter?.is_trending) {
-          query = query.eq('is_trending', true);
-        }
-        if (filter?.is_featured) {
-          query = query.eq('is_featured', true);
-        }
-        query = query.order('published_at', { ascending: false });
-        if (filter?.limit) {
-          query = query.limit(filter.limit);
-        }
+    if (!supabase || !isSupabaseConfigured()) {
+      return [];
+    }
 
-        const { data, error } = await query;
-        if (!error && data && data.length > 0) {
-          const mapped: CMSArticle[] = data.map((d: any) => ({
-            id: d.id,
-            slug: d.slug,
-            title: d.title,
-            subtitle: d.subtitle,
-            category_id: d.category_id || '',
-            category_name: d.category_name,
-            category_slug: d.category_slug,
-            sub_category: d.sub_category,
-            author_id: d.author_id || 'author-arjun-sindhu',
-            author_name: d.author_name || 'Arjun Sindhu',
-            author_role: d.author_role || 'Founder & Editor-in-Chief',
-            author_avatar: d.author_avatar || AUTHORS['arjun-sindhu'].avatar,
-            featured_image: d.featured_image,
-            image_caption: d.image_caption,
-            image_credit: d.image_credit,
-            content_blocks: d.content_blocks || [],
-            raw_paragraphs: Array.isArray(d.raw_paragraphs) ? d.raw_paragraphs : [],
-            status: d.status || 'published',
-            published_at: d.published_at || new Date().toISOString(),
-            reading_time_minutes: d.reading_time_minutes || 5,
-            tags: d.tags || [],
-            source_name: d.source_name,
-            source_url: d.source_url,
-            is_featured: Boolean(d.is_featured),
-            is_trending: Boolean(d.is_trending),
-            is_breaking: Boolean(d.is_breaking),
-            is_editor_pick: Boolean(d.is_editor_pick),
-            priority: d.priority || 0,
-            seo_title: d.seo_title,
-            seo_description: d.seo_description,
-            quote_text: d.quote_text,
-            quote_author: d.quote_author,
-            is_sponsored: Boolean(d.is_sponsored),
-            sponsor_name: d.sponsor_name,
-          }));
+    try {
+      let query = supabase
+        .from('articles')
+        .select('*, categories(id, name, slug), authors(id, name, slug, designation, bio, photo_url), article_blocks(*)');
 
-          // Merge any verified default articles not yet in Supabase
-          for (const art of ARTICLES) {
-            if (!mapped.some((m) => m.slug === art.slug || m.id === art.id)) {
-              const cmsArt = this.mapMockToCMS(art);
-              mapped.push(cmsArt);
-              this.saveArticle(cmsArt).catch(() => {});
-            }
-          }
-
-          mapped.sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime());
-          localStorage.setItem(STORAGE_KEYS.ARTICLES, JSON.stringify(mapped));
-          
-          let filteredMapped = mapped;
-          if (filter?.status && filter.status !== 'all') {
-            filteredMapped = filteredMapped.filter((a) => a.status === filter.status);
-          }
-          if (filter?.category && filter.category !== 'all') {
-            filteredMapped = filteredMapped.filter((a) => a.category_slug === filter.category);
-          }
-          if (filter?.is_trending) {
-            filteredMapped = filteredMapped.filter((a) => a.is_trending);
-          }
-          if (filter?.is_featured) {
-            filteredMapped = filteredMapped.filter((a) => a.is_featured);
-          }
-          if (filter?.limit) {
-            filteredMapped = filteredMapped.slice(0, filter.limit);
-          }
-          return filteredMapped;
-        }
-      } catch (err) {
-        console.warn('Supabase getArticles error, using local storage:', err);
+      // Status filter: default to 'published' for public website
+      if (filter?.status && filter.status !== 'all') {
+        query = query.eq('status', filter.status);
+      } else if (!filter?.status) {
+        query = query.eq('status', 'published');
       }
-    }
 
-    // Local Storage Fallback
-    const stored = localStorage.getItem(STORAGE_KEYS.ARTICLES);
-    let all: CMSArticle[] = [];
-    if (!stored) {
-      all = ARTICLES.map((art) => this.mapMockToCMS(art));
-      all.sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime());
-      localStorage.setItem(STORAGE_KEYS.ARTICLES, JSON.stringify(all));
-    } else {
-      try {
-        all = JSON.parse(stored);
-        let updated = false;
-        for (const art of ARTICLES) {
-          if (!all.some((a) => a.id === art.id || a.slug === art.slug)) {
-            all.push(this.mapMockToCMS(art));
-            updated = true;
-          }
-        }
-        all.sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime());
-        if (updated) {
-          localStorage.setItem(STORAGE_KEYS.ARTICLES, JSON.stringify(all));
-        }
-      } catch {
-        all = ARTICLES.map((art) => this.mapMockToCMS(art));
-        all.sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime());
+      if (filter?.is_trending) {
+        query = query.eq('is_trending', true);
       }
-    }
+      if (filter?.is_featured) {
+        query = query.eq('is_featured', true);
+      }
 
-    let filtered = all;
-    if (filter?.status && filter.status !== 'all') {
-      filtered = filtered.filter((a) => a.status === filter.status);
-    }
-    if (filter?.category && filter.category !== 'all') {
-      filtered = filtered.filter((a) => a.category_slug === filter.category);
-    }
-    if (filter?.is_trending) {
-      filtered = filtered.filter((a) => a.is_trending);
-    }
-    if (filter?.is_featured) {
-      filtered = filtered.filter((a) => a.is_featured);
-    }
-    if (filter?.limit) {
-      filtered = filtered.slice(0, filter.limit);
-    }
+      query = query.order('published_at', { ascending: false });
 
-    return filtered;
+      if (filter?.limit) {
+        query = query.limit(filter.limit);
+      }
+
+      const { data, error } = await query;
+      if (error) {
+        console.error('Supabase getArticles error:', error.message);
+        return [];
+      }
+
+      if (!data) return [];
+
+      let articles = data.map(mapDbRowToCMSArticle);
+
+      // Filter by category if requested
+      if (filter?.category && filter.category !== 'all') {
+        const catTarget = filter.category.toLowerCase();
+        articles = articles.filter(
+          (a) =>
+            a.category_slug.toLowerCase() === catTarget ||
+            a.category_name.toLowerCase() === catTarget ||
+            (catTarget === 'tech' && (a.category_slug === 'technology' || a.category_slug === 'tech'))
+        );
+      }
+
+      return articles;
+    } catch (err) {
+      console.error('getArticles exception:', err);
+      return [];
+    }
   },
 
+  // Single article by slug
+  async getArticleBySlug(slug: string): Promise<CMSArticle | null> {
+    const supabase = getSupabaseClient();
+    if (!supabase || !isSupabaseConfigured()) return null;
+
+    try {
+      const { data, error } = await supabase
+        .from('articles')
+        .select('*, categories(id, name, slug), authors(id, name, slug, designation, bio, photo_url), article_blocks(*)')
+        .eq('slug', slug)
+        .single();
+
+      if (error || !data) return null;
+      return mapDbRowToCMSArticle(data);
+    } catch {
+      return null;
+    }
+  },
+
+  // Save / Update Article in Supabase
   async saveArticle(article: CMSArticle): Promise<CMSArticle> {
     const supabase = getSupabaseClient();
-    const cleanArticle: CMSArticle = {
-      ...article,
-      author_id: 'author-arjun-sindhu',
-      author_name: 'Arjun Sindhu',
-      author_role: 'Founder & Editor-in-Chief',
-      author_avatar: AUTHORS['arjun-sindhu'].avatar,
+    if (!supabase || !isSupabaseConfigured()) {
+      throw new Error('Supabase client is not configured.');
+    }
+
+    // Ensure admin auth session is active
+    await ensureAdminAuth();
+
+    // 1. Resolve Category ID
+    let categoryId = article.category_id;
+    if (!categoryId || !categoryId.includes('-')) {
+      const { data: catData } = await supabase
+        .from('categories')
+        .select('id, slug')
+        .eq('slug', article.category_slug.toLowerCase())
+        .limit(1)
+        .single();
+      if (catData) {
+        categoryId = catData.id;
+      } else {
+        // Fallback to startups category
+        const { data: defaultCat } = await supabase.from('categories').select('id').limit(1).single();
+        categoryId = defaultCat?.id;
+      }
+    }
+
+    // 2. Resolve Author ID
+    let authorId = article.author_id;
+    if (!authorId || !authorId.includes('-')) {
+      const { data: authData } = await supabase.from('authors').select('id').eq('slug', 'arjun-sindhu').limit(1).single();
+      authorId = authData?.id || 'a925a3a4-abd9-4ebb-8966-b5fed4592371';
+    }
+
+    // 3. Prepare Article Payload matching Supabase schema exactly
+    const payload: any = {
+      title: article.title,
+      slug: article.slug,
+      subtitle: article.subtitle,
+      excerpt: article.subtitle,
+      category_id: categoryId,
+      author_id: authorId,
+      featured_image_url: article.featured_image,
+      featured_image_alt: article.title,
+      featured_image_caption: article.image_caption || null,
+      featured_image_credit: article.image_credit || 'Founder Bytes',
+      status: article.status || 'published',
+      is_featured: Boolean(article.is_featured),
+      is_trending: Boolean(article.is_trending),
+      seo_title: article.seo_title || article.title,
+      seo_description: article.seo_description || article.subtitle,
+      source_name: article.source_name || 'Founder Bytes',
+      source_url: article.source_url || `https://founderbytes.in/${article.slug}`,
+      published_at: article.published_at || new Date().toISOString(),
+      reading_time: article.reading_time_minutes || 4,
       updated_at: new Date().toISOString(),
     };
 
-    if (supabase && isSupabaseConfigured()) {
-      try {
-        const payload: any = {
-          id: cleanArticle.id.includes('-') && cleanArticle.id.length > 30 ? cleanArticle.id : undefined,
-          slug: cleanArticle.slug,
-          title: cleanArticle.title,
-          subtitle: cleanArticle.subtitle,
-          category_slug: cleanArticle.category_slug,
-          category_name: cleanArticle.category_name,
-          sub_category: cleanArticle.sub_category,
-          author_name: cleanArticle.author_name,
-          author_role: cleanArticle.author_role,
-          author_avatar: cleanArticle.author_avatar,
-          featured_image: cleanArticle.featured_image,
-          image_caption: cleanArticle.image_caption,
-          image_credit: cleanArticle.image_credit,
-          raw_paragraphs: cleanArticle.raw_paragraphs || [],
-          status: cleanArticle.status,
-          published_at: cleanArticle.published_at,
-          reading_time_minutes: cleanArticle.reading_time_minutes || 5,
-          tags: cleanArticle.tags || [],
-          source_name: cleanArticle.source_name,
-          source_url: cleanArticle.source_url,
-          is_featured: cleanArticle.is_featured,
-          is_trending: cleanArticle.is_trending,
-          is_breaking: cleanArticle.is_breaking,
-          is_editor_pick: cleanArticle.is_editor_pick,
-          priority: cleanArticle.priority,
-          seo_title: cleanArticle.seo_title,
-          seo_description: cleanArticle.seo_description,
-          quote_text: cleanArticle.quote_text,
-          quote_author: cleanArticle.quote_author,
-          is_sponsored: cleanArticle.is_sponsored,
-          sponsor_name: cleanArticle.sponsor_name,
-          updated_at: cleanArticle.updated_at,
-        };
-
-        const { data, error } = await supabase.from('articles').upsert(payload).select().single();
-        if (!error && data) {
-          cleanArticle.id = data.id;
-        }
-      } catch (err) {
-        console.warn('Supabase saveArticle error:', err);
-      }
+    // Include ID only if it's an existing UUID (length > 30)
+    if (article.id && article.id.includes('-') && article.id.length > 30) {
+      payload.id = article.id;
     }
 
-    // Local storage sync
-    const current = await this.getArticles();
-    const idx = current.findIndex((a) => a.id === cleanArticle.id || a.slug === cleanArticle.slug);
-    if (idx >= 0) {
-      current[idx] = cleanArticle;
-    } else {
-      current.unshift(cleanArticle);
+    const { data: savedArticle, error: saveErr } = await supabase
+      .from('articles')
+      .upsert(payload)
+      .select('*, categories(*), authors(*)')
+      .single();
+
+    if (saveErr) {
+      console.error('Supabase saveArticle error:', saveErr.message);
+      throw saveErr;
     }
-    localStorage.setItem(STORAGE_KEYS.ARTICLES, JSON.stringify(current));
+
+    const savedId = savedArticle.id;
+
+    // 4. Update Article Blocks (Paragraphs)
+    const paragraphs = article.raw_paragraphs && article.raw_paragraphs.length > 0
+      ? article.raw_paragraphs
+      : [article.subtitle];
+
+    // Delete existing blocks for this article
+    await supabase.from('article_blocks').delete().eq('article_id', savedId);
+
+    // Insert new blocks
+    const blockRows = paragraphs.map((p, idx) => ({
+      article_id: savedId,
+      block_type: 'paragraph',
+      content: p,
+      display_order: idx,
+    }));
+
+    if (blockRows.length > 0) {
+      await supabase.from('article_blocks').insert(blockRows);
+    }
+
     notifySubscribers();
-    return cleanArticle;
+
+    return mapDbRowToCMSArticle({
+      ...savedArticle,
+      article_blocks: blockRows,
+    });
   },
 
+  // Delete Article from Supabase
   async deleteArticle(id: string): Promise<void> {
     const supabase = getSupabaseClient();
-    if (supabase && isSupabaseConfigured()) {
-      try {
-        await supabase.from('articles').delete().eq('id', id);
-      } catch (err) {
-        console.warn('Supabase deleteArticle error:', err);
-      }
+    if (!supabase || !isSupabaseConfigured()) return;
+
+    await ensureAdminAuth();
+
+    // Delete blocks first, then article
+    await supabase.from('article_blocks').delete().eq('article_id', id);
+    const { error } = await supabase.from('articles').delete().eq('id', id);
+
+    if (error) {
+      console.error('Supabase deleteArticle error:', error.message);
+      throw error;
     }
 
-    const current = await this.getArticles();
-    const filtered = current.filter((a) => a.id !== id);
-    localStorage.setItem(STORAGE_KEYS.ARTICLES, JSON.stringify(filtered));
     notifySubscribers();
   },
 
-  // 2. DYNAMIC HOMEPAGE SECTIONS
+  // 2. HOMEPAGE SECTIONS
   async getSections(): Promise<CMSSection[]> {
     const supabase = getSupabaseClient();
-    if (supabase && isSupabaseConfigured()) {
-      try {
-        const { data, error } = await supabase
-          .from('sections')
-          .select('*')
-          .order('display_order', { ascending: true });
+    if (!supabase || !isSupabaseConfigured()) return [];
 
-        if (!error && data && data.length > 0) {
-          const mapped = data.map((d: any) => ({
-            id: d.id,
-            name: d.name,
-            slug: d.slug,
-            section_type: d.section_type || 'category',
-            description: d.description,
-            display_order: d.display_order,
-            is_visible: d.is_visible,
-            story_count: d.story_count || 4,
-            layout_type: d.layout_type || 'grid-3',
-            category_slug: d.category_slug,
-            created_at: d.created_at,
-            updated_at: d.updated_at,
-          }));
-          localStorage.setItem(STORAGE_KEYS.SECTIONS, JSON.stringify(mapped));
-          return mapped;
-        }
-      } catch (err) {
-        console.warn('Supabase getSections error:', err);
-      }
-    }
-
-    const stored = localStorage.getItem(STORAGE_KEYS.SECTIONS);
-    if (!stored) {
-      localStorage.setItem(STORAGE_KEYS.SECTIONS, JSON.stringify(DEFAULT_SECTIONS));
-      return DEFAULT_SECTIONS;
-    }
     try {
-      const parsed: CMSSection[] = JSON.parse(stored);
-      return parsed.sort((a, b) => a.display_order - b.display_order);
+      const { data, error } = await supabase
+        .from('homepage_sections')
+        .select('*, categories(slug)')
+        .eq('is_active', true)
+        .order('display_order', { ascending: true });
+
+      if (error || !data || data.length === 0) {
+        return [];
+      }
+
+      const hasHero = data.some((d: any) => d.section_type === 'hero' || d.section_key === 'main-hero' || d.section_key === 'hero');
+
+      const mappedSections: CMSSection[] = data.map((d: any) => {
+        let categorySlug = d.categories?.slug || d.section_key;
+        if (categorySlug === 'startup-news') categorySlug = 'startups';
+        if (categorySlug === 'business-news') categorySlug = 'business';
+        if (categorySlug === 'technology-news') categorySlug = 'tech';
+        if (categorySlug === 'ai-news') categorySlug = 'ai';
+
+        let sectionType = d.section_type;
+        if (d.section_key === 'main-hero' || d.section_key === 'hero') sectionType = 'hero';
+        if (d.section_key === 'latest' && (sectionType === 'latest' || !sectionType)) sectionType = 'wire-trending';
+
+        let layout: SectionLayoutType = 'grid-3';
+        if (sectionType === 'hero') layout = 'startup-split';
+        else if (categorySlug === 'startups') layout = 'startup-split';
+        else if (categorySlug === 'tech') layout = 'tech-grid';
+        else if (categorySlug === 'funding') layout = 'funding-table';
+        else if (categorySlug === 'founders') layout = 'founders-mosaic';
+
+        return {
+          id: d.id,
+          name: d.title,
+          slug: d.section_key,
+          section_type: (sectionType as any) || 'category',
+          description: d.description || '',
+          display_order: d.display_order,
+          is_visible: d.is_active,
+          story_count: d.max_items || 4,
+          layout_type: layout,
+          category_slug: categorySlug,
+          created_at: d.created_at,
+          updated_at: d.updated_at,
+        };
+      });
+
+      if (!hasHero) {
+        mappedSections.unshift({
+          id: 'sec-hero',
+          name: 'Top News Lead & Desk Wire',
+          slug: 'main-hero',
+          section_type: 'hero',
+          description: 'Dominant news lead and desk dispatch',
+          display_order: 0,
+          is_visible: true,
+          story_count: 6,
+          layout_type: 'startup-split',
+          created_at: '',
+          updated_at: '',
+        });
+      }
+
+      return mappedSections;
     } catch {
-      return DEFAULT_SECTIONS;
+      return [];
     }
   },
 
   async saveSection(section: CMSSection): Promise<void> {
     const supabase = getSupabaseClient();
-    if (supabase && isSupabaseConfigured()) {
-      try {
-        await supabase.from('sections').upsert({
-          id: section.id.includes('-') && section.id.length > 30 ? section.id : undefined,
-          name: section.name,
-          slug: section.slug,
-          section_type: section.section_type,
-          description: section.description,
-          display_order: section.display_order,
-          is_visible: section.is_visible,
-          story_count: section.story_count,
-          layout_type: section.layout_type,
-          category_slug: section.category_slug,
-          updated_at: new Date().toISOString(),
-        });
-      } catch (err) {
-        console.warn('Supabase saveSection error:', err);
-      }
+    if (!supabase || !isSupabaseConfigured()) return;
+    await ensureAdminAuth();
+
+    const payload: any = {
+      section_key: section.slug,
+      title: section.name,
+      description: section.description,
+      section_type: section.section_type,
+      display_order: section.display_order,
+      is_active: section.is_visible,
+      max_items: section.story_count || 4,
+      updated_at: new Date().toISOString(),
+    };
+
+    if (section.id && section.id.includes('-') && section.id.length > 30) {
+      payload.id = section.id;
     }
 
-    const sections = await this.getSections();
-    const idx = sections.findIndex((s) => s.id === section.id);
-    if (idx >= 0) {
-      sections[idx] = section;
-    } else {
-      sections.push(section);
-    }
-    sections.sort((a, b) => a.display_order - b.display_order);
-    localStorage.setItem(STORAGE_KEYS.SECTIONS, JSON.stringify(sections));
+    await supabase.from('homepage_sections').upsert(payload);
     notifySubscribers();
   },
 
   async reorderSections(orderedIds: string[]): Promise<void> {
-    const sections = await this.getSections();
-    const updated = sections.map((sec) => {
-      const newIndex = orderedIds.indexOf(sec.id);
-      return {
-        ...sec,
-        display_order: newIndex >= 0 ? newIndex + 1 : sec.display_order,
-        updated_at: new Date().toISOString(),
-      };
-    });
-    updated.sort((a, b) => a.display_order - b.display_order);
-
     const supabase = getSupabaseClient();
-    if (supabase && isSupabaseConfigured()) {
-      try {
-        await Promise.all(
-          updated.map((s) =>
-            supabase
-              .from('sections')
-              .update({ display_order: s.display_order, updated_at: s.updated_at })
-              .eq('slug', s.slug)
-          )
-        );
-      } catch (err) {
-        console.warn('Supabase reorderSections error:', err);
-      }
-    }
+    if (!supabase || !isSupabaseConfigured()) return;
+    await ensureAdminAuth();
 
-    localStorage.setItem(STORAGE_KEYS.SECTIONS, JSON.stringify(updated));
+    await Promise.all(
+      orderedIds.map((id, index) =>
+        supabase
+          .from('homepage_sections')
+          .update({ display_order: index + 1, updated_at: new Date().toISOString() })
+          .eq('id', id)
+      )
+    );
     notifySubscribers();
   },
 
   async deleteSection(id: string): Promise<void> {
     const supabase = getSupabaseClient();
-    if (supabase && isSupabaseConfigured()) {
-      try {
-        await supabase.from('sections').delete().eq('id', id);
-      } catch (err) {
-        console.warn('Supabase deleteSection error:', err);
-      }
-    }
+    if (!supabase || !isSupabaseConfigured()) return;
+    await ensureAdminAuth();
 
-    const sections = await this.getSections();
-    const filtered = sections.filter((s) => s.id !== id);
-    localStorage.setItem(STORAGE_KEYS.SECTIONS, JSON.stringify(filtered));
+    await supabase.from('homepage_sections').delete().eq('id', id);
     notifySubscribers();
   },
 
   // 3. BREAKING NEWS ALERTS
   async getBreakingNews(): Promise<CMSBreakingNews[]> {
     const supabase = getSupabaseClient();
-    if (supabase && isSupabaseConfigured()) {
-      try {
-        const { data, error } = await supabase
-          .from('breaking_news')
-          .select('*')
-          .order('priority', { ascending: false });
+    if (!supabase || !isSupabaseConfigured()) return [];
 
-        if (!error && data && data.length > 0) {
-          const mapped: CMSBreakingNews[] = data.map((d: any) => ({
-            id: d.id,
-            headline: d.headline,
-            link: d.link,
-            is_active: d.is_active,
-            priority: d.priority || 0,
-            start_date: d.start_date,
-            end_date: d.end_date,
-            display_order: d.display_order || d.priority || 0,
-            created_at: d.created_at,
-          }));
-          localStorage.setItem(STORAGE_KEYS.BREAKING_NEWS, JSON.stringify(mapped));
-          return mapped;
-        }
-      } catch (err) {
-        console.warn('Supabase getBreakingNews error:', err);
-      }
-    }
-
-    const stored = localStorage.getItem(STORAGE_KEYS.BREAKING_NEWS);
-    if (!stored) {
-      const initial: CMSBreakingNews[] = BREAKING_NEWS_ITEMS.map((item, i) => ({
-        id: item.id,
-        headline: item.headline,
-        link: item.slug ? `/${item.slug}` : '#',
-        is_active: true,
-        priority: 10 - i,
-        display_order: i + 1,
-        created_at: item.timestamp,
-      }));
-      localStorage.setItem(STORAGE_KEYS.BREAKING_NEWS, JSON.stringify(initial));
-      return initial;
-    }
     try {
-      return JSON.parse(stored);
+      const { data, error } = await supabase
+        .from('breaking_news')
+        .select('*')
+        .eq('is_active', true)
+        .order('display_order', { ascending: true });
+
+      if (error || !data) return [];
+
+      return data.map((d: any) => ({
+        id: d.id,
+        headline: d.headline,
+        link: d.link_url || '#',
+        is_active: d.is_active,
+        priority: 10 - (d.display_order || 0),
+        display_order: d.display_order || 1,
+        created_at: d.created_at,
+      }));
     } catch {
       return [];
     }
@@ -843,214 +630,128 @@ export const ContentService = {
 
   async saveBreakingNews(item: CMSBreakingNews): Promise<void> {
     const supabase = getSupabaseClient();
-    if (supabase && isSupabaseConfigured()) {
-      try {
-        await supabase.from('breaking_news').upsert({
-          id: item.id.includes('-') && item.id.length > 30 ? item.id : undefined,
-          headline: item.headline,
-          link: item.link,
-          is_active: item.is_active,
-          priority: item.priority || 0,
-        });
-      } catch (err) {
-        console.warn('Supabase saveBreakingNews error:', err);
-      }
+    if (!supabase || !isSupabaseConfigured()) return;
+    await ensureAdminAuth();
+
+    const payload: any = {
+      headline: item.headline,
+      link_url: item.link,
+      is_active: item.is_active,
+      display_order: item.display_order || 1,
+    };
+    if (item.id && item.id.includes('-') && item.id.length > 30) {
+      payload.id = item.id;
     }
 
-    const items = await this.getBreakingNews();
-    const idx = items.findIndex((b) => b.id === item.id);
-    if (idx >= 0) {
-      items[idx] = item;
-    } else {
-      items.unshift(item);
-    }
-    localStorage.setItem(STORAGE_KEYS.BREAKING_NEWS, JSON.stringify(items));
+    await supabase.from('breaking_news').upsert(payload);
     notifySubscribers();
   },
 
   async deleteBreakingNews(id: string): Promise<void> {
     const supabase = getSupabaseClient();
-    if (supabase && isSupabaseConfigured()) {
-      try {
-        await supabase.from('breaking_news').delete().eq('id', id);
-      } catch (err) {
-        console.warn('Supabase deleteBreakingNews error:', err);
-      }
-    }
+    if (!supabase || !isSupabaseConfigured()) return;
+    await ensureAdminAuth();
 
-    const items = await this.getBreakingNews();
-    const filtered = items.filter((b) => b.id !== id);
-    localStorage.setItem(STORAGE_KEYS.BREAKING_NEWS, JSON.stringify(filtered));
+    await supabase.from('breaking_news').delete().eq('id', id);
     notifySubscribers();
   },
 
-  // 4. ADVERTISEMENTS & COMMERCIAL SLOTS
+  // 4. ADVERTISEMENTS
   async getAdvertisements(placement?: string, page?: AdPageType | string): Promise<CMSAdvertisement[]> {
     const supabase = getSupabaseClient();
-    if (supabase && isSupabaseConfigured()) {
-      try {
-        let query = supabase.from('advertisements').select('*');
-        if (placement) {
-          query = query.eq('placement', placement);
-        }
-        const { data, error } = await query;
-        if (!error && data && data.length > 0) {
-          const mapped: CMSAdvertisement[] = data.map((d: any) => ({
-            id: d.id,
-            name: d.name,
-            advertiser: d.advertiser,
-            image_url: d.image_url,
-            destination_url: d.destination_url,
-            ad_type: d.ad_type || 'banner',
-            page: d.page || 'all',
-            placement: d.placement,
-            start_date: d.start_date,
-            end_date: d.end_date,
-            is_active: d.is_active,
-            created_at: d.created_at,
-          }));
-          localStorage.setItem(STORAGE_KEYS.ADS, JSON.stringify(mapped));
-          
-          let results = mapped;
-          if (page && page !== 'all') {
-            results = results.filter((a) => a.page === page || a.page === 'all');
-          }
-          return results;
-        }
-      } catch (err) {
-        console.warn('Supabase getAdvertisements error:', err);
-      }
-    }
+    if (!supabase || !isSupabaseConfigured()) return [];
 
-    const stored = localStorage.getItem(STORAGE_KEYS.ADS);
-    let all: CMSAdvertisement[] = [];
-    if (!stored) {
-      all = DEFAULT_ADS;
-      localStorage.setItem(STORAGE_KEYS.ADS, JSON.stringify(all));
-    } else {
-      try {
-        all = JSON.parse(stored);
-      } catch {
-        all = DEFAULT_ADS;
+    try {
+      let query = supabase.from('advertisements').select('*').eq('is_active', true);
+      if (placement) {
+        query = query.eq('placement', placement);
       }
-    }
+      const { data, error } = await query;
+      if (error || !data) return [];
 
-    let results = all;
-    if (placement) {
-      results = results.filter((a) => a.placement === placement);
+      return data.map((d: any) => ({
+        id: d.id,
+        name: d.name,
+        advertiser: d.advertiser,
+        image_url: d.image_url,
+        destination_url: d.destination_url,
+        ad_type: (d.ad_type as any) || 'banner',
+        page: d.page || 'all',
+        placement: d.placement,
+        start_date: d.start_date,
+        end_date: d.end_date,
+        is_active: d.is_active,
+        created_at: d.created_at,
+      }));
+    } catch {
+      return [];
     }
-    if (page && page !== 'all') {
-      results = results.filter((a) => a.page === page || a.page === 'all');
-    }
-    return results;
   },
 
   async saveAdvertisement(ad: CMSAdvertisement): Promise<void> {
     const supabase = getSupabaseClient();
-    if (supabase && isSupabaseConfigured()) {
-      try {
-        await supabase.from('advertisements').upsert({
-          id: ad.id.includes('-') && ad.id.length > 30 ? ad.id : undefined,
-          name: ad.name,
-          advertiser: ad.advertiser,
-          image_url: ad.image_url,
-          destination_url: ad.destination_url,
-          ad_type: ad.ad_type || 'banner',
-          placement: ad.placement,
-          start_date: ad.start_date,
-          end_date: ad.end_date,
-          is_active: ad.is_active,
-        });
-      } catch (err) {
-        console.warn('Supabase saveAdvertisement error:', err);
-      }
+    if (!supabase || !isSupabaseConfigured()) return;
+    await ensureAdminAuth();
+
+    const payload: any = {
+      name: ad.name,
+      advertiser: ad.advertiser,
+      image_url: ad.image_url,
+      destination_url: ad.destination_url,
+      ad_type: ad.ad_type || 'banner',
+      placement: ad.placement,
+      start_date: ad.start_date,
+      end_date: ad.end_date || null,
+      is_active: ad.is_active,
+    };
+    if (ad.id && ad.id.includes('-') && ad.id.length > 30) {
+      payload.id = ad.id;
     }
 
-    const ads = await this.getAdvertisements();
-    const idx = ads.findIndex((a) => a.id === ad.id);
-    if (idx >= 0) {
-      ads[idx] = ad;
-    } else {
-      ads.unshift(ad);
-    }
-    localStorage.setItem(STORAGE_KEYS.ADS, JSON.stringify(ads));
+    await supabase.from('advertisements').upsert(payload);
     notifySubscribers();
   },
 
   async deleteAdvertisement(id: string): Promise<void> {
     const supabase = getSupabaseClient();
-    if (supabase && isSupabaseConfigured()) {
-      try {
-        await supabase.from('advertisements').delete().eq('id', id);
-      } catch (err) {
-        console.warn('Supabase deleteAdvertisement error:', err);
-      }
-    }
+    if (!supabase || !isSupabaseConfigured()) return;
+    await ensureAdminAuth();
 
-    const ads = await this.getAdvertisements();
-    const filtered = ads.filter((a) => a.id !== id);
-    localStorage.setItem(STORAGE_KEYS.ADS, JSON.stringify(filtered));
+    await supabase.from('advertisements').delete().eq('id', id);
     notifySubscribers();
   },
 
   // 5. THE FOUNDER MAGAZINE
   async getMagazineIssues(): Promise<CMSMagazineIssue[]> {
     const supabase = getSupabaseClient();
-    if (supabase && isSupabaseConfigured()) {
-      try {
-        const { data, error } = await supabase
-          .from('magazine_issues')
-          .select('*')
-          .order('created_at', { ascending: false });
+    if (!supabase || !isSupabaseConfigured()) return [];
 
-        if (!error && data && data.length > 0) {
-          const mapped: CMSMagazineIssue[] = data.map((d: any) => ({
-            id: d.id,
-            issue_number: d.issue_number,
-            season: d.season,
-            title: d.title,
-            dek: d.dek,
-            cover_image: d.cover_image,
-            published_date: d.published_date,
-            theme: d.theme,
-            is_featured: d.is_featured,
-            is_published: d.is_published,
-            pdf_link: d.pdf_link,
-            featured_founders: d.featured_founders || [],
-            table_of_contents: d.table_of_contents || [],
-            created_at: d.created_at,
-            updated_at: d.updated_at,
-          }));
-          localStorage.setItem(STORAGE_KEYS.MAGAZINE, JSON.stringify(mapped));
-          return mapped;
-        }
-      } catch (err) {
-        console.warn('Supabase getMagazineIssues error:', err);
-      }
-    }
-
-    const stored = localStorage.getItem(STORAGE_KEYS.MAGAZINE);
-    if (!stored) {
-      const initial: CMSMagazineIssue[] = [{
-        id: 'issue-01',
-        issue_number: CURRENT_MAGAZINE_ISSUE.issueNumber,
-        season: CURRENT_MAGAZINE_ISSUE.season,
-        title: CURRENT_MAGAZINE_ISSUE.title,
-        dek: CURRENT_MAGAZINE_ISSUE.dek,
-        cover_image: CURRENT_MAGAZINE_ISSUE.coverImage,
-        published_date: CURRENT_MAGAZINE_ISSUE.publishedDate,
-        theme: CURRENT_MAGAZINE_ISSUE.theme,
-        is_featured: true,
-        is_published: true,
-        featured_founders: CURRENT_MAGAZINE_ISSUE.featuredFounders,
-        table_of_contents: CURRENT_MAGAZINE_ISSUE.tableOfContents,
-        page_count: 16,
-      }];
-      localStorage.setItem(STORAGE_KEYS.MAGAZINE, JSON.stringify(initial));
-      return initial;
-    }
     try {
-      return JSON.parse(stored);
+      const { data, error } = await supabase
+        .from('magazine_issues')
+        .select('*')
+        .order('published_at', { ascending: false });
+
+      if (error || !data) return [];
+
+      return data.map((d: any) => ({
+        id: d.id,
+        issue_number: d.issue_number,
+        season: 'Winter 2026',
+        title: d.title,
+        dek: d.description || '',
+        cover_image: d.cover_url || '',
+        published_date: d.published_at || 'October 2026',
+        theme: d.description || '',
+        is_featured: Boolean(d.is_featured),
+        is_published: Boolean(d.is_published),
+        pdf_link: d.pdf_url || '',
+        page_count: d.total_pages || 16,
+        featured_founders: [],
+        table_of_contents: [],
+        created_at: d.created_at,
+        updated_at: d.updated_at,
+      }));
     } catch {
       return [];
     }
@@ -1058,150 +759,120 @@ export const ContentService = {
 
   async saveMagazineIssue(issue: CMSMagazineIssue): Promise<void> {
     const supabase = getSupabaseClient();
-    if (supabase && isSupabaseConfigured()) {
-      try {
-        await supabase.from('magazine_issues').upsert({
-          id: issue.id.includes('-') && issue.id.length > 30 ? issue.id : undefined,
-          issue_number: issue.issue_number,
-          season: issue.season,
-          title: issue.title,
-          dek: issue.dek,
-          cover_image: issue.cover_image,
-          published_date: issue.published_date,
-          theme: issue.theme,
-          is_featured: issue.is_featured,
-          is_published: issue.is_published,
-          pdf_link: issue.pdf_link,
-          featured_founders: issue.featured_founders,
-          table_of_contents: issue.table_of_contents,
-          updated_at: new Date().toISOString(),
-        });
-      } catch (err) {
-        console.warn('Supabase saveMagazineIssue error:', err);
-      }
+    if (!supabase || !isSupabaseConfigured()) return;
+    await ensureAdminAuth();
+
+    const payload: any = {
+      issue_number: issue.issue_number,
+      title: issue.title,
+      slug: issue.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      description: issue.dek,
+      cover_url: issue.cover_image,
+      pdf_url: issue.pdf_link,
+      total_pages: issue.page_count || 16,
+      published_at: issue.published_date || new Date().toISOString(),
+      is_published: issue.is_published,
+      is_featured: issue.is_featured,
+      updated_at: new Date().toISOString(),
+    };
+    if (issue.id && issue.id.includes('-') && issue.id.length > 30) {
+      payload.id = issue.id;
     }
 
-    const issues = await this.getMagazineIssues();
-    const idx = issues.findIndex((i) => i.id === issue.id);
-    if (idx >= 0) {
-      issues[idx] = issue;
-    } else {
-      issues.unshift(issue);
-    }
-    localStorage.setItem(STORAGE_KEYS.MAGAZINE, JSON.stringify(issues));
+    await supabase.from('magazine_issues').upsert(payload);
     notifySubscribers();
   },
 
   async deleteMagazineIssue(id: string): Promise<void> {
     const supabase = getSupabaseClient();
-    if (supabase && isSupabaseConfigured()) {
-      try {
-        await supabase.from('magazine_issues').delete().eq('id', id);
-      } catch (err) {
-        console.warn('Supabase deleteMagazineIssue error:', err);
-      }
-    }
+    if (!supabase || !isSupabaseConfigured()) return;
+    await ensureAdminAuth();
 
-    const issues = await this.getMagazineIssues();
-    const filtered = issues.filter((i) => i.id !== id);
-    localStorage.setItem(STORAGE_KEYS.MAGAZINE, JSON.stringify(filtered));
+    await supabase.from('magazine_issues').delete().eq('id', id);
     notifySubscribers();
   },
 
-  // 6. AUTHORS & CATEGORIES (ARJUN SINDHU ONLY as requested)
+  // 6. AUTHORS & CATEGORIES
   async getAuthors(): Promise<CMSAuthor[]> {
-    const soleAuthor: CMSAuthor = {
-      id: 'author-arjun-sindhu',
+    const fallbackAuthor: CMSAuthor = {
+      id: 'a925a3a4-abd9-4ebb-8966-b5fed4592371',
       name: 'Arjun Sindhu',
       slug: 'arjun-sindhu',
       role: 'Founder & Editor-in-Chief',
       organization: 'Founder Bytes',
       bio: 'Arjun Sindhu covers high-growth venture capital, Indian digital economy policy, and macro business shifts.',
-      avatar: AUTHORS['arjun-sindhu'].avatar,
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
       twitter: 'https://twitter.com/founderbytes',
       linkedin: 'https://linkedin.com/in/founderbytes',
       email: 'arjun@founderbytes.in',
-      total_articles: 142,
+      total_articles: 25,
     };
 
     const supabase = getSupabaseClient();
-    if (supabase && isSupabaseConfigured()) {
-      try {
-        const { data, error } = await supabase.from('authors').select('*');
-        if (!error && data && data.length > 0) {
-          return data.map((a: any) => ({
-            id: a.id,
-            name: a.name,
-            slug: a.slug,
-            role: a.role,
-            organization: a.organization,
-            bio: a.bio,
-            avatar: a.avatar,
-            twitter: a.twitter,
-            linkedin: a.linkedin,
-            email: a.email,
-          }));
-        }
-      } catch (err) {
-        console.warn('Supabase getAuthors error:', err);
-      }
-    }
+    if (!supabase || !isSupabaseConfigured()) return [fallbackAuthor];
 
-    // Always offer Arjun Sindhu as the sole authorized author
-    return [soleAuthor];
+    try {
+      const { data, error } = await supabase.from('authors').select('*').eq('is_active', true);
+      if (error || !data || data.length === 0) return [fallbackAuthor];
+
+      return data.map((a: any) => ({
+        id: a.id,
+        name: a.name,
+        slug: a.slug,
+        role: a.designation || 'Founder & Editor-in-Chief',
+        organization: 'Founder Bytes',
+        bio: a.bio || '',
+        avatar: a.photo_url || fallbackAuthor.avatar,
+        twitter: 'https://twitter.com/founderbytes',
+        linkedin: 'https://linkedin.com/company/founderbytes',
+        email: a.email || 'arjun@founderbytes.in',
+        total_articles: 25,
+      }));
+    } catch {
+      return [fallbackAuthor];
+    }
   },
 
   async saveAuthor(author: CMSAuthor): Promise<void> {
-    const authors = await this.getAuthors();
-    const idx = authors.findIndex((a) => a.id === author.id);
-    if (idx >= 0) {
-      authors[idx] = author;
-    } else {
-      authors.push(author);
-    }
-    localStorage.setItem(STORAGE_KEYS.AUTHORS, JSON.stringify(authors));
+    const supabase = getSupabaseClient();
+    if (!supabase || !isSupabaseConfigured()) return;
+    await ensureAdminAuth();
+
+    await supabase.from('authors').upsert({
+      id: author.id.includes('-') && author.id.length > 30 ? author.id : undefined,
+      name: author.name,
+      slug: author.slug,
+      designation: author.role,
+      bio: author.bio,
+      photo_url: author.avatar,
+      email: author.email,
+      is_active: true,
+      updated_at: new Date().toISOString(),
+    });
     notifySubscribers();
   },
 
   async getCategories(): Promise<CMSCategory[]> {
     const supabase = getSupabaseClient();
-    if (supabase && isSupabaseConfigured()) {
-      try {
-        const { data, error } = await supabase
-          .from('categories')
-          .select('*')
-          .order('display_order', { ascending: true });
+    if (!supabase || !isSupabaseConfigured()) return [];
 
-        if (!error && data && data.length > 0) {
-          return data.map((c: any) => ({
-            id: c.id,
-            name: c.name,
-            slug: c.slug,
-            description: c.description || '',
-            display_order: c.display_order || 0,
-            is_visible: c.is_visible ?? true,
-          }));
-        }
-      } catch (err) {
-        console.warn('Supabase getCategories error:', err);
-      }
-    }
+    try {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .eq('is_active', true)
+        .order('display_order', { ascending: true });
 
-    const stored = localStorage.getItem(STORAGE_KEYS.CATEGORIES);
-    if (!stored) {
-      const initial = CATEGORIES.map((c, i) => ({
-        id: `cat-${c.slug}`,
+      if (error || !data) return [];
+
+      return data.map((c: any) => ({
+        id: c.id,
         name: c.name,
         slug: c.slug,
-        description: c.description,
-        display_order: i + 1,
-        is_visible: true,
+        description: c.description || '',
+        display_order: c.display_order || 0,
+        is_visible: c.is_active ?? true,
       }));
-      localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(initial));
-      return initial;
-    }
-    try {
-      return JSON.parse(stored);
     } catch {
       return [];
     }
@@ -1209,43 +880,31 @@ export const ContentService = {
 
   async saveCategory(category: CMSCategory): Promise<void> {
     const supabase = getSupabaseClient();
-    if (supabase && isSupabaseConfigured()) {
-      try {
-        await supabase.from('categories').upsert({
-          id: category.id,
-          name: category.name,
-          slug: category.slug,
-          description: category.description,
-          display_order: category.display_order,
-          is_visible: category.is_visible,
-        });
-      } catch (err) {
-        console.warn('Supabase saveCategory error:', err);
-      }
+    if (!supabase || !isSupabaseConfigured()) return;
+    await ensureAdminAuth();
+
+    const payload: any = {
+      name: category.name,
+      slug: category.slug,
+      description: category.description,
+      display_order: category.display_order,
+      is_active: category.is_visible,
+      updated_at: new Date().toISOString(),
+    };
+    if (category.id && category.id.includes('-') && category.id.length > 30) {
+      payload.id = category.id;
     }
-    const categories = await this.getCategories();
-    const idx = categories.findIndex((c) => c.id === category.id);
-    if (idx >= 0) {
-      categories[idx] = category;
-    } else {
-      categories.push(category);
-    }
-    localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(categories));
+
+    await supabase.from('categories').upsert(payload);
     notifySubscribers();
   },
 
   async deleteCategory(id: string): Promise<void> {
     const supabase = getSupabaseClient();
-    if (supabase && isSupabaseConfigured()) {
-      try {
-        await supabase.from('categories').delete().eq('id', id);
-      } catch (err) {
-        console.warn('Supabase deleteCategory error:', err);
-      }
-    }
-    const categories = await this.getCategories();
-    const filtered = categories.filter((c) => c.id !== id);
-    localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(filtered));
+    if (!supabase || !isSupabaseConfigured()) return;
+    await ensureAdminAuth();
+
+    await supabase.from('categories').delete().eq('id', id);
     notifySubscribers();
   },
 
@@ -1268,51 +927,36 @@ export const ContentService = {
     };
 
     const supabase = getSupabaseClient();
-    if (supabase && isSupabaseConfigured()) {
-      try {
-        const { data, error } = await supabase.from('site_settings').select('*').limit(1).single();
-        if (!error && data) {
-          return { ...defaults, ...data };
-        }
-      } catch (err) {
-        console.warn('Supabase getSettings error:', err);
+    if (!supabase || !isSupabaseConfigured()) return defaults;
+
+    try {
+      const { data } = await supabase.from('site_settings').select('*');
+      if (data && data.length > 0) {
+        const merged = { ...defaults };
+        data.forEach((row: any) => {
+          if (row.setting_key && row.setting_value) {
+            Object.assign(merged, row.setting_value);
+          }
+        });
+        return merged;
       }
+    } catch {
+      // return defaults
     }
 
-    const stored = localStorage.getItem(STORAGE_KEYS.SETTINGS);
-    if (!stored) return defaults;
-    try {
-      return { ...defaults, ...JSON.parse(stored) };
-    } catch {
-      return defaults;
-    }
+    return defaults;
   },
 
   async saveSettings(settings: CMSSiteSettings): Promise<void> {
     const supabase = getSupabaseClient();
-    if (supabase && isSupabaseConfigured()) {
-      try {
-        await supabase.from('site_settings').upsert({
-          id: 1,
-          site_name: settings.site_name,
-          tagline: settings.tagline,
-          contact_email: settings.contact_email,
-          tips_email: settings.tips_email,
-          social_twitter: settings.social_twitter,
-          social_linkedin: settings.social_linkedin,
-          social_instagram: settings.social_instagram,
-          social_youtube: settings.social_youtube,
-          seo_default_title: settings.seo_default_title,
-          seo_default_description: settings.seo_default_description,
-          footer_text: settings.footer_text,
-          updated_at: new Date().toISOString(),
-        });
-      } catch (err) {
-        console.warn('Supabase saveSettings error:', err);
-      }
-    }
+    if (!supabase || !isSupabaseConfigured()) return;
+    await ensureAdminAuth();
 
-    localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
+    await supabase.from('site_settings').upsert({
+      setting_key: 'general_settings',
+      setting_value: settings,
+      updated_at: new Date().toISOString(),
+    });
     notifySubscribers();
   },
 };
