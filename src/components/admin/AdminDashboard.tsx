@@ -53,7 +53,8 @@ import {
   KeyRound,
   Radio,
   Image as ImageIcon,
-  CheckCircle2
+  CheckCircle2,
+  RefreshCw
 } from 'lucide-react';
 
 interface AdminDashboardProps {
@@ -159,6 +160,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [newAdStartDate, setNewAdStartDate] = useState(new Date().toISOString().slice(0, 10));
   const [newAdEndDate, setNewAdEndDate] = useState('');
   const [newAdActive, setNewAdActive] = useState(true);
+  const [isSavingAd, setIsSavingAd] = useState(false);
 
   // New magazine issue modal state
   const [showAddMagazineModal, setShowAddMagazineModal] = useState(false);
@@ -201,7 +203,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       ContentService.getArticles(),
       ContentService.getSections(),
       ContentService.getBreakingNews(),
-      ContentService.getAdvertisements(),
+      ContentService.getAdvertisements(undefined, undefined, true),
       ContentService.getMagazineIssues(),
       ContentService.getAuthors(),
       ContentService.getCategories(),
@@ -574,43 +576,79 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   // Ad Save / Update
   const handleSaveAd = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newAdName || !newAdAdvertiser) {
-      showToast('Error: Name and advertiser are required.');
+    if (!newAdName.trim()) {
+      showToast('Error: Campaign Name is required.');
+      return;
+    }
+    if (!newAdAdvertiser.trim()) {
+      showToast('Error: Advertiser / Brand is required.');
+      return;
+    }
+    if (!newAdImage.trim()) {
+      showToast('Error: Advertisement banner image creative is required. Please upload or provide a banner image.');
+      return;
+    }
+    if (!newAdUrl.trim()) {
+      showToast('Error: Destination URL is required.');
       return;
     }
 
-    const adToSave: CMSAdvertisement = {
-      id: editingAd ? editingAd.id : `ad-${Date.now()}`,
-      name: newAdName.trim(),
-      advertiser: newAdAdvertiser.trim(),
-      image_url: newAdImage || 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=1200&q=80',
-      destination_url: newAdUrl.trim() || 'https://founderbytes.in/advertise',
-      page: newAdPage,
-      placement: newAdPlacement,
-      ad_type: 'banner',
-      start_date: newAdStartDate ? new Date(newAdStartDate).toISOString() : new Date().toISOString(),
-      end_date: newAdEndDate ? new Date(newAdEndDate).toISOString() : undefined,
-      is_active: newAdActive,
-    };
+    try {
+      setIsSavingAd(true);
+      const adToSave: Partial<CMSAdvertisement> & { name: string; destination_url: string } = {
+        name: newAdName.trim(),
+        advertiser: newAdAdvertiser.trim(),
+        image_url: newAdImage.trim(),
+        destination_url: newAdUrl.trim(),
+        page: newAdPage,
+        placement: newAdPlacement,
+        ad_type: 'banner',
+        start_date: newAdStartDate ? new Date(newAdStartDate).toISOString() : new Date().toISOString(),
+        end_date: newAdEndDate && newAdEndDate.trim() ? new Date(newAdEndDate).toISOString() : undefined,
+        is_active: newAdActive,
+      };
 
-    await ContentService.saveAdvertisement(adToSave);
-    setShowAddAdModal(false);
-    showToast(editingAd ? 'Updated successfully.' : 'Published successfully.');
-    loadAllData();
+      if (editingAd && isValidUUID(editingAd.id)) {
+        adToSave.id = editingAd.id;
+      }
+
+      await ContentService.saveAdvertisement(adToSave);
+      setShowAddAdModal(false);
+      showToast(editingAd ? 'Advertisement updated successfully.' : 'Advertisement published successfully.');
+      const freshAds = await ContentService.getAdvertisements(undefined, undefined, true);
+      setAds(freshAds);
+    } catch (err: any) {
+      console.error('Failed to save advertisement:', err);
+      showToast(`Error: ${err?.message || 'Database error saving advertisement'}`);
+    } finally {
+      setIsSavingAd(false);
+    }
   };
 
   const handleToggleAdActive = async (ad: CMSAdvertisement) => {
-    const updated = { ...ad, is_active: !ad.is_active };
-    await ContentService.saveAdvertisement(updated);
-    showToast('Updated successfully.');
-    loadAllData();
+    try {
+      const updated = { ...ad, is_active: !ad.is_active };
+      await ContentService.saveAdvertisement(updated);
+      showToast(updated.is_active ? 'Advertisement activated.' : 'Advertisement paused.');
+      const freshAds = await ContentService.getAdvertisements(undefined, undefined, true);
+      setAds(freshAds);
+    } catch (err: any) {
+      console.error('Failed to toggle ad status:', err);
+      showToast(`Error: ${err?.message || 'Failed to update advertisement status'}`);
+    }
   };
 
   const handleDeleteAd = async (id: string) => {
-    if (!window.confirm('Delete this advertisement campaign?')) return;
-    await ContentService.deleteAdvertisement(id);
-    showToast('Deleted successfully.');
-    loadAllData();
+    if (!window.confirm('Are you sure you want to permanently delete this advertisement campaign?')) return;
+    try {
+      await ContentService.deleteAdvertisement(id);
+      showToast('Advertisement campaign deleted successfully.');
+      const freshAds = await ContentService.getAdvertisements(undefined, undefined, true);
+      setAds(freshAds);
+    } catch (err: any) {
+      console.error('Failed to delete ad:', err);
+      showToast(`Error: ${err?.message || 'Failed to delete advertisement'}`);
+    }
   };
 
   // Magazine Issue Save
@@ -1696,81 +1734,125 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
               {/* Ads Table matching Requirement 16 */}
               <div className="overflow-x-auto border border-neutral-300 font-mono text-xs">
-                <table className="w-full text-left">
-                  <thead className="bg-[#111111] text-white uppercase text-[10px] tracking-wider">
-                    <tr>
-                      <th className="py-2.5 px-3">Ad</th>
-                      <th className="py-2.5 px-3">Advertiser</th>
-                      <th className="py-2.5 px-3">Page</th>
-                      <th className="py-2.5 px-3">Placement</th>
-                      <th className="py-2.5 px-3">Status</th>
-                      <th className="py-2.5 px-3">Start</th>
-                      <th className="py-2.5 px-3">End</th>
-                      <th className="py-2.5 px-3 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-neutral-200">
-                    {ads.map((ad) => (
-                      <tr key={ad.id} className="hover:bg-neutral-50">
-                        <td className="py-3 px-3">
-                          <div className="flex items-center gap-2.5">
-                            <img
-                              src={ad.image_url}
-                              alt={ad.name}
-                              className="w-12 h-8 object-cover border border-neutral-300 shrink-0 bg-neutral-100"
-                            />
-                            <div className="font-bold text-neutral-900 truncate max-w-[180px]">{ad.name}</div>
-                          </div>
-                        </td>
-                        <td className="py-3 px-3 text-neutral-700">{ad.advertiser}</td>
-                        <td className="py-3 px-3 whitespace-nowrap">
-                          <span className="bg-neutral-100 px-2 py-0.5 border border-neutral-200 uppercase text-[10px] font-bold">
-                            {ad.page || 'all'}
-                          </span>
-                        </td>
-                        <td className="py-3 px-3 whitespace-nowrap">
-                          <span className="text-[10px] text-neutral-600 font-bold">
-                            {ad.placement}
-                          </span>
-                        </td>
-                        <td className="py-3 px-3 whitespace-nowrap">
-                          <button
-                            onClick={() => handleToggleAdActive(ad)}
-                            className={`px-2 py-0.5 text-[10px] font-bold uppercase border cursor-pointer ${
-                              ad.is_active ? 'bg-emerald-50 text-emerald-800 border-emerald-300' : 'bg-neutral-200 text-neutral-700'
-                            }`}
-                          >
-                            {ad.is_active ? 'Active' : 'Paused'}
-                          </button>
-                        </td>
-                        <td className="py-3 px-3 text-[10px] text-neutral-500 whitespace-nowrap">
-                          {ad.start_date ? new Date(ad.start_date).toLocaleDateString() : '—'}
-                        </td>
-                        <td className="py-3 px-3 text-[10px] text-neutral-500 whitespace-nowrap">
-                          {ad.end_date ? new Date(ad.end_date).toLocaleDateString() : 'Continuous'}
-                        </td>
-                        <td className="py-3 px-3 text-right whitespace-nowrap">
-                          <div className="flex items-center justify-end gap-1.5">
-                            <button
-                              onClick={() => handleOpenAdModal(ad)}
-                              className="p-1 hover:text-black text-neutral-500 cursor-pointer"
-                              title="Edit Advertisement"
-                            >
-                              <Edit3 className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteAd(ad.id)}
-                              className="p-1 text-neutral-400 hover:text-red-600 cursor-pointer"
-                              title="Delete"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </td>
+                {ads.length === 0 ? (
+                  <div className="p-8 text-center bg-white">
+                    <Megaphone className="w-8 h-8 text-neutral-400 mx-auto mb-2" />
+                    <p className="font-bold text-neutral-800 uppercase tracking-wider text-xs">No Advertisement Campaigns</p>
+                    <p className="text-neutral-500 text-[11px] mt-1">Publish an advertisement banner for News Page or other sections.</p>
+                    <button
+                      onClick={() => handleOpenAdModal()}
+                      className="mt-4 px-4 py-2 bg-[#111111] hover:bg-black text-white text-xs font-bold uppercase cursor-pointer"
+                    >
+                      Publish New Advertisement
+                    </button>
+                  </div>
+                ) : (
+                  <table className="w-full text-left">
+                    <thead className="bg-[#111111] text-white uppercase text-[10px] tracking-wider">
+                      <tr>
+                        <th className="py-2.5 px-3">Campaign & Creative</th>
+                        <th className="py-2.5 px-3">Advertiser</th>
+                        <th className="py-2.5 px-3">Target Section</th>
+                        <th className="py-2.5 px-3">Placement Slot</th>
+                        <th className="py-2.5 px-3">Status</th>
+                        <th className="py-2.5 px-3">Start Date</th>
+                        <th className="py-2.5 px-3">End Date</th>
+                        <th className="py-2.5 px-3 text-right">Actions</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-neutral-200">
+                      {ads.map((ad) => {
+                        const now = Date.now();
+                        let statusLabel = 'Published';
+                        let statusColor = 'bg-emerald-50 text-emerald-800 border-emerald-300';
+                        if (!ad.is_active) {
+                          statusLabel = 'Draft / Paused';
+                          statusColor = 'bg-neutral-200 text-neutral-700 border-neutral-300';
+                        } else if (ad.start_date && new Date(ad.start_date).getTime() > now) {
+                          statusLabel = 'Scheduled';
+                          statusColor = 'bg-amber-50 text-amber-800 border-amber-300';
+                        } else if (ad.end_date && new Date(ad.end_date).getTime() < now) {
+                          statusLabel = 'Expired';
+                          statusColor = 'bg-red-50 text-red-800 border-red-300';
+                        }
+
+                        return (
+                          <tr key={ad.id} className="hover:bg-neutral-50">
+                            <td className="py-3 px-3">
+                              <div className="flex items-center gap-2.5">
+                                <a
+                                  href={ad.destination_url}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="shrink-0 group relative block"
+                                  title="Click to visit destination URL"
+                                >
+                                  <img
+                                    src={ad.image_url}
+                                    alt={ad.name}
+                                    className="w-16 h-8 object-cover border border-neutral-300 bg-neutral-100 group-hover:border-black transition-colors"
+                                  />
+                                </a>
+                                <div>
+                                  <div className="font-bold text-neutral-900 truncate max-w-[200px]" title={ad.name}>
+                                    {ad.name}
+                                  </div>
+                                  <div className="text-[10px] text-neutral-400 truncate max-w-[200px]" title={ad.destination_url}>
+                                    {ad.destination_url}
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="py-3 px-3 text-neutral-700 font-medium">{ad.advertiser}</td>
+                            <td className="py-3 px-3 whitespace-nowrap">
+                              <span className="bg-neutral-100 px-2 py-0.5 border border-neutral-200 uppercase text-[10px] font-bold">
+                                {ad.page || 'all'}
+                              </span>
+                            </td>
+                            <td className="py-3 px-3 whitespace-nowrap">
+                              <span className="text-[10px] text-neutral-600 font-bold">
+                                {ad.placement}
+                              </span>
+                            </td>
+                            <td className="py-3 px-3 whitespace-nowrap">
+                              <button
+                                onClick={() => handleToggleAdActive(ad)}
+                                className={`px-2 py-0.5 text-[10px] font-bold uppercase border cursor-pointer ${statusColor}`}
+                                title={`Click to toggle (${ad.is_active ? 'Pause' : 'Activate'})`}
+                              >
+                                {statusLabel}
+                              </button>
+                            </td>
+                            <td className="py-3 px-3 text-[10px] text-neutral-500 whitespace-nowrap">
+                              {ad.start_date ? new Date(ad.start_date).toLocaleDateString() : '—'}
+                            </td>
+                            <td className="py-3 px-3 text-[10px] text-neutral-500 whitespace-nowrap">
+                              {ad.end_date ? new Date(ad.end_date).toLocaleDateString() : 'Continuous'}
+                            </td>
+                            <td className="py-3 px-3 text-right whitespace-nowrap">
+                              <div className="flex items-center justify-end gap-1.5">
+                                <button
+                                  onClick={() => handleOpenAdModal(ad)}
+                                  className="p-1 hover:text-black text-neutral-500 cursor-pointer"
+                                  title="Edit Advertisement"
+                                >
+                                  <Edit3 className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteAd(ad.id)}
+                                  className="p-1 text-neutral-400 hover:text-red-600 cursor-pointer"
+                                  title="Delete"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                )}
               </div>
             </div>
           )}
@@ -2214,19 +2296,41 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </div>
               </div>
 
+              <div className="flex items-center gap-2 pt-1 border-t border-neutral-200">
+                <input
+                  type="checkbox"
+                  id="newAdActive"
+                  checked={newAdActive}
+                  onChange={(e) => setNewAdActive(e.target.checked)}
+                  className="w-4 h-4 rounded border-neutral-300 text-black focus:ring-0 cursor-pointer"
+                />
+                <label htmlFor="newAdActive" className="text-xs font-bold text-neutral-800 cursor-pointer select-none">
+                  Active & Published (Display on public website according to dates)
+                </label>
+              </div>
+
               <div className="flex justify-end gap-2 pt-2">
                 <button
                   type="button"
                   onClick={() => setShowAddAdModal(false)}
-                  className="px-3 py-2 bg-neutral-200 text-neutral-800 text-xs cursor-pointer"
+                  disabled={isSavingAd}
+                  className="px-3 py-2 bg-neutral-200 text-neutral-800 text-xs cursor-pointer hover:bg-neutral-300 disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-[#111111] text-white font-bold text-xs uppercase cursor-pointer"
+                  disabled={isSavingAd}
+                  className="px-4 py-2 bg-[#111111] hover:bg-black text-white font-bold text-xs uppercase cursor-pointer disabled:opacity-50 flex items-center gap-2"
                 >
-                  Save Advertisement
+                  {isSavingAd && <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#F5B800]" />}
+                  <span>
+                    {isSavingAd
+                      ? 'Saving Campaign...'
+                      : editingAd
+                      ? 'Update Advertisement'
+                      : 'Publish Advertisement'}
+                  </span>
                 </button>
               </div>
             </form>

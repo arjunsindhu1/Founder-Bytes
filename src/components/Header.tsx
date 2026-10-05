@@ -37,6 +37,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   const navItems = [
     { label: 'HOME', slug: '', isHome: true },
+    { label: 'NEWS', slug: 'news' },
     { label: 'LATEST', slug: 'latest' },
     { label: 'STARTUPS', slug: 'startups' },
     { label: 'BUSINESS', slug: 'business' },

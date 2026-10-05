@@ -3,6 +3,7 @@ import {
   CMSSection, 
   CMSBreakingNews, 
   CMSAdvertisement, 
+  CMSAdSlot,
   CMSMagazineIssue, 
   CMSAuthor, 
   CMSCategory, 
@@ -293,6 +294,162 @@ function mapDbRowToCMSArticle(d: any): CMSArticle {
     quote_text: d.quote_text,
     quote_author: d.quote_author,
     is_sponsored: false,
+  };
+}
+
+export const DEFAULT_AD_SLOTS: CMSAdSlot[] = [
+  {
+    id: '60b54e3d-cf48-48a6-904f-f86ecf023c88',
+    slot_name: 'News Page Advertisement',
+    page_type: 'news',
+    placement_key: 'news-primary',
+    description: 'Primary advertisement for the News page',
+    width: 728,
+    height: 90,
+    recommended_width: 728,
+    recommended_height: 90,
+    is_active: true,
+    display_order: 1,
+  },
+  {
+    id: 'ad18ec68-2c47-448f-ac4e-d225aa6633f4',
+    slot_name: 'Startups Page Advertisement',
+    page_type: 'startups',
+    placement_key: 'startups-primary',
+    description: 'Primary advertisement for the Startups page',
+    width: 728,
+    height: 90,
+    recommended_width: 728,
+    recommended_height: 90,
+    is_active: true,
+    display_order: 2,
+  },
+  {
+    id: '264dfaed-6e47-4370-802f-1168750ba5fe',
+    slot_name: 'Business Page Advertisement',
+    page_type: 'business',
+    placement_key: 'business-primary',
+    description: 'Primary advertisement for the Business page',
+    width: 728,
+    height: 90,
+    recommended_width: 728,
+    recommended_height: 90,
+    is_active: true,
+    display_order: 3,
+  },
+  {
+    id: 'f7824558-8351-496a-80b5-a3b0931df8d1',
+    slot_name: 'Technology Page Advertisement',
+    page_type: 'tech',
+    placement_key: 'tech-primary',
+    description: 'Primary advertisement for the Technology page',
+    width: 728,
+    height: 90,
+    recommended_width: 728,
+    recommended_height: 90,
+    is_active: true,
+    display_order: 4,
+  },
+  {
+    id: '4ed64006-019e-4fb3-9135-35b602804b53',
+    slot_name: 'AI Page Advertisement',
+    page_type: 'ai',
+    placement_key: 'ai-primary',
+    description: 'Primary advertisement for the AI page',
+    width: 728,
+    height: 90,
+    recommended_width: 728,
+    recommended_height: 90,
+    is_active: true,
+    display_order: 5,
+  },
+  {
+    id: '44ecdb83-34b3-4ff8-9753-41ae09a18321',
+    slot_name: 'Founders Page Advertisement',
+    page_type: 'founders',
+    placement_key: 'founders-primary',
+    description: 'Primary advertisement for the Founders page',
+    width: 728,
+    height: 90,
+    recommended_width: 728,
+    recommended_height: 90,
+    is_active: true,
+    display_order: 6,
+  },
+  {
+    id: '3228a6a5-7af5-4e0c-a2be-60db6916a45c',
+    slot_name: 'Funding Page Advertisement',
+    page_type: 'funding',
+    placement_key: 'funding-primary',
+    description: 'Primary advertisement for the Funding page',
+    width: 728,
+    height: 90,
+    recommended_width: 728,
+    recommended_height: 90,
+    is_active: true,
+    display_order: 7,
+  },
+  {
+    id: 'b52af903-50d5-4baf-ad7a-03235b731fe6',
+    slot_name: 'Innovation Page Advertisement',
+    page_type: 'innovation',
+    placement_key: 'innovation-primary',
+    description: 'Primary advertisement for the Innovation page',
+    width: 728,
+    height: 90,
+    recommended_width: 728,
+    recommended_height: 90,
+    is_active: true,
+    display_order: 8,
+  },
+  {
+    id: '98166470-b89e-4e7d-8f55-0ee5a2b6b787',
+    slot_name: 'Article Page Advertisement',
+    page_type: 'article',
+    placement_key: 'article-primary',
+    description: 'Primary advertisement for individual articles',
+    width: 728,
+    height: 90,
+    recommended_width: 728,
+    recommended_height: 90,
+    is_active: true,
+    display_order: 9,
+  },
+  {
+    id: 'ad82c7ce-137c-4159-a8fe-bbc372f30c4d',
+    slot_name: 'Magazine Page Advertisement',
+    page_type: 'magazine',
+    placement_key: 'magazine-primary',
+    description: 'Primary advertisement for The Founder Magazine',
+    width: 728,
+    height: 90,
+    recommended_width: 728,
+    recommended_height: 90,
+    is_active: true,
+    display_order: 10,
+  },
+];
+
+function mapDbRowToCMSAdvertisement(d: any): CMSAdvertisement {
+  const adSlot = d.ad_slots || {};
+  return {
+    id: d.id,
+    name: d.name || '',
+    advertiser: d.advertiser_name || d.advertiser || '',
+    image_url: d.image_url || '',
+    image_alt: d.image_alt || d.name || '',
+    image_width: d.image_width || adSlot.width || 728,
+    image_height: d.image_height || adSlot.height || 90,
+    destination_url: d.destination_url || '',
+    slot_id: d.slot_id || adSlot.id || '',
+    page: adSlot.page_type || d.page || 'news',
+    placement: adSlot.placement_key || d.placement || 'news-primary',
+    ad_type: 'banner',
+    start_date: d.start_at || d.start_date || d.created_at || new Date().toISOString(),
+    end_date: d.end_at || d.end_date || undefined,
+    is_active: Boolean(d.is_active),
+    created_at: d.created_at,
+    updated_at: d.updated_at,
   };
 }
 
@@ -851,68 +1008,239 @@ export const ContentService = {
     notifySubscribers();
   },
 
-  // 4. ADVERTISEMENTS
-  async getAdvertisements(placement?: string, page?: AdPageType | string): Promise<CMSAdvertisement[]> {
+  // 4. ADVERTISEMENTS & AD SLOTS
+  async getAdSlots(): Promise<CMSAdSlot[]> {
+    const supabase = getSupabaseClient();
+    if (!supabase || !isSupabaseConfigured()) {
+      return DEFAULT_AD_SLOTS;
+    }
+    try {
+      const { data, error } = await supabase
+        .from('ad_slots')
+        .select('*')
+        .order('display_order', { ascending: true });
+      if (error || !data || data.length === 0) {
+        return DEFAULT_AD_SLOTS;
+      }
+      return data.map((s: any) => ({
+        id: s.id,
+        slot_name: s.slot_name,
+        page_type: s.page_type,
+        placement_key: s.placement_key,
+        description: s.description,
+        width: s.width || 728,
+        height: s.height || 90,
+        recommended_width: s.recommended_width || 728,
+        recommended_height: s.recommended_height || 90,
+        is_active: Boolean(s.is_active),
+        display_order: s.display_order || 0,
+        created_at: s.created_at,
+        updated_at: s.updated_at,
+      }));
+    } catch {
+      return DEFAULT_AD_SLOTS;
+    }
+  },
+
+  async getAdvertisements(
+    placement?: string, 
+    page?: AdPageType | string, 
+    includeInactive: boolean = false
+  ): Promise<CMSAdvertisement[]> {
     const supabase = getSupabaseClient();
     if (!supabase || !isSupabaseConfigured()) return [];
 
     try {
-      let query = supabase.from('advertisements').select('*').eq('is_active', true);
-      if (placement) {
-        query = query.eq('placement', placement);
-      }
-      const { data, error } = await query;
-      if (error || !data) return [];
+      let query = supabase
+        .from('advertisements')
+        .select('*, ad_slots(*)')
+        .order('created_at', { ascending: false });
 
-      return data.map((d: any) => ({
-        id: d.id,
-        name: d.name,
-        advertiser: d.advertiser,
-        image_url: d.image_url,
-        destination_url: d.destination_url,
-        ad_type: (d.ad_type as any) || 'banner',
-        page: d.page || 'all',
-        placement: d.placement,
-        start_date: d.start_date,
-        end_date: d.end_date,
-        is_active: d.is_active,
-        created_at: d.created_at,
-      }));
-    } catch {
+      if (!includeInactive) {
+        query = query.eq('is_active', true);
+      }
+
+      const { data, error } = await query;
+      if (error) {
+        console.error('getAdvertisements error from Supabase:', error);
+        return [];
+      }
+      if (!data) return [];
+
+      const mapped = data.map(mapDbRowToCMSAdvertisement);
+
+      return mapped.filter((item) => {
+        // Date active checking for public requests
+        if (!includeInactive) {
+          if (!item.is_active) return false;
+          const now = Date.now();
+          if (item.start_date) {
+            const startTime = new Date(item.start_date).getTime();
+            if (!isNaN(startTime) && startTime > now) return false;
+          }
+          if (item.end_date) {
+            const endTime = new Date(item.end_date).getTime();
+            if (!isNaN(endTime) && endTime < now) return false;
+          }
+        }
+
+        // Placement filtering
+        if (placement && placement !== 'all') {
+          const matchPlacement =
+            item.placement === placement ||
+            item.slot_id === placement ||
+            (placement === 'news-primary' && (item.page === 'news' || item.placement.includes('news'))) ||
+            (placement === 'top' && item.page === 'all') ||
+            (placement === 'footer' && item.page === 'all') ||
+            (placement === 'between-ticker-hero' && item.page === 'all') ||
+            (placement === 'between-sections' && item.page === 'all');
+
+          if (!matchPlacement) {
+            if (page && page !== 'all' && (item.page === page || item.placement.startsWith(page))) {
+              return true;
+            }
+            return false;
+          }
+        }
+
+        // Target page filtering
+        if (page && page !== 'all') {
+          if (item.page === 'all') return true;
+          if (item.page === page) return true;
+          if (item.placement.startsWith(page)) return true;
+          if ((page === 'technology' || page === 'tech') && (item.page === 'tech' || item.page === 'technology')) return true;
+          return false;
+        }
+
+        return true;
+      });
+    } catch (err) {
+      console.error('getAdvertisements exception:', err);
       return [];
     }
   },
 
-  async saveAdvertisement(ad: CMSAdvertisement): Promise<void> {
+  async saveAdvertisement(
+    ad: Partial<CMSAdvertisement> & { name: string; destination_url?: string }
+  ): Promise<CMSAdvertisement> {
     const supabase = getSupabaseClient();
-    if (!supabase || !isSupabaseConfigured()) return;
+    if (!supabase || !isSupabaseConfigured()) {
+      throw new Error('Database is not configured. Unable to connect to Supabase.');
+    }
     await ensureAdminAuth();
 
+    if (!ad.name || !ad.name.trim()) {
+      throw new Error('Campaign Name is required.');
+    }
+    if (!ad.advertiser || !ad.advertiser.trim()) {
+      throw new Error('Advertiser / Brand is required.');
+    }
+    if (!ad.image_url || !ad.image_url.trim()) {
+      throw new Error('Advertisement banner image creative is required. Please upload or provide a banner image.');
+    }
+    if (!ad.destination_url || !ad.destination_url.trim()) {
+      throw new Error('Destination URL is required.');
+    }
+
+    // Resolve slot_id to genuine UUID from ad_slots
+    let resolvedSlotId = ad.slot_id;
+    if (!resolvedSlotId || !isValidUUID(resolvedSlotId)) {
+      const slots = await this.getAdSlots();
+      const targetKey = ad.placement || ad.page || 'news-primary';
+      const matched = slots.find(
+        (s) =>
+          s.id === targetKey ||
+          s.placement_key === targetKey ||
+          s.page_type === targetKey ||
+          (ad.page && s.page_type === ad.page) ||
+          (ad.placement && s.placement_key === ad.placement)
+      );
+      if (matched) {
+        resolvedSlotId = matched.id;
+      } else {
+        // Fallback to News Page Advertisement UUID: 60b54e3d-cf48-48a6-904f-f86ecf023c88
+        resolvedSlotId = '60b54e3d-cf48-48a6-904f-f86ecf023c88';
+      }
+    }
+
+    // Ensure valid URL format
+    let destUrl = ad.destination_url.trim();
+    if (!destUrl.startsWith('http://') && !destUrl.startsWith('https://')) {
+      destUrl = `https://${destUrl}`;
+    }
+
+    // Parse and handle dates consistently
+    let startAtIso = new Date().toISOString();
+    if (ad.start_date) {
+      // Check if format is DD-MM-YYYY
+      const parts = ad.start_date.split('-');
+      if (parts.length === 3 && parts[0].length === 2 && parts[2].length === 4) {
+        // DD-MM-YYYY
+        const d = new Date(`${parts[2]}-${parts[1]}-${parts[0]}T00:00:00.000Z`);
+        if (!isNaN(d.getTime())) startAtIso = d.toISOString();
+      } else {
+        const d = new Date(ad.start_date);
+        if (!isNaN(d.getTime())) startAtIso = d.toISOString();
+      }
+    }
+
+    let endAtIso: string | null = null;
+    if (ad.end_date && ad.end_date.trim()) {
+      const parts = ad.end_date.trim().split('-');
+      if (parts.length === 3 && parts[0].length === 2 && parts[2].length === 4) {
+        const d = new Date(`${parts[2]}-${parts[1]}-${parts[0]}T23:59:59.999Z`);
+        if (!isNaN(d.getTime())) endAtIso = d.toISOString();
+      } else {
+        const d = new Date(ad.end_date.trim());
+        if (!isNaN(d.getTime())) endAtIso = d.toISOString();
+      }
+    }
+
     const payload: any = {
-      name: ad.name,
-      advertiser: ad.advertiser,
-      image_url: ad.image_url,
-      destination_url: ad.destination_url,
-      ad_type: ad.ad_type || 'banner',
-      placement: ad.placement,
-      start_date: ad.start_date,
-      end_date: ad.end_date || null,
-      is_active: ad.is_active,
+      name: ad.name.trim(),
+      advertiser_name: ad.advertiser.trim(),
+      image_url: ad.image_url.trim(),
+      image_alt: (ad.image_alt || ad.name).trim(),
+      destination_url: destUrl,
+      slot_id: resolvedSlotId,
+      is_active: ad.is_active !== undefined ? Boolean(ad.is_active) : true,
+      start_at: startAtIso,
+      end_at: endAtIso,
+      updated_at: new Date().toISOString(),
     };
-    if (ad.id && ad.id.includes('-') && ad.id.length > 30) {
+
+    if (ad.id && isValidUUID(ad.id)) {
       payload.id = ad.id;
     }
 
-    await supabase.from('advertisements').upsert(payload);
+    const { data, error } = await supabase
+      .from('advertisements')
+      .upsert(payload)
+      .select('*, ad_slots(*)')
+      .single();
+
+    if (error) {
+      console.error('Supabase saveAdvertisement error:', error);
+      throw new Error(error.message || `Database error saving advertisement (${error.code || 'unknown'})`);
+    }
+
+    const saved = mapDbRowToCMSAdvertisement(data);
     notifySubscribers();
+    return saved;
   },
 
   async deleteAdvertisement(id: string): Promise<void> {
     const supabase = getSupabaseClient();
-    if (!supabase || !isSupabaseConfigured()) return;
+    if (!supabase || !isSupabaseConfigured()) {
+      throw new Error('Supabase is not configured.');
+    }
     await ensureAdminAuth();
 
-    await supabase.from('advertisements').delete().eq('id', id);
+    const { error } = await supabase.from('advertisements').delete().eq('id', id);
+    if (error) {
+      console.error('Supabase deleteAdvertisement error:', error);
+      throw new Error(error.message || 'Failed to delete advertisement');
+    }
     notifySubscribers();
   },
 

@@ -208,12 +208,32 @@ export type AdPageType =
   | 'magazine' 
   | 'article';
 
+export interface CMSAdSlot {
+  id: string;
+  slot_name: string;
+  page_type: string;
+  placement_key: string;
+  description?: string;
+  width: number;
+  height: number;
+  recommended_width?: number;
+  recommended_height?: number;
+  is_active: boolean;
+  display_order: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface CMSAdvertisement {
   id: string;
   name: string;
   advertiser: string;
   image_url: string;
+  image_alt?: string;
+  image_width?: number;
+  image_height?: number;
   destination_url: string;
+  slot_id?: string;
   page: AdPageType | string;
   placement: string;
   ad_type?: 'banner' | 'medium-rectangle' | 'responsive';
@@ -221,6 +241,7 @@ export interface CMSAdvertisement {
   end_date?: string;
   is_active: boolean;
   created_at?: string;
+  updated_at?: string;
 }
 
 export interface CMSSiteSettings {

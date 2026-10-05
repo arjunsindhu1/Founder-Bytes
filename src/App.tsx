@@ -26,7 +26,7 @@ import { Article, MagazineIssue } from './types';
 import { DEFAULT_MAGAZINE_ISSUE } from './constants/magazine';
 
 function matchCategory(articleCategorySlug?: string, articleCategoryName?: string, targetCategory?: string): boolean {
-  if (!targetCategory || targetCategory === 'all') return true;
+  if (!targetCategory || targetCategory === 'all' || targetCategory === 'news' || targetCategory === 'latest') return true;
   const normTarget = targetCategory.toLowerCase().replace(/-news$/, '').trim();
   const aSlug = (articleCategorySlug || '').toLowerCase().trim();
   const aName = (articleCategoryName || '').toLowerCase().trim();
@@ -270,7 +270,7 @@ export default function App() {
         return;
       }
 
-      const validCategories = ['latest', 'startups', 'business', 'tech', 'ai', 'founders', 'funding', 'innovation', 'markets'];
+      const validCategories = ['news', 'latest', 'startups', 'business', 'tech', 'technology', 'ai', 'founders', 'funding', 'innovation', 'markets'];
       if (validCategories.includes(path.toLowerCase())) {
         setActiveCategorySlug(path.toLowerCase());
         setCurrentView('category');
@@ -363,7 +363,7 @@ export default function App() {
   const trendingArticles = mappedArticles.filter((a) => a.isTrending);
 
   // Category archive articles
-  const categoryArticles = activeCategorySlug === 'latest'
+  const categoryArticles = (activeCategorySlug === 'latest' || activeCategorySlug === 'news')
     ? mappedArticles
     : mappedArticles.filter((a) => matchCategory(a.categorySlug, a.category, activeCategorySlug));
 
@@ -483,6 +483,13 @@ export default function App() {
               </span>
             </div>
 
+            {/* Target Page Section Primary Ad Banner (e.g. News Feed Primary Ad Banner) */}
+            <AdSlot 
+              pageType={activeCategorySlug === 'latest' ? 'news' : activeCategorySlug} 
+              placement={activeCategorySlug === 'news' || activeCategorySlug === 'latest' ? 'news-primary' : `${activeCategorySlug}-primary`} 
+              className="my-6" 
+            />
+
             {categoryArticles.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {categoryArticles.map((art) => (
@@ -576,7 +583,7 @@ export default function App() {
                         onSelectArticle={handleSelectArticle}
                         onSelectCategory={handleSelectCategory}
                       />
-                      <AdSlot position="between-sections" />
+                      <AdSlot pageType="news" placement="news-primary" position="between-sections" />
                     </React.Fragment>
                   );
                 }

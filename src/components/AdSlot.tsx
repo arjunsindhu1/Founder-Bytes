@@ -11,25 +11,41 @@ interface AdSlotProps {
 }
 
 export const AdSlot: React.FC<AdSlotProps> = ({
-  pageType = 'home',
+  pageType,
   placement,
   position,
   className = '',
 }) => {
   const [ad, setAd] = useState<CMSAdvertisement | null>(null);
-  const targetPlacement = placement || position || 'leaderboard';
+  const targetPlacement = placement || position || '';
 
   useEffect(() => {
     let isMounted = true;
+
     const fetchAd = async () => {
-      const activeAds = await ContentService.getAdvertisements(targetPlacement, pageType);
+      const activeAds = await ContentService.getAdvertisements(
+        targetPlacement || undefined,
+        pageType || undefined,
+        false
+      );
       if (!isMounted) return;
 
-      const now = new Date().toISOString();
+      const now = Date.now();
       const valid = activeAds.filter((a) => {
         if (!a.is_active) return false;
-        if (a.start_date && a.start_date > now) return false;
-        if (a.end_date && a.end_date < now) return false;
+
+        // Check start date
+        if (a.start_date) {
+          const startTime = new Date(a.start_date).getTime();
+          if (!isNaN(startTime) && startTime > now) return false;
+        }
+
+        // Check end date: If empty, treat as no expiry date
+        if (a.end_date && a.end_date.trim()) {
+          const endTime = new Date(a.end_date).getTime();
+          if (!isNaN(endTime) && endTime < now) return false;
+        }
+
         return true;
       });
 
@@ -49,7 +65,7 @@ export const AdSlot: React.FC<AdSlotProps> = ({
   }, [pageType, targetPlacement]);
 
   // If there is no active advertisement, collapse completely!
-  // Requirement 14 & 31: "If there is no active advertisement: collapse the slot. Do NOT leave a giant empty white area."
+  // Requirement: "If there is no active advertisement: collapse the slot. Do NOT leave a giant empty white area."
   if (!ad) {
     return null;
   }
@@ -61,13 +77,13 @@ export const AdSlot: React.FC<AdSlotProps> = ({
       aria-label={`Advertisement: ${ad.name}`}
     >
       <div className="w-full max-w-4xl mx-auto px-4 flex flex-col items-center">
-        {/* Subtle Editorial Marker */}
+        {/* Editorial Marker */}
         <div className="w-full flex items-center justify-between text-[9px] font-mono text-neutral-400 uppercase tracking-widest mb-1.5 px-0.5">
           <div className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 bg-[#DF9E00]"></span>
             <span className="font-bold text-neutral-500">ADVERTISEMENT</span>
           </div>
-          <span>SPONSORED BY {ad.advertiser.toUpperCase()}</span>
+          <span>SPONSORED BY {(ad.advertiser || 'SPONSOR').toUpperCase()}</span>
         </div>
 
         {/* Ad Container */}
@@ -77,11 +93,11 @@ export const AdSlot: React.FC<AdSlotProps> = ({
           rel="noopener noreferrer sponsored"
           className="group block relative w-full overflow-hidden border border-neutral-300 bg-neutral-100 hover:border-black transition-colors"
         >
-          <div className="w-full max-h-32 sm:max-h-28 flex items-center justify-center overflow-hidden bg-neutral-900">
+          <div className="w-full aspect-[728/90] min-h-[70px] max-h-36 flex items-center justify-center overflow-hidden bg-neutral-900">
             <img
               src={ad.image_url}
-              alt={ad.name}
-              className="w-full h-auto max-h-32 sm:max-h-28 object-cover group-hover:scale-[1.01] transition-transform"
+              alt={ad.image_alt || ad.name}
+              className="w-full h-full object-cover group-hover:scale-[1.01] transition-transform"
               loading="lazy"
             />
           </div>
