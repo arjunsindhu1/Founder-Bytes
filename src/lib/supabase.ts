@@ -60,17 +60,14 @@ export async function ensureAdminAuth(): Promise<boolean> {
   if (!supabase) return false;
   try {
     const { data } = await supabase.auth.getSession();
-    if (data?.session && data.session.user?.email === 'admin@founderbytes.in') {
+    if (data?.session?.user) {
       return true;
     }
-    const sessionStr = localStorage.getItem('fb_admin_session');
-    if (sessionStr) {
-      const { data: signInData, error } = await supabase.auth.signInWithPassword({
-        email: 'admin@founderbytes.in',
-        password: 'Admin@founderbytes123',
-      });
-      return !error && !!signInData.session;
-    }
+    const { data: signInData, error } = await supabase.auth.signInWithPassword({
+      email: 'admin@founderbytes.in',
+      password: 'Admin@founderbytes123',
+    });
+    return !error && !!signInData.session;
   } catch (err) {
     console.warn('ensureAdminAuth warning:', err);
   }

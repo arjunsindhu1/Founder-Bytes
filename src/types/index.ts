@@ -46,6 +46,7 @@ export interface Article {
   title: string;
   dek: string;
   content: string[]; // HTML/paragraphs or structured sections
+  articleBody?: string; // Unified rich HTML body
   category: string;
   categorySlug: CategorySlug;
   subCategory?: string;
@@ -54,8 +55,11 @@ export interface Article {
   featuredImage: string;
   imageCaption: string;
   imageCredit: string;
+  featuredImageAlt?: string;
+  featuredImageSourceUrl?: string;
   publishedAt: string; // ISO string
   updatedAt?: string; // ISO string
+  scheduledAt?: string | null;
   readingTimeMinutes: number;
   status: 'published' | 'draft';
   tags: string[];
@@ -64,7 +68,28 @@ export interface Article {
   sponsorName?: string;
   seoTitle?: string;
   seoDescription?: string;
+  focusKeyword?: string;
+  secondaryKeywords?: string[];
   canonicalUrl: string;
+  robotsMeta?: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImage?: string;
+  twitterTitle?: string;
+  twitterDescription?: string;
+  twitterImage?: string;
+  schemaType?: 'NewsArticle' | 'Article';
+  sourceType?: string;
+  location?: string;
+  articleType?: string;
+  entities?: {
+    people?: string[];
+    companies?: string[];
+    organizations?: string[];
+    places?: string[];
+    products_or_books?: string[];
+    topics?: string[];
+  };
   isLeadHero?: boolean;
   isSecondaryHero?: boolean;
   isTrending?: boolean;

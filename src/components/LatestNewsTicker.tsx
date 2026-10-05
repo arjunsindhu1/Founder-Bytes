@@ -8,21 +8,49 @@ interface LatestNewsTickerProps {
 }
 
 export const LatestNewsTicker: React.FC<LatestNewsTickerProps> = ({ onSelectArticle }) => {
-  const [tickerItems, setTickerItems] = useState<{ id: string; slug: string; time: string; category: string; headline: string }[]>([]);
+  const [tickerItems, setTickerItems] = useState<{ id: string; slug: string; time: string; category: string; headline: string }[]>(() => {
+    const cached = ContentService.getCachedArticles();
+    if (cached && cached.length > 0) {
+      return cached.slice(0, 12).map((art) => ({
+        id: art.id,
+        slug: art.slug,
+        time: formatISTTimeOnly(art.published_at),
+        category: art.category_name,
+        headline: art.title,
+      }));
+    }
+    return [];
+  });
 
   useEffect(() => {
     const loadTickerStories = async () => {
-      const articles = await ContentService.getArticles({ status: 'published', limit: 12 });
-      if (articles.length > 0) {
-        setTickerItems(
-          articles.map((art) => ({
-            id: art.id,
-            slug: art.slug,
-            time: formatISTTimeOnly(art.published_at),
-            category: art.category_name,
-            headline: art.title,
-          }))
-        );
+      try {
+        const articles = await ContentService.getArticles({ status: 'published', limit: 12 });
+        if (articles.length > 0) {
+          setTickerItems(
+            articles.map((art) => ({
+              id: art.id,
+              slug: art.slug,
+              time: formatISTTimeOnly(art.published_at),
+              category: art.category_name,
+              headline: art.title,
+            }))
+          );
+        }
+      } catch (err) {
+        // Fallback to cached items if network fails
+        const cached = ContentService.getCachedArticles();
+        if (cached && cached.length > 0) {
+          setTickerItems(
+            cached.slice(0, 12).map((art) => ({
+              id: art.id,
+              slug: art.slug,
+              time: formatISTTimeOnly(art.published_at),
+              category: art.category_name,
+              headline: art.title,
+            }))
+          );
+        }
       }
     };
 

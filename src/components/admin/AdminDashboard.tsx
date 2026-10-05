@@ -17,6 +17,10 @@ import { isSupabaseConfigured, updateSupabaseCredentials } from '../../lib/supab
 import { FounderBytesLogo } from '../FounderBytesLogo';
 import { ArticlePage } from '../ArticlePage';
 import { MediaUploader } from './MediaUploader';
+import { FullArticleBodyEditor } from './FullArticleBodyEditor';
+import { ArticleSEOSection } from './ArticleSEOSection';
+import { ArticleEntitiesSection } from './ArticleEntitiesSection';
+import { convertBlocksToArticleBody, extractPlainTextFromHtml } from '../../utils/articleBodyUtils';
 import { 
   LayoutDashboard, 
   FileText, 
@@ -262,26 +266,37 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       author_role: 'Founder & Editor-in-Chief',
       author_avatar: authors[0]?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
       featured_image: '',
+      featured_image_alt: '',
+      featured_image_source_url: '',
       image_caption: '',
-      image_credit: '',
-      content_blocks: [
-        {
-          id: `block-${Date.now()}-0`,
-          block_type: 'paragraph',
-          position: 0,
-          content: '',
-        }
-      ],
+      image_credit: 'Founder Bytes',
+      article_body: '',
+      content_blocks: [],
       raw_paragraphs: [''],
       status: 'draft',
       published_at: new Date().toISOString(),
-      reading_time_minutes: 5,
+      reading_time_minutes: 3,
       tags: [],
       is_featured: false,
       is_trending: false,
       is_breaking: false,
       is_editor_pick: false,
       priority: 0,
+      seo_title: '',
+      seo_description: '',
+      focus_keyword: '',
+      secondary_keywords: [],
+      canonical_url: '',
+      robots_meta: 'index, follow',
+      schema_type: 'NewsArticle',
+      entities: {
+        people: [],
+        companies: [],
+        organizations: [],
+        places: [],
+        products_or_books: [],
+        topics: [],
+      },
     };
     setEditingArticle(newArt);
     setActiveTab('article-editor');
@@ -289,7 +304,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   // Edit existing article
   const handleEditArticle = (art: CMSArticle) => {
-    setEditingArticle(JSON.parse(JSON.stringify(art)));
+    const cloned: CMSArticle = JSON.parse(JSON.stringify(art));
+    // Safely migrate existing blocks or raw paragraphs into unified article_body
+    if (!cloned.article_body && cloned.content_blocks && cloned.content_blocks.length > 0) {
+      cloned.article_body = convertBlocksToArticleBody(cloned.content_blocks);
+    }
+    if (!cloned.article_body && cloned.raw_paragraphs && cloned.raw_paragraphs.length > 0) {
+      cloned.article_body = cloned.raw_paragraphs.map((p) => `<p>${p}</p>`).join('\n');
+    }
+    setEditingArticle(cloned);
     setActiveTab('article-editor');
   };
 
@@ -301,22 +324,33 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       return;
     }
 
+    const targetStatus = statusOverride || editingArticle.status;
+
+    // Requirement 5: Featured Image Alt Text MUST be required before publishing
+    if (targetStatus === 'published' && editingArticle.featured_image && !editingArticle.featured_image_alt?.trim()) {
+      showToast('Error: Featured Image Alt Text is strictly required before publishing story.');
+      return;
+    }
+
     try {
+      const bodyHtml = editingArticle.article_body || convertBlocksToArticleBody(editingArticle.content_blocks) || `<p>${editingArticle.subtitle || editingArticle.title}</p>`;
+      const plainText = extractPlainTextFromHtml(bodyHtml);
+      const paragraphs = plainText ? plainText.split(/\n+/).filter(Boolean) : [editingArticle.subtitle || editingArticle.title];
+
       const artToSave: CMSArticle = {
         ...editingArticle,
-        status: statusOverride || editingArticle.status,
-        author_id: 'author-arjun-sindhu',
-        author_name: 'Arjun Sindhu',
-        author_role: 'Founder & Editor-in-Chief',
-        raw_paragraphs: editingArticle.content_blocks
-          .filter((b) => b.block_type === 'paragraph' && b.content.trim())
-          .map((b) => b.content),
+        article_body: bodyHtml,
+        status: targetStatus,
+        author_id: editingArticle.author_id || 'author-arjun-sindhu',
+        author_name: editingArticle.author_name || 'Arjun Sindhu',
+        author_role: editingArticle.author_role || 'Founder & Editor-in-Chief',
+        raw_paragraphs: paragraphs,
         updated_at: new Date().toISOString(),
       };
 
       await ContentService.saveArticle(artToSave);
       setEditingArticle(artToSave);
-      showToast(statusOverride === 'published' ? 'Published successfully.' : 'Saved successfully.');
+      showToast(targetStatus === 'published' ? 'Story published live successfully.' : 'Draft saved successfully.');
       loadAllData();
     } catch (err: any) {
       showToast(`Error: ${err?.message || 'Could not save article.'}`);
@@ -350,41 +384,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     } catch (err: any) {
       showToast(`Error: ${err?.message || 'Could not update status.'}`);
     }
-  };
-
-  // Add block to article
-  const handleAddBlock = (type: BlockType) => {
-    if (!editingArticle) return;
-    const newBlock: ArticleBlock = {
-      id: `block-${Date.now()}-${editingArticle.content_blocks.length}`,
-      block_type: type,
-      position: editingArticle.content_blocks.length,
-      content: '',
-    };
-    setEditingArticle({
-      ...editingArticle,
-      content_blocks: [...editingArticle.content_blocks, newBlock],
-    });
-  };
-
-  // Update block
-  const handleUpdateBlock = (id: string, updates: Partial<ArticleBlock>) => {
-    if (!editingArticle) return;
-    setEditingArticle({
-      ...editingArticle,
-      content_blocks: editingArticle.content_blocks.map((b) =>
-        b.id === id ? { ...b, ...updates } : b
-      ),
-    });
-  };
-
-  // Remove block
-  const handleRemoveBlock = (id: string) => {
-    if (!editingArticle) return;
-    setEditingArticle({
-      ...editingArticle,
-      content_blocks: editingArticle.content_blocks.filter((b) => b.id !== id),
-    });
   };
 
   // Reorder homepage section
@@ -1296,20 +1295,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </div>
               </div>
 
-              {/* Featured Image MediaUploader (Requirements 7, 8, 9, 27, 32) */}
+              {/* Featured Image MediaUploader (Requirements 5, 7, 8, 9, 27, 32) */}
               <div className="p-4 bg-neutral-50 border border-neutral-300">
                 <MediaUploader
-                  label="Featured News Image"
+                  label="Featured News Image (1200 × 675, 16:9)"
                   recommendedWidth={1200}
                   recommendedHeight={675}
                   aspectRatioLabel="16:9"
                   bucket="article-images"
                   currentImageUrl={editingArticle.featured_image}
                   onImageUploaded={(url) => setEditingArticle({ ...editingArticle, featured_image: url })}
+                  altText={editingArticle.featured_image_alt}
+                  onAltTextChange={(alt) => setEditingArticle({ ...editingArticle, featured_image_alt: alt })}
                   caption={editingArticle.image_caption}
                   onCaptionChange={(caption) => setEditingArticle({ ...editingArticle, image_caption: caption })}
                   credit={editingArticle.image_credit}
                   onCreditChange={(credit) => setEditingArticle({ ...editingArticle, image_credit: credit })}
+                  sourceUrl={editingArticle.featured_image_source_url}
+                  onSourceUrlChange={(src) => setEditingArticle({ ...editingArticle, featured_image_source_url: src })}
                 />
               </div>
 
@@ -1343,7 +1346,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </label>
               </div>
 
-              {/* Source & SEO Metadata */}
+              {/* Source & Attribution Metadata */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono">
                 <div>
                   <label className="block font-bold text-neutral-700 mb-1">Source / Attribution</label>
@@ -1367,115 +1370,45 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </div>
               </div>
 
-              {/* Modular Content Blocks */}
-              <div className="space-y-3 pt-2">
-                <div className="flex items-center justify-between pb-2 border-b border-neutral-300 font-mono text-xs">
-                  <span className="font-black uppercase tracking-wider text-neutral-900">
-                    Story Content Blocks ({editingArticle.content_blocks.length})
-                  </span>
-                  <div className="flex flex-wrap gap-1">
-                    <button
-                      type="button"
-                      onClick={() => handleAddBlock('paragraph')}
-                      className="px-2 py-1 bg-neutral-100 hover:bg-neutral-200 border border-neutral-300 text-[11px] font-bold cursor-pointer"
-                    >
-                      + Paragraph
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleAddBlock('heading')}
-                      className="px-2 py-1 bg-neutral-100 hover:bg-neutral-200 border border-neutral-300 text-[11px] font-bold cursor-pointer"
-                    >
-                      + Heading
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleAddBlock('quote')}
-                      className="px-2 py-1 bg-neutral-100 hover:bg-neutral-200 border border-neutral-300 text-[11px] font-bold cursor-pointer"
-                    >
-                      + Quote
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleAddBlock('image')}
-                      className="px-2 py-1 bg-neutral-100 hover:bg-neutral-200 border border-neutral-300 text-[11px] font-bold cursor-pointer"
-                    >
-                      + Image
-                    </button>
+              {/* 1. REBUILD THE ARTICLE EDITOR: ONE SINGLE FULL ARTICLE BODY RICH-TEXT EDITOR */}
+              <div className="space-y-2 pt-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-2 border-b border-neutral-900 font-mono text-xs gap-1">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 bg-[#DF9E00]"></span>
+                    <span className="font-black uppercase tracking-wider text-neutral-900 text-sm">
+                      Full Article Body (Unified Editor)
+                    </span>
                   </div>
+                  <span className="text-[11px] text-neutral-500 font-sans">
+                    One single rich-text editor with full typographic hierarchy, in-body media, and verified internal links.
+                  </span>
                 </div>
 
-                <div className="space-y-3">
-                  {editingArticle.content_blocks.map((block, idx) => (
-                    <div key={block.id} className="p-3 bg-neutral-50 border border-neutral-300 relative group font-mono text-xs">
-                      <div className="flex items-center justify-between mb-1.5 text-[10px] text-neutral-500 uppercase">
-                        <span className="font-bold text-[#DF9E00]">{idx + 1}. {block.block_type}</span>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveBlock(block.id)}
-                          className="text-neutral-400 hover:text-red-600 cursor-pointer"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
+                <FullArticleBodyEditor
+                  value={editingArticle.article_body || convertBlocksToArticleBody(editingArticle.content_blocks)}
+                  onChange={(html) => setEditingArticle({ ...editingArticle, article_body: html })}
+                  articleTitle={editingArticle.title}
+                  allArticles={articles}
+                />
+              </div>
 
-                      {block.block_type === 'paragraph' && (
-                        <textarea
-                          rows={3}
-                          value={block.content}
-                          onChange={(e) => handleUpdateBlock(block.id, { content: e.target.value })}
-                          placeholder="Type paragraph text..."
-                          className="w-full p-2.5 bg-white border border-neutral-300 font-serif text-sm focus:outline-none focus:border-black"
-                        />
-                      )}
+              {/* 2. DEDICATED SEO SECTION & REAL-TIME SEO ANALYSIS */}
+              <div className="pt-4">
+                <ArticleSEOSection
+                  article={editingArticle}
+                  onChange={(updated) => setEditingArticle({ ...editingArticle, ...updated })}
+                  allArticles={articles}
+                />
+              </div>
 
-                      {block.block_type === 'heading' && (
-                        <input
-                          type="text"
-                          value={block.content}
-                          onChange={(e) => handleUpdateBlock(block.id, { content: e.target.value })}
-                          placeholder="Section Subheading..."
-                          className="w-full p-2 bg-white border border-neutral-300 font-sans font-bold text-sm focus:outline-none focus:border-black"
-                        />
-                      )}
-
-                      {block.block_type === 'quote' && (
-                        <div className="space-y-2">
-                          <textarea
-                            rows={2}
-                            value={block.content}
-                            onChange={(e) => handleUpdateBlock(block.id, { content: e.target.value })}
-                            placeholder="Quote text..."
-                            className="w-full p-2 bg-white border border-neutral-300 font-serif italic text-sm"
-                          />
-                          <input
-                            type="text"
-                            value={block.attribution || ''}
-                            onChange={(e) => handleUpdateBlock(block.id, { attribution: e.target.value })}
-                            placeholder="Attribution / Speaker (e.g. Tarun Mehta, CEO)"
-                            className="w-full p-1.5 bg-white border border-neutral-300 text-xs"
-                          />
-                        </div>
-                      )}
-
-                      {block.block_type === 'image' && (
-                        <MediaUploader
-                          label="Additional Story Image"
-                          recommendedWidth={1200}
-                          recommendedHeight={675}
-                          aspectRatioLabel="16:9"
-                          bucket="article-images"
-                          currentImageUrl={block.image_url}
-                          onImageUploaded={(url) => handleUpdateBlock(block.id, { image_url: url })}
-                          caption={block.image_caption}
-                          onCaptionChange={(caption) => handleUpdateBlock(block.id, { image_caption: caption })}
-                          credit={block.image_credit}
-                          onCreditChange={(credit) => handleUpdateBlock(block.id, { image_credit: credit })}
-                        />
-                      )}
-                    </div>
-                  ))}
-                </div>
+              {/* 3. ENTITIES, AUTHOR BYLINE & TOPICAL KNOWLEDGE GRAPH */}
+              <div className="pt-2">
+                <ArticleEntitiesSection
+                  article={editingArticle}
+                  onChange={(updated) => setEditingArticle({ ...editingArticle, ...updated })}
+                  authors={authors}
+                  categories={categories}
+                />
               </div>
             </div>
           )}

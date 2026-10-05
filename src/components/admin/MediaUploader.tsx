@@ -16,6 +16,8 @@ interface MediaUploaderProps {
   onCreditChange?: (credit: string) => void;
   altText?: string;
   onAltTextChange?: (alt: string) => void;
+  sourceUrl?: string;
+  onSourceUrlChange?: (url: string) => void;
   allowPdf?: boolean;
 }
 
@@ -33,10 +35,14 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({
   onCreditChange,
   altText,
   onAltTextChange,
+  sourceUrl,
+  onSourceUrlChange,
   allowPdf = false,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [directUrlInput, setDirectUrlInput] = useState('');
+  const [showUrlInput, setShowUrlInput] = useState(false);
   const [detectedDims, setDetectedDims] = useState<{ width: number; height: number } | null>(null);
   const [aspectRatioMatch, setAspectRatioMatch] = useState<boolean | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -181,13 +187,20 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({
                 </div>
               )}
 
-              <div className="flex gap-2 pt-1">
+              <div className="flex flex-wrap items-center gap-2 pt-1">
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   className="px-2.5 py-1 bg-white border border-neutral-300 hover:border-black text-[10px] font-bold uppercase transition-colors"
                 >
-                  Replace Image
+                  Replace File
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowUrlInput(!showUrlInput)}
+                  className="px-2.5 py-1 bg-white border border-neutral-300 hover:border-black text-[10px] font-bold uppercase transition-colors"
+                >
+                  {showUrlInput ? 'Hide URL' : 'Edit URL'}
                 </button>
                 <a
                   href={currentImageUrl}
@@ -198,72 +211,157 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({
                   View Full Asset
                 </a>
               </div>
+
+              {showUrlInput && (
+                <div className="pt-2 flex items-center gap-1.5">
+                  <input
+                    type="url"
+                    defaultValue={currentImageUrl}
+                    onBlur={(e) => {
+                      if (e.target.value.trim() && e.target.value !== currentImageUrl) {
+                        onImageUploaded(e.target.value.trim());
+                      }
+                    }}
+                    placeholder="https://images.unsplash.com/..."
+                    className="flex-1 px-2 py-1 bg-white border border-neutral-300 text-[11px]"
+                  />
+                  <span className="text-[10px] text-neutral-400">Direct Image URL</span>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Optional Caption and Credit */}
-          {(onCaptionChange || onCreditChange || onAltTextChange) && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 border-t border-neutral-200">
+          {/* Featured Image Metadata Fields (Alt Text, Caption, Credit, Source URL) */}
+          <div className="pt-3 border-t border-neutral-200 space-y-3 font-mono">
+            {/* Image Alt Text (Strictly Required for SEO & Publishing) */}
+            {onAltTextChange && (
+              <div>
+                <div className="flex items-center justify-between mb-0.5">
+                  <label className="text-[11px] font-bold text-neutral-800 flex items-center gap-1">
+                    <span>Image Alt Text</span>
+                    <span className="text-red-600 font-black">*</span>
+                    <span className="text-[10px] font-normal text-neutral-500">(Required for Google News & SEO)</span>
+                  </label>
+                  {!altText?.trim() && (
+                    <span className="text-[10px] font-bold text-red-600 bg-red-50 px-1.5 py-0.5 border border-red-200">
+                      ALT TEXT MISSING
+                    </span>
+                  )}
+                </div>
+                <input
+                  type="text"
+                  value={altText || ''}
+                  onChange={(e) => onAltTextChange(e.target.value)}
+                  placeholder="Accurate visual description of photograph (e.g. Arjun Sindhu speaking at Bengaluru Tech Summit)..."
+                  className={`w-full px-2.5 py-1.5 bg-white border text-xs ${
+                    !altText?.trim() ? 'border-red-400 focus:border-red-600 bg-red-50/20' : 'border-neutral-300 focus:border-black'
+                  }`}
+                />
+                <p className="text-[10px] text-neutral-400 mt-0.5">
+                  Required before publishing. Accurately describes image for screen readers and search engines.
+                </p>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {onCaptionChange && (
                 <div>
-                  <label className="block text-[10px] text-neutral-500 mb-0.5">Image Caption</label>
+                  <label className="block text-[10px] font-bold text-neutral-600 mb-0.5">Image Caption</label>
                   <input
                     type="text"
                     value={caption || ''}
                     onChange={(e) => onCaptionChange(e.target.value)}
-                    placeholder="e.g. Founders reviewing factory telemetry in Bengaluru."
-                    className="w-full px-2.5 py-1.5 bg-white border border-neutral-300 text-[11px]"
+                    placeholder="Brief editorial caption shown below image..."
+                    className="w-full px-2.5 py-1.5 bg-white border border-neutral-300 text-xs"
                   />
                 </div>
               )}
               {onCreditChange && (
                 <div>
-                  <label className="block text-[10px] text-neutral-500 mb-0.5">Photo Credit / Agency</label>
+                  <label className="block text-[10px] font-bold text-neutral-600 mb-0.5">Image Credit / Agency</label>
                   <input
                     type="text"
                     value={credit || ''}
                     onChange={(e) => onCreditChange(e.target.value)}
-                    placeholder="e.g. Founder Bytes Photography / PTI"
-                    className="w-full px-2.5 py-1.5 bg-white border border-neutral-300 text-[11px]"
+                    placeholder="e.g. Founder Bytes / PTI / Reuters"
+                    className="w-full px-2.5 py-1.5 bg-white border border-neutral-300 text-xs"
+                  />
+                </div>
+              )}
+              {onSourceUrlChange && (
+                <div>
+                  <label className="block text-[10px] font-bold text-neutral-600 mb-0.5">Image Source URL</label>
+                  <input
+                    type="url"
+                    value={sourceUrl || ''}
+                    onChange={(e) => onSourceUrlChange(e.target.value)}
+                    placeholder="https://..."
+                    className="w-full px-2.5 py-1.5 bg-white border border-neutral-300 text-xs"
                   />
                 </div>
               )}
             </div>
-          )}
+          </div>
         </div>
       ) : (
-        <div
-          onDragOver={(e) => {
-            e.preventDefault();
-            setIsDragging(true);
-          }}
-          onDragLeave={() => setIsDragging(false)}
-          onDrop={handleDrop}
-          onClick={() => fileInputRef.current?.click()}
-          className={`border-2 border-dashed p-6 text-center cursor-pointer transition-colors ${
-            isDragging
-              ? 'border-black bg-[#F5B800]/10'
-              : 'border-neutral-300 bg-neutral-50 hover:bg-neutral-100 hover:border-neutral-500'
-          }`}
-        >
-          {uploading ? (
-            <div className="py-4 flex flex-col items-center justify-center gap-2">
-              <Loader2 className="w-6 h-6 animate-spin text-[#DF9E00]" />
-              <span className="text-xs font-bold text-neutral-700">Uploading to Supabase Storage...</span>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center gap-1.5">
-              <div className="w-10 h-10 rounded-full bg-white border border-neutral-300 flex items-center justify-center mb-1 shadow-xs">
-                <Upload className="w-5 h-5 text-neutral-700" />
+        <div className="space-y-3">
+          <div
+            onDragOver={(e) => {
+              e.preventDefault();
+              setIsDragging(true);
+            }}
+            onDragLeave={() => setIsDragging(false)}
+            onDrop={handleDrop}
+            onClick={() => fileInputRef.current?.click()}
+            className={`border-2 border-dashed p-6 text-center cursor-pointer transition-colors ${
+              isDragging
+                ? 'border-black bg-[#F5B800]/10'
+                : 'border-neutral-300 bg-neutral-50 hover:bg-neutral-100 hover:border-neutral-500'
+            }`}
+          >
+            {uploading ? (
+              <div className="py-4 flex flex-col items-center justify-center gap-2">
+                <Loader2 className="w-6 h-6 animate-spin text-[#DF9E00]" />
+                <span className="text-xs font-bold text-neutral-700">Uploading to Supabase Storage...</span>
               </div>
-              <p className="text-xs font-bold text-neutral-900 uppercase tracking-tight">
-                Click to Choose Image or Drag & Drop File
-              </p>
-              <p className="text-[10px] text-neutral-500 font-sans">
-                Supports PNG, JPG, WebP up to 10MB · Automatically stored in Supabase
-              </p>
-            </div>
-          )}
+            ) : (
+              <div className="flex flex-col items-center justify-center gap-1.5">
+                <div className="w-10 h-10 rounded-full bg-white border border-neutral-300 flex items-center justify-center mb-1 shadow-xs">
+                  <Upload className="w-5 h-5 text-neutral-700" />
+                </div>
+                <p className="text-xs font-bold text-neutral-900 uppercase tracking-tight">
+                  Click to Choose Image or Drag & Drop File
+                </p>
+                <p className="text-[10px] text-neutral-500 font-sans">
+                  Recommended: {recommendedWidth} × {recommendedHeight} ({aspectRatioLabel}) · JPEG, PNG, WebP
+                </p>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2 text-xs font-mono">
+            <span className="text-neutral-400 text-[10px] uppercase font-bold">Or Paste URL:</span>
+            <input
+              type="url"
+              value={directUrlInput}
+              onChange={(e) => setDirectUrlInput(e.target.value)}
+              placeholder="https://images.unsplash.com/photo-..."
+              className="flex-1 px-2.5 py-1 bg-white border border-neutral-300 text-xs"
+            />
+            <button
+              type="button"
+              onClick={() => {
+                if (directUrlInput.trim()) {
+                  onImageUploaded(directUrlInput.trim());
+                  setDirectUrlInput('');
+                }
+              }}
+              disabled={!directUrlInput.trim()}
+              className="px-3 py-1 bg-neutral-800 hover:bg-black text-white text-[10px] font-bold uppercase disabled:opacity-40"
+            >
+              Set Image
+            </button>
+          </div>
         </div>
       )}
 

@@ -253,7 +253,7 @@ export const ArticlePage: React.FC<ArticlePageProps> = ({
               <div className="w-full aspect-[16/10] bg-neutral-100 overflow-hidden">
                 <img
                   src={article.featuredImage}
-                  alt={article.title}
+                  alt={article.featuredImageAlt || article.imageCaption || article.title}
                   className="w-full h-full object-cover"
                   loading="eager"
                 />
@@ -281,22 +281,29 @@ export const ArticlePage: React.FC<ArticlePageProps> = ({
             )}
 
             {/* Article Body (700-800px reading measure) */}
-            <div className="space-y-5 text-base sm:text-lg text-neutral-800 leading-[1.8] font-sans">
-              {article.content.map((paragraph, index) => {
-                if (index === 0) {
+            {article.articleBody ? (
+              <div
+                className="article-rich-body space-y-5 text-base sm:text-lg text-neutral-800 leading-[1.8] font-sans"
+                dangerouslySetInnerHTML={{ __html: article.articleBody }}
+              />
+            ) : (
+              <div className="space-y-5 text-base sm:text-lg text-neutral-800 leading-[1.8] font-sans">
+                {article.content.map((paragraph, index) => {
+                  if (index === 0) {
+                    return (
+                      <p key={index} className="editorial-dropcap leading-relaxed">
+                        {paragraph}
+                      </p>
+                    );
+                  }
                   return (
-                    <p key={index} className="editorial-dropcap leading-relaxed">
+                    <p key={index} className="leading-relaxed">
                       {paragraph}
                     </p>
                   );
-                }
-                return (
-                  <p key={index} className="leading-relaxed">
-                    {paragraph}
-                  </p>
-                );
-              })}
-            </div>
+                })}
+              </div>
+            )}
 
             {/* In-Article Advertisement Placement (Requirement 14) */}
             <AdSlot pageType="article" placement="article-middle" />

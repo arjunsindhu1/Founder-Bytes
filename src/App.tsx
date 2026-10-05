@@ -19,6 +19,7 @@ import { AdminLoginModal } from './components/AdminLoginModal';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { MagazineFlipbook } from './components/MagazineFlipbook';
 import { SEOHead } from './components/SEOHead';
+import { EditorialLoadingSkeleton } from './components/EditorialLoadingSkeleton';
 import { ContentService } from './services/contentService';
 import { CMSArticle, CMSSection, CMSMagazineIssue } from './types/cms';
 import { Article, MagazineIssue } from './types';
@@ -73,6 +74,7 @@ function mapCMSArticleToArticle(c: CMSArticle): Article {
     title: c.title,
     dek: c.subtitle,
     content: c.raw_paragraphs && c.raw_paragraphs.length > 0 ? c.raw_paragraphs : [c.subtitle],
+    articleBody: c.article_body,
     category: c.category_name,
     categorySlug: c.category_slug as any,
     subCategory: c.sub_category,
@@ -90,13 +92,32 @@ function mapCMSArticleToArticle(c: CMSArticle): Article {
     featuredImage: c.featured_image,
     imageCaption: c.image_caption || '',
     imageCredit: c.image_credit || '',
+    featuredImageAlt: c.featured_image_alt,
+    featuredImageSourceUrl: c.featured_image_source_url,
     publishedAt: c.published_at,
     updatedAt: c.updated_at,
+    scheduledAt: c.scheduled_at,
     readingTimeMinutes: c.reading_time_minutes || 4,
     status: (c.status === 'published' ? 'published' : 'draft'),
     tags: c.tags || [],
     sources: c.source_name ? [{ name: c.source_name, url: c.source_url, type: 'original' }] : [{ name: 'Founder Bytes Newsroom', type: 'original' }],
-    canonicalUrl: `https://founderbytes.in/${c.slug}`,
+    canonicalUrl: c.canonical_url || `https://founderbytes.in/${c.slug}`,
+    seoTitle: c.seo_title,
+    seoDescription: c.seo_description,
+    focusKeyword: c.focus_keyword,
+    secondaryKeywords: c.secondary_keywords,
+    robotsMeta: c.robots_meta || 'index, follow',
+    ogTitle: c.og_title,
+    ogDescription: c.og_description,
+    ogImage: c.og_image,
+    twitterTitle: c.twitter_title,
+    twitterDescription: c.twitter_description,
+    twitterImage: c.twitter_image,
+    schemaType: c.schema_type,
+    sourceType: c.source_type,
+    location: c.location,
+    articleType: c.article_type,
+    entities: c.entities,
     isLeadHero: c.is_featured,
     isSecondaryHero: false,
     isTrending: c.is_trending,
@@ -119,42 +140,74 @@ export default function App() {
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [adminLoginOpen, setAdminLoginOpen] = useState(false);
 
-  // Dynamic CMS state
-  const [articles, setArticles] = useState<CMSArticle[]>([]);
-  const [sections, setSections] = useState<CMSSection[]>([]);
+  // Dynamic CMS state initialized from fast cache if available
+  const [articles, setArticles] = useState<CMSArticle[]>(() => {
+    return ContentService.getCachedArticles() || [];
+  });
+  const [sections, setSections] = useState<CMSSection[]>(() => {
+    return ContentService.getCachedSections() || DEFAULT_FALLBACK_SECTIONS;
+  });
   const [magazineIssue, setMagazineIssue] = useState<MagazineIssue>(DEFAULT_MAGAZINE_ISSUE);
 
+  // Explicit loading and error states to prevent false error flashes
+  const [isLoading, setIsLoading] = useState<boolean>(() => {
+    const cached = ContentService.getCachedArticles();
+    return !cached || cached.length === 0;
+  });
+  const [isError, setIsError] = useState<boolean>(false);
+
   // Load content from dynamic ContentService
-  const loadDynamicContent = async () => {
-    const [publishedArticles, activeSections, issues] = await Promise.all([
-      ContentService.getArticles({ status: 'published' }),
-      ContentService.getSections(),
-      ContentService.getMagazineIssues(),
-    ]);
+  const loadDynamicContent = async (isRetry = false) => {
+    if (isRetry || articles.length === 0) {
+      setIsLoading(true);
+      setIsError(false);
+    }
 
-    setArticles(publishedArticles);
-    setSections(activeSections);
+    try {
+      const [publishedArticles, activeSections, issues] = await Promise.all([
+        ContentService.getArticles({ status: 'published' }),
+        ContentService.getSections(),
+        ContentService.getMagazineIssues(),
+      ]);
 
-    if (issues.length > 0) {
-      const topIssue = issues[0];
-      setMagazineIssue({
-        issueNumber: topIssue.issue_number,
-        season: topIssue.season,
-        title: topIssue.title,
-        dek: topIssue.dek,
-        coverImage: topIssue.cover_image,
-        coverStorySlug: topIssue.featured_founders[0]?.slug || 'news/latest',
-        theme: topIssue.theme,
-        publishedDate: topIssue.published_date,
-        featuredFounders: topIssue.featured_founders,
-        tableOfContents: topIssue.table_of_contents,
-      });
+      setArticles(publishedArticles);
+      if (activeSections && activeSections.length > 0) {
+        setSections(activeSections);
+      }
+
+      if (issues && issues.length > 0) {
+        const topIssue = issues[0];
+        setMagazineIssue({
+          issueNumber: topIssue.issue_number,
+          season: topIssue.season,
+          title: topIssue.title,
+          dek: topIssue.dek,
+          coverImage: topIssue.cover_image,
+          coverStorySlug: topIssue.featured_founders[0]?.slug || 'news/latest',
+          theme: topIssue.theme,
+          publishedDate: topIssue.published_date,
+          featuredFounders: topIssue.featured_founders,
+          tableOfContents: topIssue.table_of_contents,
+        });
+      }
+
+      setIsError(false);
+      setIsLoading(false);
+    } catch (err) {
+      console.error('Failed to load live Supabase content:', err);
+      // Only show error state if we have no articles to display or user explicitly retried
+      if (articles.length === 0 || isRetry) {
+        setIsError(true);
+      }
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
     loadDynamicContent();
-    const unsubscribe = ContentService.subscribe(loadDynamicContent);
+    const unsubscribe = ContentService.subscribe(() => {
+      loadDynamicContent();
+    });
     return () => unsubscribe();
   }, []);
 
@@ -252,6 +305,12 @@ export default function App() {
   const handleSelectArticle = (slug: string) => {
     setActiveArticleSlug(slug);
     navigateTo('article', slug);
+    // Enrich with complete article blocks in background if not already loaded
+    ContentService.getArticleBySlug(slug).then((fetched) => {
+      if (fetched) {
+        setArticles((prev) => prev.map((a) => (a.slug === fetched.slug ? fetched : a)));
+      }
+    });
   };
 
   const handleSelectAuthor = (authorSlug: string) => {
@@ -456,21 +515,34 @@ export default function App() {
         {/* VIEW 6: Homepage (DYNAMIC CMS SECTIONS BUILDER) */}
         {currentView === 'home' && (
           <>
-            {mappedArticles.length === 0 ? (
+            {isLoading ? (
+              <EditorialLoadingSkeleton />
+            ) : isError ? (
               <div className="max-w-7xl mx-auto px-4 py-20 text-center">
-                <div className="inline-block p-6 bg-neutral-50 border border-neutral-300">
-                  <p className="text-sm font-mono text-neutral-700 font-bold uppercase tracking-wider mb-2">
+                <div className="inline-block p-6 sm:p-8 bg-neutral-50 border border-neutral-300 max-w-md w-full">
+                  <p className="text-sm font-mono text-neutral-800 font-bold uppercase tracking-wider mb-2">
                     Unable to load the latest stories. Please try again.
                   </p>
-                  <p className="text-xs text-neutral-500 font-serif">
+                  <p className="text-xs text-neutral-500 font-serif mb-4">
                     Connecting to live Supabase newsroom dispatch.
                   </p>
                   <button
-                    onClick={() => loadDynamicContent()}
-                    className="mt-4 px-5 py-2.5 bg-neutral-900 text-white font-mono text-xs font-bold uppercase tracking-wider hover:bg-black cursor-pointer"
+                    onClick={() => loadDynamicContent(true)}
+                    className="mt-2 px-5 py-2.5 bg-neutral-900 text-white font-mono text-xs font-bold uppercase tracking-wider hover:bg-black cursor-pointer transition-colors shadow-xs"
                   >
                     Retry Connection
                   </button>
+                </div>
+              </div>
+            ) : mappedArticles.length === 0 ? (
+              <div className="max-w-7xl mx-auto px-4 py-20 text-center">
+                <div className="inline-block p-8 bg-neutral-50 border border-neutral-200 max-w-md w-full">
+                  <p className="text-xs font-mono text-neutral-500 font-bold uppercase tracking-wider mb-2">
+                    LATEST STORIES
+                  </p>
+                  <p className="text-sm font-serif text-neutral-700">
+                    No latest stories available. New stories are being assembled by the newsroom.
+                  </p>
                 </div>
               </div>
             ) : (

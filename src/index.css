@@ -77,3 +77,118 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Rich Editorial Article Body & Editor Canvas Typography */
+.article-rich-body, .article-editor-canvas {
+  font-family: var(--font-serif);
+}
+
+.article-rich-body h2, .article-editor-canvas h2 {
+  font-family: var(--font-sans);
+  font-weight: 800;
+  font-size: 1.5rem;
+  line-height: 1.3;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  color: #111111;
+  letter-spacing: -0.01em;
+}
+
+.article-rich-body h3, .article-editor-canvas h3 {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 1.25rem;
+  line-height: 1.35;
+  margin-top: 1.75rem;
+  margin-bottom: 0.5rem;
+  color: #171717;
+}
+
+.article-rich-body h4, .article-editor-canvas h4 {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: #262626;
+}
+
+.article-rich-body p, .article-editor-canvas p {
+  margin-bottom: 1.25rem;
+  line-height: 1.8;
+  color: #262626;
+}
+
+.article-rich-body blockquote, .article-editor-canvas blockquote {
+  border-left: 3px solid #F5B800;
+  padding-left: 1.25rem;
+  margin: 1.5rem 0;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.15rem;
+  line-height: 1.7;
+  color: #333333;
+}
+
+.article-rich-body blockquote cite, .article-editor-canvas blockquote cite {
+  display: block;
+  font-size: 0.875rem;
+  font-family: var(--font-mono);
+  font-style: normal;
+  color: #737373;
+  margin-top: 0.5rem;
+}
+
+.article-rich-body ul, .article-editor-canvas ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.article-rich-body ol, .article-editor-canvas ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.article-rich-body li, .article-editor-canvas li {
+  margin-bottom: 0.5rem;
+  line-height: 1.7;
+}
+
+.article-rich-body a, .article-editor-canvas a {
+  color: #1d4ed8;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-weight: 500;
+}
+
+.article-rich-body a:hover, .article-editor-canvas a:hover {
+  color: #1e40af;
+}
+
+.article-rich-body hr, .article-editor-canvas hr {
+  border: none;
+  border-top: 1px solid #E5E5E5;
+  margin: 2rem 0;
+}
+
+.article-rich-body figure, .article-editor-canvas figure {
+  margin: 1.75rem 0;
+  display: block;
+  clear: both;
+}
+
+.article-rich-body figure img, .article-editor-canvas figure img {
+  width: 100%;
+  height: auto;
+  border-radius: 2px;
+}
+
+.article-rich-body figcaption, .article-editor-canvas figcaption {
+  font-size: 0.8rem;
+  color: #737373;
+  margin-top: 0.5rem;
+  font-family: var(--font-serif);
+  font-style: italic;
+}

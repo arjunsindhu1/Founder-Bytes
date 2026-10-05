@@ -23,12 +23,21 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
   article,
   type = 'website',
 }) => {
-  const pageTitle = article ? `${article.title} — ${SITE_NAME}` : title ? `${title} — ${SITE_NAME}` : DEFAULT_TITLE;
-  const pageDescription = article ? article.dek : description || DEFAULT_DESC;
-  const pageCanonical = canonicalUrl || (article ? `${BASE_URL}/${article.slug}` : BASE_URL);
-  const pageImage = article?.featuredImage || DEFAULT_IMAGE;
-  const pageImageAlt = article?.imageCaption || article?.title || SITE_NAME;
+  const pageTitle = article?.seoTitle || (article ? `${article.title} — ${SITE_NAME}` : title ? `${title} — ${SITE_NAME}` : DEFAULT_TITLE);
+  const pageDescription = article?.seoDescription || (article ? article.dek : description || DEFAULT_DESC);
+  const pageCanonical = article?.canonicalUrl || canonicalUrl || (article ? `${BASE_URL}/${article.slug}` : BASE_URL);
+  const pageImage = article?.ogImage || article?.featuredImage || DEFAULT_IMAGE;
+  const pageImageAlt = article?.featuredImageAlt || article?.imageCaption || article?.title || SITE_NAME;
+  const pageRobots = article?.robotsMeta || 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
   const isArticle = type === 'article' || Boolean(article);
+
+  const ogTitle = article?.ogTitle || pageTitle;
+  const ogDescription = article?.ogDescription || pageDescription;
+  const ogImage = article?.ogImage || pageImage;
+
+  const twitterTitle = article?.twitterTitle || pageTitle;
+  const twitterDescription = article?.twitterDescription || pageDescription;
+  const twitterImage = article?.twitterImage || pageImage;
 
   useEffect(() => {
     // 1. Title
@@ -58,7 +67,7 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
 
     // 2. Standard Meta & Favicons
     setMetaTag('name', 'description', pageDescription);
-    setMetaTag('name', 'robots', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
+    setMetaTag('name', 'robots', pageRobots);
     setLinkTag('canonical', pageCanonical);
     setLinkTag('icon', '/8051754E-BE89-46BC-8C1F-E63D6C8C856F.png');
     setLinkTag('shortcut icon', '/8051754E-BE89-46BC-8C1F-E63D6C8C856F.png');
@@ -67,12 +76,12 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
     // 3. Open Graph (WhatsApp, LinkedIn, Facebook, Slack)
     setMetaTag('property', 'og:site_name', SITE_NAME);
     setMetaTag('property', 'og:locale', 'en_IN');
-    setMetaTag('property', 'og:title', pageTitle);
-    setMetaTag('property', 'og:description', pageDescription);
+    setMetaTag('property', 'og:title', ogTitle);
+    setMetaTag('property', 'og:description', ogDescription);
     setMetaTag('property', 'og:url', pageCanonical);
     setMetaTag('property', 'og:type', isArticle ? 'article' : 'website');
-    setMetaTag('property', 'og:image', pageImage);
-    setMetaTag('property', 'og:image:secure_url', pageImage);
+    setMetaTag('property', 'og:image', ogImage);
+    setMetaTag('property', 'og:image:secure_url', ogImage);
     setMetaTag('property', 'og:image:alt', pageImageAlt);
     setMetaTag('property', 'og:image:width', '1200');
     setMetaTag('property', 'og:image:height', '630');
@@ -87,9 +96,9 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
     // 4. Twitter / X Cards
     setMetaTag('name', 'twitter:card', 'summary_large_image');
     setMetaTag('name', 'twitter:site', '@founderbytes');
-    setMetaTag('name', 'twitter:title', pageTitle);
-    setMetaTag('name', 'twitter:description', pageDescription);
-    setMetaTag('name', 'twitter:image', pageImage);
+    setMetaTag('name', 'twitter:title', twitterTitle);
+    setMetaTag('name', 'twitter:description', twitterDescription);
+    setMetaTag('name', 'twitter:image', twitterImage);
     setMetaTag('name', 'twitter:image:alt', pageImageAlt);
 
     // 5. JSON-LD Dynamic Schema
@@ -102,11 +111,17 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
     }
 
     if (article) {
+      const keywordsList = [
+        ...(article.focusKeyword ? [article.focusKeyword] : []),
+        ...(article.secondaryKeywords || []),
+        ...(article.tags || []),
+      ];
+
       const schemaData = {
         '@context': 'https://schema.org',
-        '@type': article.isSponsored ? 'Article' : 'NewsArticle',
-        headline: article.title,
-        description: article.dek,
+        '@type': article.schemaType || (article.isSponsored ? 'Article' : 'NewsArticle'),
+        headline: article.seoTitle || article.title,
+        description: article.seoDescription || article.dek,
         image: [article.featuredImage],
         datePublished: article.publishedAt,
         dateModified: article.updatedAt || article.publishedAt,
@@ -135,7 +150,7 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
           },
         },
         articleSection: article.category,
-        keywords: article.tags?.join(', ') || article.category,
+        keywords: keywordsList.length > 0 ? keywordsList.join(', ') : article.category,
       };
       scriptTag.textContent = JSON.stringify(schemaData);
     } else {

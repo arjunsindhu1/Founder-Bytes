@@ -12,6 +12,7 @@ import {
   SectionLayoutType
 } from '../types/cms';
 import { getSupabaseClient, isSupabaseConfigured, ensureAdminAuth } from '../lib/supabase';
+import { convertBlocksToArticleBody, calculateReadingTime } from '../utils/articleBodyUtils';
 
 // In-memory subscribers
 type ContentListener = () => void;
@@ -22,6 +23,58 @@ const statusListeners = new Set<StatusListener>();
 let currentRealtimeStatus: RealtimeStatus = 'LOCAL';
 let broadcastChannel: BroadcastChannel | null = null;
 let realtimeChannel: any = null;
+
+// Lightweight caching layer for instant initial page render & zero flash
+const CACHE_KEY_ARTICLES = 'fb_cache_articles_v3';
+const CACHE_KEY_SECTIONS = 'fb_cache_sections_v3';
+const CACHE_KEY_ISSUES = 'fb_cache_issues_v3';
+
+let memCachedArticles: CMSArticle[] | null = null;
+let memCachedSections: CMSSection[] | null = null;
+let memCachedIssues: CMSMagazineIssue[] | null = null;
+let inFlightArticlesPromise: Promise<CMSArticle[]> | null = null;
+
+function getCachedData<T>(key: string, memVal: T | null): T | null {
+  if (memVal && Array.isArray(memVal) && memVal.length > 0) {
+    return memVal;
+  }
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed && Array.isArray(parsed.data) && parsed.data.length > 0) {
+      return parsed.data as T;
+    }
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
+function setCachedData<T>(key: string, data: T) {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(key, JSON.stringify({ timestamp: Date.now(), data }));
+  } catch {
+    // ignore
+  }
+}
+
+function clearCache() {
+  memCachedArticles = null;
+  memCachedSections = null;
+  memCachedIssues = null;
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.removeItem(CACHE_KEY_ARTICLES);
+      localStorage.removeItem(CACHE_KEY_SECTIONS);
+      localStorage.removeItem(CACHE_KEY_ISSUES);
+    } catch {
+      // ignore
+    }
+  }
+}
 
 // Initialize cross-tab broadcast channel for instant multi-tab sync
 try {
@@ -48,6 +101,7 @@ function notifySubscribersLocalOnly() {
 }
 
 function notifySubscribers() {
+  clearCache();
   notifySubscribersLocalOnly();
   try {
     broadcastChannel?.postMessage({ type: 'CONTENT_CHANGED', timestamp: Date.now() });
@@ -141,6 +195,29 @@ function mapDbRowToCMSArticle(d: any): CMSArticle {
     (a: any, b: any) => (a.display_order ?? a.position ?? 0) - (b.display_order ?? b.position ?? 0)
   );
 
+  // 1. Unified Rich-Text Article Body:
+  // Look for dedicated full article body paragraph or rich-text block; otherwise convert legacy blocks to HTML
+  const bodyBlock = blocks.find((b: any) => 
+    b.block_type === 'article_body' || 
+    b.block_type === 'rich_text' ||
+    (b.block_type === 'paragraph' && (b.display_order === 0 || b.position === 0) && (b.content?.includes('<p>') || b.content?.includes('<h') || b.content?.includes('<div')))
+  );
+  const articleBodyHtml = bodyBlock?.content || convertBlocksToArticleBody(blocks);
+
+  // 2. Extra SEO & Entity Metadata Block:
+  let extraMeta: any = {};
+  const metaBlock = blocks.find((b: any) => 
+    b.block_type === 'seo_metadata' ||
+    (b.block_type === 'embed' && b.embed_url === 'fb_metadata')
+  );
+  if (metaBlock && metaBlock.content) {
+    try {
+      extraMeta = JSON.parse(metaBlock.content);
+    } catch {
+      // ignore
+    }
+  }
+
   const rawParagraphs = blocks
     .filter((b: any) => b.block_type === 'paragraph' && b.content)
     .map((b: any) => b.content);
@@ -169,6 +246,9 @@ function mapDbRowToCMSArticle(d: any): CMSArticle {
     featured_image: d.featured_image_url || 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1200&q=80',
     image_caption: d.featured_image_caption || '',
     image_credit: d.featured_image_credit || 'Founder Bytes',
+    featured_image_alt: d.featured_image_alt || d.title,
+    featured_image_source_url: extraMeta.featured_image_source_url || '',
+    article_body: articleBodyHtml,
     content_blocks: blocks.map((b: any) => ({
       id: b.id,
       block_type: (b.block_type as any) || 'paragraph',
@@ -182,10 +262,15 @@ function mapDbRowToCMSArticle(d: any): CMSArticle {
     raw_paragraphs: rawParagraphs.length > 0 ? rawParagraphs : [d.subtitle || d.excerpt || d.title],
     status: (d.status as any) || 'published',
     published_at: d.published_at || d.created_at || new Date().toISOString(),
-    reading_time_minutes: d.reading_time || 4,
+    updated_at: d.updated_at || d.published_at || d.created_at || new Date().toISOString(),
+    scheduled_at: d.scheduled_at || null,
+    reading_time_minutes: d.reading_time || calculateReadingTime(articleBodyHtml || d.subtitle || ''),
     tags: d.tags || [categoryName],
     source_name: d.source_name || 'Founder Bytes Newsroom',
     source_url: d.source_url || `https://founderbytes.in/${d.slug}`,
+    source_type: extraMeta.source_type || 'Original Reporting',
+    location: extraMeta.location || '',
+    article_type: extraMeta.article_type || 'News Wire',
     is_featured: Boolean(d.is_featured),
     is_trending: Boolean(d.is_trending),
     is_breaking: false,
@@ -193,6 +278,18 @@ function mapDbRowToCMSArticle(d: any): CMSArticle {
     priority: d.is_featured ? 100 : 0,
     seo_title: d.seo_title || d.title,
     seo_description: d.seo_description || d.subtitle || d.excerpt || '',
+    focus_keyword: extraMeta.focus_keyword || '',
+    secondary_keywords: extraMeta.secondary_keywords || [],
+    canonical_url: extraMeta.canonical_url || `https://founderbytes.in/${d.slug}`,
+    robots_meta: extraMeta.robots_meta || 'index, follow',
+    og_title: extraMeta.og_title || '',
+    og_description: extraMeta.og_description || '',
+    og_image: extraMeta.og_image || '',
+    twitter_title: extraMeta.twitter_title || '',
+    twitter_description: extraMeta.twitter_description || '',
+    twitter_image: extraMeta.twitter_image || '',
+    schema_type: extraMeta.schema_type || 'NewsArticle',
+    entities: extraMeta.entities || {},
     quote_text: d.quote_text,
     quote_author: d.quote_author,
     is_sponsored: false,
@@ -214,6 +311,19 @@ export const ContentService = {
 
   getRealtimeStatus(): RealtimeStatus {
     return currentRealtimeStatus;
+  },
+
+  // Synchronous cache access for instant zero-flash initial render
+  getCachedArticles(): CMSArticle[] | null {
+    return getCachedData<CMSArticle[]>(CACHE_KEY_ARTICLES, memCachedArticles);
+  },
+
+  getCachedSections(): CMSSection[] | null {
+    return getCachedData<CMSSection[]>(CACHE_KEY_SECTIONS, memCachedSections);
+  },
+
+  getCachedMagazineIssues(): CMSMagazineIssue[] | null {
+    return getCachedData<CMSMagazineIssue[]>(CACHE_KEY_ISSUES, memCachedIssues);
   },
 
   // Media Upload to Supabase Storage
@@ -268,23 +378,44 @@ export const ContentService = {
     });
   },
 
-  // 1. ARTICLES: Fetch directly from Supabase
+  // 1. ARTICLES: Fetch directly from Supabase with performance optimization & in-flight deduplication
   async getArticles(filter?: {
     category?: string;
     status?: string;
     is_featured?: boolean;
     is_trending?: boolean;
     limit?: number;
+    includeBlocks?: boolean;
+    skipCache?: boolean;
   }): Promise<CMSArticle[]> {
     const supabase = getSupabaseClient();
     if (!supabase || !isSupabaseConfigured()) {
-      return [];
+      const cached = getCachedData<CMSArticle[]>(CACHE_KEY_ARTICLES, memCachedArticles);
+      if (cached && cached.length > 0) return cached;
+      throw new Error('Supabase client is not configured.');
     }
 
-    try {
-      let query = supabase
-        .from('articles')
-        .select('*, categories(id, name, slug), authors(id, name, slug, designation, bio, photo_url), article_blocks(*)');
+    const isDefaultQuery =
+      !filter?.category &&
+      (!filter?.status || filter.status === 'published') &&
+      !filter?.limit &&
+      !filter?.is_featured &&
+      !filter?.is_trending &&
+      !filter?.includeBlocks;
+
+    // Deduplicate in-flight requests for the default published feed
+    if (isDefaultQuery && inFlightArticlesPromise) {
+      return inFlightArticlesPromise;
+    }
+
+    const fetchPromise = (async () => {
+      // PERFORMANCE OPTIMIZATION: Only join article_blocks if explicitly requested.
+      // Card listings (homepage, category, ticker) only need article metadata and authors/categories.
+      const selectFields = filter?.includeBlocks
+        ? '*, categories(id, name, slug), authors(id, name, slug, designation, bio, photo_url), article_blocks(*)'
+        : '*, categories(id, name, slug), authors(id, name, slug, designation, bio, photo_url)';
+
+      let query = supabase.from('articles').select(selectFields);
 
       // Status filter: default to 'published' for public website
       if (filter?.status && filter.status !== 'all') {
@@ -309,7 +440,9 @@ export const ContentService = {
       const { data, error } = await query;
       if (error) {
         console.error('Supabase getArticles error:', error.message);
-        return [];
+        const cached = getCachedData<CMSArticle[]>(CACHE_KEY_ARTICLES, memCachedArticles);
+        if (cached && cached.length > 0) return cached;
+        throw new Error(error.message);
       }
 
       if (!data) return [];
@@ -327,11 +460,22 @@ export const ContentService = {
         );
       }
 
+      if (isDefaultQuery) {
+        memCachedArticles = articles;
+        setCachedData(CACHE_KEY_ARTICLES, articles);
+      }
+
       return articles;
-    } catch (err) {
-      console.error('getArticles exception:', err);
-      return [];
+    })();
+
+    if (isDefaultQuery) {
+      inFlightArticlesPromise = fetchPromise.finally(() => {
+        inFlightArticlesPromise = null;
+      });
+      return inFlightArticlesPromise;
     }
+
+    return fetchPromise;
   },
 
   // Single article by slug
@@ -397,7 +541,7 @@ export const ContentService = {
       category_id: categoryId,
       author_id: authorId,
       featured_image_url: article.featured_image,
-      featured_image_alt: article.title,
+      featured_image_alt: article.featured_image_alt || article.title,
       featured_image_caption: article.image_caption || null,
       featured_image_credit: article.image_credit || 'Founder Bytes',
       status: article.status || 'published',
@@ -408,9 +552,13 @@ export const ContentService = {
       source_name: article.source_name || 'Founder Bytes',
       source_url: article.source_url || `https://founderbytes.in/${article.slug}`,
       published_at: article.published_at || new Date().toISOString(),
-      reading_time: article.reading_time_minutes || 4,
-      updated_at: new Date().toISOString(),
+      reading_time: article.reading_time_minutes || calculateReadingTime(article.article_body || article.subtitle || ''),
+      updated_at: new Date().toISOString(), // dateModified automatically updates
     };
+
+    if (article.scheduled_at !== undefined) {
+      payload.scheduled_at = article.scheduled_at;
+    }
 
     // Include ID only if it's an existing UUID (length > 30)
     if (article.id && article.id.includes('-') && article.id.length > 30) {
@@ -430,25 +578,50 @@ export const ContentService = {
 
     const savedId = savedArticle.id;
 
-    // 4. Update Article Blocks (Paragraphs)
-    const paragraphs = article.raw_paragraphs && article.raw_paragraphs.length > 0
-      ? article.raw_paragraphs
-      : [article.subtitle];
-
+    // 4. Update Article Content Blocks (Unified Single Full Article Body + Metadata Block)
     // Delete existing blocks for this article
     await supabase.from('article_blocks').delete().eq('article_id', savedId);
 
-    // Insert new blocks
-    const blockRows = paragraphs.map((p, idx) => ({
+    const blockRows: any[] = [];
+
+    // Block 0: Primary Unified Full Article Body Rich-Text in compliant 'paragraph' block
+    const bodyHtml = article.article_body || (article.raw_paragraphs && article.raw_paragraphs.length > 0 ? article.raw_paragraphs.map((p) => `<p>${p}</p>`).join('\n') : `<p>${article.subtitle || article.title}</p>`);
+    blockRows.push({
       article_id: savedId,
       block_type: 'paragraph',
-      content: p,
-      display_order: idx,
-    }));
+      content: bodyHtml,
+      display_order: 0,
+    });
 
-    if (blockRows.length > 0) {
-      await supabase.from('article_blocks').insert(blockRows);
-    }
+    // Block 1: Extra SEO & Entity Metadata in compliant 'embed' block
+    const metaPayload = {
+      focus_keyword: article.focus_keyword || '',
+      secondary_keywords: article.secondary_keywords || [],
+      canonical_url: article.canonical_url || `https://founderbytes.in/${article.slug}`,
+      robots_meta: article.robots_meta || 'index, follow',
+      og_title: article.og_title || '',
+      og_description: article.og_description || '',
+      og_image: article.og_image || '',
+      twitter_title: article.twitter_title || '',
+      twitter_description: article.twitter_description || '',
+      twitter_image: article.twitter_image || '',
+      schema_type: article.schema_type || (article.is_sponsored ? 'Article' : 'NewsArticle'),
+      source_type: article.source_type || 'Original Reporting',
+      location: article.location || '',
+      article_type: article.article_type || 'News Wire',
+      entities: article.entities || {},
+      featured_image_source_url: article.featured_image_source_url || '',
+    };
+
+    blockRows.push({
+      article_id: savedId,
+      block_type: 'embed',
+      embed_url: 'fb_metadata',
+      content: JSON.stringify(metaPayload),
+      display_order: 9999,
+    });
+
+    await supabase.from('article_blocks').insert(blockRows);
 
     notifySubscribers();
 
@@ -480,7 +653,10 @@ export const ContentService = {
   // 2. HOMEPAGE SECTIONS
   async getSections(): Promise<CMSSection[]> {
     const supabase = getSupabaseClient();
-    if (!supabase || !isSupabaseConfigured()) return [];
+    if (!supabase || !isSupabaseConfigured()) {
+      const cached = getCachedData<CMSSection[]>(CACHE_KEY_SECTIONS, memCachedSections);
+      return cached || [];
+    }
 
     try {
       const { data, error } = await supabase
@@ -490,7 +666,8 @@ export const ContentService = {
         .order('display_order', { ascending: true });
 
       if (error || !data || data.length === 0) {
-        return [];
+        const cached = getCachedData<CMSSection[]>(CACHE_KEY_SECTIONS, memCachedSections);
+        return cached || [];
       }
 
       const hasHero = data.some((d: any) => d.section_type === 'hero' || d.section_key === 'main-hero' || d.section_key === 'hero');
@@ -545,9 +722,12 @@ export const ContentService = {
         });
       }
 
+      memCachedSections = mappedSections;
+      setCachedData(CACHE_KEY_SECTIONS, mappedSections);
       return mappedSections;
     } catch {
-      return [];
+      const cached = getCachedData<CMSSection[]>(CACHE_KEY_SECTIONS, memCachedSections);
+      return cached || [];
     }
   },
 
@@ -724,7 +904,10 @@ export const ContentService = {
   // 5. THE FOUNDER MAGAZINE
   async getMagazineIssues(): Promise<CMSMagazineIssue[]> {
     const supabase = getSupabaseClient();
-    if (!supabase || !isSupabaseConfigured()) return [];
+    if (!supabase || !isSupabaseConfigured()) {
+      const cached = getCachedData<CMSMagazineIssue[]>(CACHE_KEY_ISSUES, memCachedIssues);
+      return cached || [];
+    }
 
     try {
       const { data, error } = await supabase
@@ -732,9 +915,12 @@ export const ContentService = {
         .select('*')
         .order('published_at', { ascending: false });
 
-      if (error || !data) return [];
+      if (error || !data || data.length === 0) {
+        const cached = getCachedData<CMSMagazineIssue[]>(CACHE_KEY_ISSUES, memCachedIssues);
+        return cached || [];
+      }
 
-      return data.map((d: any) => ({
+      const mapped = data.map((d: any) => ({
         id: d.id,
         issue_number: d.issue_number,
         season: 'Winter 2026',
@@ -752,8 +938,13 @@ export const ContentService = {
         created_at: d.created_at,
         updated_at: d.updated_at,
       }));
+
+      memCachedIssues = mapped;
+      setCachedData(CACHE_KEY_ISSUES, mapped);
+      return mapped;
     } catch {
-      return [];
+      const cached = getCachedData<CMSMagazineIssue[]>(CACHE_KEY_ISSUES, memCachedIssues);
+      return cached || [];
     }
   },
 

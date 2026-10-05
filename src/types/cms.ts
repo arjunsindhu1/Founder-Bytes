@@ -20,6 +20,7 @@ export interface ArticleBlock {
   position: number;
   content: string;
   image_url?: string;
+  image_alt?: string;
   image_caption?: string;
   image_credit?: string;
   attribution?: string; // for quotes
@@ -42,15 +43,22 @@ export interface CMSArticle {
   featured_image: string;
   image_caption?: string;
   image_credit?: string;
+  featured_image_alt?: string;
+  featured_image_source_url?: string;
+  article_body?: string; // Unified full-article rich-text HTML
   content_blocks: ArticleBlock[];
   raw_paragraphs: string[]; // fallback / quick reader format
   status: ArticleStatus;
   published_at: string; // ISO string
   updated_at?: string;
+  scheduled_at?: string | null;
   reading_time_minutes: number;
   tags: string[];
   source_name?: string;
   source_url?: string;
+  source_type?: string;
+  location?: string;
+  article_type?: string;
   is_featured: boolean;
   is_trending: boolean;
   is_breaking: boolean;
@@ -58,6 +66,25 @@ export interface CMSArticle {
   priority: number;
   seo_title?: string;
   seo_description?: string;
+  focus_keyword?: string;
+  secondary_keywords?: string[];
+  canonical_url?: string;
+  robots_meta?: string;
+  og_title?: string;
+  og_description?: string;
+  og_image?: string;
+  twitter_title?: string;
+  twitter_description?: string;
+  twitter_image?: string;
+  schema_type?: 'NewsArticle' | 'Article';
+  entities?: {
+    people?: string[];
+    companies?: string[];
+    organizations?: string[];
+    places?: string[];
+    products_or_books?: string[];
+    topics?: string[];
+  };
   quote_text?: string;
   quote_author?: string;
   is_sponsored?: boolean;
