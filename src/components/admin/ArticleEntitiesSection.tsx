@@ -92,14 +92,17 @@ export const ArticleEntitiesSection: React.FC<ArticleEntitiesSectionProps> = ({
             }}
             className="w-full px-3 py-2 border border-neutral-300 text-xs bg-white font-bold"
           >
-            <option value="author-arjun-sindhu">Arjun Sindhu (Founder & Editor-in-Chief)</option>
-            {authors
-              .filter((a) => a.id !== 'author-arjun-sindhu' && a.slug !== 'arjun-sindhu')
-              .map((a) => (
+            {authors.length > 0 ? (
+              authors.map((a) => (
                 <option key={a.id} value={a.id}>
-                  {a.name} ({a.role || (a as any).designation})
+                  {a.name} ({a.role || (a as any).designation || 'Contributing Writer'})
                 </option>
-              ))}
+              ))
+            ) : (
+              <option value="a925a3a4-abd9-4ebb-8966-b5fed4592371">
+                Arjun Sindhu (Founder & Editor-in-Chief)
+              </option>
+            )}
           </select>
         </div>
 

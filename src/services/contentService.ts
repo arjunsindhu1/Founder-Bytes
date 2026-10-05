@@ -12,7 +12,7 @@ import {
   SectionLayoutType
 } from '../types/cms';
 import { getSupabaseClient, isSupabaseConfigured, ensureAdminAuth } from '../lib/supabase';
-import { convertBlocksToArticleBody, calculateReadingTime } from '../utils/articleBodyUtils';
+import { convertBlocksToArticleBody, calculateReadingTime, isValidUUID } from '../utils/articleBodyUtils';
 
 // In-memory subscribers
 type ContentListener = () => void;
@@ -239,7 +239,7 @@ function mapDbRowToCMSArticle(d: any): CMSArticle {
     category_name: categoryName,
     category_slug: categorySlug,
     sub_category: d.sub_category,
-    author_id: d.author_id || 'author-arjun-sindhu',
+    author_id: (d.author_id && isValidUUID(d.author_id)) ? d.author_id : 'a925a3a4-abd9-4ebb-8966-b5fed4592371',
     author_name: authorName,
     author_role: authorRole,
     author_avatar: authorAvatar,
@@ -507,29 +507,44 @@ export const ContentService = {
     // Ensure admin auth session is active
     await ensureAdminAuth();
 
-    // 1. Resolve Category ID
+    // 1. Resolve Category ID (Strict UUID verification)
     let categoryId = article.category_id;
-    if (!categoryId || !categoryId.includes('-')) {
-      const { data: catData } = await supabase
-        .from('categories')
-        .select('id, slug')
-        .eq('slug', article.category_slug.toLowerCase())
-        .limit(1)
-        .single();
-      if (catData) {
-        categoryId = catData.id;
-      } else {
-        // Fallback to startups category
+    if (!isValidUUID(categoryId)) {
+      if (article.category_slug) {
+        const { data: catData } = await supabase
+          .from('categories')
+          .select('id, slug')
+          .eq('slug', article.category_slug.toLowerCase())
+          .limit(1)
+          .single();
+        if (catData && isValidUUID(catData.id)) {
+          categoryId = catData.id;
+        }
+      }
+      if (!isValidUUID(categoryId)) {
+        // Fallback to first active category (founders/startups)
         const { data: defaultCat } = await supabase.from('categories').select('id').limit(1).single();
-        categoryId = defaultCat?.id;
+        categoryId = defaultCat?.id || '485f6526-d2f8-458d-839d-794a5cf29665';
       }
     }
 
-    // 2. Resolve Author ID
+    // 2. Resolve Author ID (Strict UUID verification)
     let authorId = article.author_id;
-    if (!authorId || !authorId.includes('-')) {
-      const { data: authData } = await supabase.from('authors').select('id').eq('slug', 'arjun-sindhu').limit(1).single();
+    if (!isValidUUID(authorId)) {
+      const { data: authData } = await supabase
+        .from('authors')
+        .select('id')
+        .eq('slug', 'arjun-sindhu')
+        .limit(1)
+        .single();
       authorId = authData?.id || 'a925a3a4-abd9-4ebb-8966-b5fed4592371';
+    }
+
+    if (!isValidUUID(authorId)) {
+      throw new Error(`Invalid author UUID: "${authorId}". Please select a valid author from the database.`);
+    }
+    if (!isValidUUID(categoryId)) {
+      throw new Error(`Invalid category UUID: "${categoryId}". Please select a valid category from the database.`);
     }
 
     // 3. Prepare Article Payload matching Supabase schema exactly
@@ -560,8 +575,8 @@ export const ContentService = {
       payload.scheduled_at = article.scheduled_at;
     }
 
-    // Include ID only if it's an existing UUID (length > 30)
-    if (article.id && article.id.includes('-') && article.id.length > 30) {
+    // Include ID only if it's an existing valid UUID
+    if (article.id && isValidUUID(article.id)) {
       payload.id = article.id;
     }
 

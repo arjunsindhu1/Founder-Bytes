@@ -20,7 +20,7 @@ import { MediaUploader } from './MediaUploader';
 import { FullArticleBodyEditor } from './FullArticleBodyEditor';
 import { ArticleSEOSection } from './ArticleSEOSection';
 import { ArticleEntitiesSection } from './ArticleEntitiesSection';
-import { convertBlocksToArticleBody, extractPlainTextFromHtml } from '../../utils/articleBodyUtils';
+import { convertBlocksToArticleBody, extractPlainTextFromHtml, isValidUUID } from '../../utils/articleBodyUtils';
 import { 
   LayoutDashboard, 
   FileText, 
@@ -253,18 +253,33 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   // Start new article with Arjun Sindhu as default author
   const handleStartNewArticle = () => {
+    const defaultAuthor = authors.find((a) => a.slug === 'arjun-sindhu') || authors[0];
+    const defaultAuthorId = (defaultAuthor && isValidUUID(defaultAuthor.id)) 
+      ? defaultAuthor.id 
+      : 'a925a3a4-abd9-4ebb-8966-b5fed4592371';
+    const defaultAuthorName = defaultAuthor?.name || 'Arjun Sindhu';
+    const defaultAuthorRole = defaultAuthor?.role || 'Founder & Editor-in-Chief';
+    const defaultAuthorAvatar = defaultAuthor?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
+
+    const defaultCat = categories.find((c) => c.slug === 'founders') || categories.find((c) => c.slug === 'startups') || categories[0];
+    const defaultCatId = (defaultCat && isValidUUID(defaultCat.id)) 
+      ? defaultCat.id 
+      : '485f6526-d2f8-458d-839d-794a5cf29665';
+    const defaultCatName = defaultCat?.name || 'Founders';
+    const defaultCatSlug = defaultCat?.slug || 'founders';
+
     const newArt: CMSArticle = {
       id: `art-${Date.now()}`,
       slug: `news/story-${Date.now().toString().slice(-6)}`,
       title: '',
       subtitle: '',
-      category_id: categories[0]?.id || 'cat-startups',
-      category_name: categories[0]?.name || 'Startups',
-      category_slug: categories[0]?.slug || 'startups',
-      author_id: 'author-arjun-sindhu',
-      author_name: 'Arjun Sindhu',
-      author_role: 'Founder & Editor-in-Chief',
-      author_avatar: authors[0]?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+      category_id: defaultCatId,
+      category_name: defaultCatName,
+      category_slug: defaultCatSlug,
+      author_id: defaultAuthorId,
+      author_name: defaultAuthorName,
+      author_role: defaultAuthorRole,
+      author_avatar: defaultAuthorAvatar,
       featured_image: '',
       featured_image_alt: '',
       featured_image_source_url: '',
@@ -305,6 +320,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   // Edit existing article
   const handleEditArticle = (art: CMSArticle) => {
     const cloned: CMSArticle = JSON.parse(JSON.stringify(art));
+
+    // Resolve author_id to genuine UUID from authors table
+    if (!isValidUUID(cloned.author_id)) {
+      const matched = authors.find((a) => a.id === cloned.author_id || a.slug === cloned.author_id || a.slug === 'arjun-sindhu');
+      cloned.author_id = matched?.id || 'a925a3a4-abd9-4ebb-8966-b5fed4592371';
+      cloned.author_name = matched?.name || cloned.author_name || 'Arjun Sindhu';
+    }
+
+    // Resolve category_id to genuine UUID from categories table
+    if (!isValidUUID(cloned.category_id)) {
+      const matchedCat = categories.find((c) => c.id === cloned.category_id || c.slug === cloned.category_slug || c.slug === 'founders' || c.slug === 'startups');
+      if (matchedCat && isValidUUID(matchedCat.id)) {
+        cloned.category_id = matchedCat.id;
+        cloned.category_slug = matchedCat.slug;
+        cloned.category_name = matchedCat.name;
+      }
+    }
+
     // Safely migrate existing blocks or raw paragraphs into unified article_body
     if (!cloned.article_body && cloned.content_blocks && cloned.content_blocks.length > 0) {
       cloned.article_body = convertBlocksToArticleBody(cloned.content_blocks);
@@ -332,18 +365,48 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       return;
     }
 
+    // Author UUID Validation
+    let resolvedAuthorId = editingArticle.author_id;
+    if (!isValidUUID(resolvedAuthorId)) {
+      const matchedAuth = authors.find((a) => a.id === resolvedAuthorId || a.slug === 'arjun-sindhu');
+      if (matchedAuth && isValidUUID(matchedAuth.id)) {
+        resolvedAuthorId = matchedAuth.id;
+      } else {
+        showToast('Please select an author.');
+        return;
+      }
+    }
+
+    // Category UUID Validation
+    let resolvedCategoryId = editingArticle.category_id;
+    if (!isValidUUID(resolvedCategoryId)) {
+      const matchedCat = categories.find((c) => c.id === resolvedCategoryId || c.slug === editingArticle.category_slug);
+      if (matchedCat && isValidUUID(matchedCat.id)) {
+        resolvedCategoryId = matchedCat.id;
+      } else {
+        showToast('Please select a category.');
+        return;
+      }
+    }
+
     try {
       const bodyHtml = editingArticle.article_body || convertBlocksToArticleBody(editingArticle.content_blocks) || `<p>${editingArticle.subtitle || editingArticle.title}</p>`;
       const plainText = extractPlainTextFromHtml(bodyHtml);
       const paragraphs = plainText ? plainText.split(/\n+/).filter(Boolean) : [editingArticle.subtitle || editingArticle.title];
 
+      const matchedAuthorObj = authors.find((a) => a.id === resolvedAuthorId);
+      const matchedCategoryObj = categories.find((c) => c.id === resolvedCategoryId);
+
       const artToSave: CMSArticle = {
         ...editingArticle,
         article_body: bodyHtml,
         status: targetStatus,
-        author_id: editingArticle.author_id || 'author-arjun-sindhu',
-        author_name: editingArticle.author_name || 'Arjun Sindhu',
-        author_role: editingArticle.author_role || 'Founder & Editor-in-Chief',
+        author_id: resolvedAuthorId,
+        author_name: matchedAuthorObj?.name || editingArticle.author_name || 'Arjun Sindhu',
+        author_role: matchedAuthorObj?.role || editingArticle.author_role || 'Founder & Editor-in-Chief',
+        category_id: resolvedCategoryId,
+        category_name: matchedCategoryObj?.name || editingArticle.category_name,
+        category_slug: matchedCategoryObj?.slug || editingArticle.category_slug,
         raw_paragraphs: paragraphs,
         updated_at: new Date().toISOString(),
       };
@@ -1264,33 +1327,56 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <div>
                   <label className="block font-bold text-neutral-700 mb-1">Category</label>
                   <select
-                    value={editingArticle.category_slug}
+                    value={editingArticle.category_id || categories.find((c) => c.slug === editingArticle.category_slug)?.id || ''}
                     onChange={(e) => {
-                      const selectedCat = categories.find((c) => c.slug === e.target.value);
-                      setEditingArticle({
-                        ...editingArticle,
-                        category_slug: e.target.value,
-                        category_name: selectedCat ? selectedCat.name : e.target.value,
-                        category_id: e.target.value,
-                      });
+                      const selectedCat = categories.find((c) => c.id === e.target.value);
+                      if (selectedCat) {
+                        setEditingArticle({
+                          ...editingArticle,
+                          category_id: selectedCat.id,
+                          category_name: selectedCat.name,
+                          category_slug: selectedCat.slug,
+                        });
+                      }
                     }}
-                    className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 text-xs"
+                    className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 text-xs font-bold"
                   >
                     {categories.map((c) => (
-                      <option key={c.slug} value={c.slug}>{c.name}</option>
+                      <option key={c.id} value={c.id}>{c.name}</option>
                     ))}
                   </select>
                 </div>
 
-                {/* Author Selection: Arjun Sindhu (Requirement 17) */}
+                {/* Author Selection (Genuine Database UUID) */}
                 <div>
                   <label className="block font-bold text-neutral-700 mb-1">Author Byline</label>
                   <select
                     value={editingArticle.author_id}
-                    onChange={() => {}}
+                    onChange={(e) => {
+                      const selectedAuth = authors.find((a) => a.id === e.target.value);
+                      if (selectedAuth) {
+                        setEditingArticle({
+                          ...editingArticle,
+                          author_id: selectedAuth.id,
+                          author_name: selectedAuth.name,
+                          author_role: selectedAuth.role,
+                          author_avatar: selectedAuth.avatar,
+                        });
+                      }
+                    }}
                     className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 text-xs font-bold text-neutral-900"
                   >
-                    <option value="author-arjun-sindhu">Arjun Sindhu (Founder & Editor-in-Chief)</option>
+                    {authors.length > 0 ? (
+                      authors.map((a) => (
+                        <option key={a.id} value={a.id}>
+                          {a.name} ({a.role})
+                        </option>
+                      ))
+                    ) : (
+                      <option value="a925a3a4-abd9-4ebb-8966-b5fed4592371">
+                        Arjun Sindhu (Founder & Editor-in-Chief)
+                      </option>
+                    )}
                   </select>
                 </div>
               </div>

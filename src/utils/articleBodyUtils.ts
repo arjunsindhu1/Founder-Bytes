@@ -156,3 +156,11 @@ export function analyzeHeadings(html: string): {
 
   return { headings, hasH1InBody, hierarchyIssues };
 }
+
+/**
+ * Validates standard UUID format (8-4-4-4-12 hex characters)
+ */
+export function isValidUUID(str: any): boolean {
+  if (!str || typeof str !== 'string') return false;
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str.trim());
+}
