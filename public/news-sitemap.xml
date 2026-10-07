@@ -2,6 +2,248 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
+    <loc>https://founderbytes.in/tech/quanfluence-raises-10-million-photonic-quantum-computer</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-07T05:30:00+00:00</news:publication_date>
+      <news:title>Quanfluence Raises $10 Million to Build Full-Stack Photonic Quantum Computer</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/startups/zomint-raises-36-crore-seed-wealth-management</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-07T04:45:00+00:00</news:publication_date>
+      <news:title>Zomint Raises ₹36 Crore Seed Round to Build a New Wealth Platform for Indian Investors</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/tech/sunfox-technologies-raises-7-million-cardiac-diagnostics</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-07T04:15:00+00:00</news:publication_date>
+      <news:title>Sunfox Technologies Raises $7 Million to Scale Portable Cardiac Diagnostics Across India</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/tech/bytexl-raises-9-million-series-b-ai-tech-education-india</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-07T04:00:00+00:00</news:publication_date>
+      <news:title>byteXL Raises $9 Million Series B to Expand AI-Powered Tech Education Across India</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/ai/lambda-4-billion-funding-round-ai-cloud-ipo</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-06T16:30:00+00:00</news:publication_date>
+      <news:title>Nvidia-Backed Lambda Targets $4 Billion Funding Round Ahead of Planned IPO</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/ai/spacex-40-billion-financing-nvidia-ai-chips</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-06T16:00:00+00:00</news:publication_date>
+      <news:title>SpaceX Reportedly Seeks $40 Billion Financing to Buy Nvidia AI Chips</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/ai/deepseek-12-billion-funding-ai-race</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-06T15:30:00+00:00</news:publication_date>
+      <news:title>DeepSeek Reportedly Nears $12 Billion Funding Round as China’s AI Race Accelerates</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/ai/fydy-ai-startup-12-million-funding-talks</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-06T15:00:00+00:00</news:publication_date>
+      <news:title>AI Research Startup FYDY in Talks to Raise $12 Million at $50 Million Valuation</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/tech/facebook-reels-first-india-meta-video</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-06T14:30:00+00:00</news:publication_date>
+      <news:title>Facebook Tests Reels-First Experience in India as Meta Pushes Video Further</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/business/jiohotstar-expands-middle-east-north-africa</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-06T14:00:00+00:00</news:publication_date>
+      <news:title>JioHotstar Expands Into Middle East and North Africa Through STARZPLAY Partnership</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/ai/world-bank-india-ai-readiness-2026</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-06T13:30:00+00:00</news:publication_date>
+      <news:title>World Bank Ranks India Among Top Emerging Markets for AI Readiness</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/business/india-data-centre-investment-173-billion-ai</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-06T13:00:00+00:00</news:publication_date>
+      <news:title>India’s Data-Centre Boom Attracts $173 Billion in Investment Commitments Since 2021</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/startups/refit-global-raises-1-million-refurbished-electronics</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-06T12:30:00+00:00</news:publication_date>
+      <news:title>ReFit Global Raises $1 Million to Scale Refurbished Electronics Across India</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/innovation/indigotex-raises-5-crore-waterless-textile-technology</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-06T12:00:00+00:00</news:publication_date>
+      <news:title>IIT Delhi-Originated IndigoTex Raises ₹5 Crore for Waterless Textile Technology</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/funding/stockgro-raises-110-crore-before-ipo</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-06T11:30:00+00:00</news:publication_date>
+      <news:title>IPO-Bound StockGro Raises ₹110 Crore From Existing Backers</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/business/beyond-appliances-raises-110-crore-smart-kitchen</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-06T11:00:00+00:00</news:publication_date>
+      <news:title>Beyond Appliances Raises ₹110 Crore to Expand Smart Kitchen Business</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/business/swara-baby-products-1000-crore-ipo-sebi</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-06T10:30:00+00:00</news:publication_date>
+      <news:title>FirstCry-Backed Swara Baby Products Gets SEBI Nod for ₹1,000 Crore IPO</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/founders/naveli-ventures-deeptech-frontier-startups-india</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-06T10:00:00+00:00</news:publication_date>
+      <news:title>Naveli Ventures Launches to Back India’s DeepTech and Frontier Technology Founders</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/business/india-10000-crore-sme-growth-fund</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-06T09:30:00+00:00</news:publication_date>
+      <news:title>India Approves ₹10,000 Crore SME Growth Fund to Back the Next Generation of Businesses</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/ai/elevenlabs-investment-india-ai-voice</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-06T09:00:00+00:00</news:publication_date>
+      <news:title>ElevenLabs Plans to Invest Hundreds of Millions of Dollars in India</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/news/arjun-sindhu-digital-entrepreneur-brovate-founder</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-05T11:02:15.843+00:00</news:publication_date>
+      <news:title>Arjun Sindhu: Inside the Digital-First Entrepreneurial Journey of Brovate’s Founder</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/business/sebi-project-jagrook-mandates-broker-investor-awareness</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-01T10:30:00+00:00</news:publication_date>
+      <news:title>SEBI Issues &apos;Project Jagrook&apos; Circular Mandating Stock Brokers to Display Risk &amp; Awareness Warnings</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://founderbytes.in/funding/gravity-secures-15m-home-interiors-3one4-capital</loc>
     <news:news>
       <news:publication>
@@ -10,6 +252,17 @@
       </news:publication>
       <news:publication_date>2026-10-01T10:00:00+00:00</news:publication_date>
       <news:title>Gravity Secures $15M from 3one4 Capital and Info Edge Ventures to Scale Home Interiors Supply Chain</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/ai/aignosis-raises-4-crore-seed-antler-nikhil-kamath</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-01T09:30:00+00:00</news:publication_date>
+      <news:title>Jaipur AI Healthtech Aignosis Raises ₹4 Crore Seed Backed by Antler, Nikhil Kamath, and Varun Dua</news:title>
     </news:news>
   </url>
   <url>
@@ -24,6 +277,28 @@
     </news:news>
   </url>
   <url>
+    <loc>https://founderbytes.in/innovation/yohan-michelle-poonawalla-invest-in-optimized-solutions-defense</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-01T08:30:00+00:00</news:publication_date>
+      <news:title>Yohan and Michelle Poonawalla Enter Defense &amp; Aerospace with Strategic Stake in Optimized Solutions Ltd</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/tech/zaperon-raises-7-crore-seed-inflection-point-ventures</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-01T07:15:00+00:00</news:publication_date>
+      <news:title>Cybersecurity Innovator Zaperon Bags ₹7 Crore Seed Led by Inflection Point Ventures for Zero-Trust Identity</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://founderbytes.in/ai/arivihan-raises-10m-series-a-accel-prosus-ai-tutoring</loc>
     <news:news>
       <news:publication>
@@ -35,6 +310,28 @@
     </news:news>
   </url>
   <url>
+    <loc>https://founderbytes.in/business/moneyview-lists-on-bourses-after-98x-subscription-ipo</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-01T05:15:00+00:00</news:publication_date>
+      <news:title>Fintech Lender Moneyview Lists on Bourses Following 98.5x Subscription for ₹1,092 Crore Public Issue</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/funding/seeds-fincap-raises-100-crore-series-b-dell-foundation</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-01T04:00:00+00:00</news:publication_date>
+      <news:title>Seeds Fincap Secures ₹100 Crore Series B Led by Michael &amp; Susan Dell Foundation to Scale MSME Credit</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://founderbytes.in/business/linux-laboratories-raises-70m-chryscapital-tata-capital</loc>
     <news:news>
       <news:publication>
@@ -43,6 +340,28 @@
       </news:publication>
       <news:publication_date>2026-09-30T12:50:00+00:00</news:publication_date>
       <news:title>Linux Laboratories Raises $70M from ChrysCapital and Tata Capital Healthcare Fund III</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/business/srit-india-closes-218-crore-ipo-125x-subscription</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-09-30T12:30:00+00:00</news:publication_date>
+      <news:title>E-Governance IT Specialist SRIT India Closes ₹218.4 Crore IPO with Massive 125x Overall Bidding</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/business/inox-clean-energy-files-10000-crore-ipo-sebi</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-09-30T11:45:00+00:00</news:publication_date>
+      <news:title>Inox Clean Energy Files for India&apos;s Largest Renewable Energy IPO Seeking ₹10,000 Crore Valuation Boost</news:title>
     </news:news>
   </url>
   <url>
@@ -90,6 +409,17 @@
     </news:news>
   </url>
   <url>
+    <loc>https://founderbytes.in/business/sebi-overhauls-portfolio-managers-regulations-2026</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-09-29T11:15:00+00:00</news:publication_date>
+      <news:title>SEBI Overhauls Portfolio Managers Regulations, Opening PRIM Route for Mutual Funds and Global Assets</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://founderbytes.in/innovation/iitm-unicorn-frontier-fund-reaches-450-crore-first-close</loc>
     <news:news>
       <news:publication>
@@ -101,6 +431,17 @@
     </news:news>
   </url>
   <url>
+    <loc>https://founderbytes.in/funding/arovia-consumer-secures-100-crore-fireside-ventures</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-09-29T09:00:00+00:00</news:publication_date>
+      <news:title>Soulfull Founder’s New Venture Arovia Consumer Bags ₹100 Crore from Fireside Ventures to Build Food Conglomerate</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://founderbytes.in/tech/galaxeye-secures-63-crore-rdi-support-optosar-satellite</loc>
     <news:news>
       <news:publication>
@@ -109,6 +450,17 @@
       </news:publication>
       <news:publication_date>2026-09-29T06:30:00+00:00</news:publication_date>
       <news:title>GalaxEye Clinches ₹63.8 Crore RDI Support from Department of Science &amp; Technology for OptoSAR Satellite</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/innovation/karnataka-government-first-scheme-25-crore-100-startups</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-09-29T04:30:00+00:00</news:publication_date>
+      <news:title>Karnataka Govt Launches ₹25 Crore &apos;Government First&apos; Scheme to Deploy 100 Startups Across State Departments</news:title>
     </news:news>
   </url>
   <url>
@@ -145,6 +497,17 @@
     </news:news>
   </url>
   <url>
+    <loc>https://founderbytes.in/ai/prodoc-ai-raises-seed-funding-dr-velumani-family-office</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-09-28T11:00:00+00:00</news:publication_date>
+      <news:title>Healthcare Agentic AI Startup Prodoc AI Raises Seed Round Led by Dr. A. Velumani Family Office</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://founderbytes.in/founders/ola-electric-board-approves-1000-crore-rights-issue</loc>
     <news:news>
       <news:publication>
@@ -153,6 +516,28 @@
       </news:publication>
       <news:publication_date>2026-09-28T08:45:00+00:00</news:publication_date>
       <news:title>Ola Electric Board Clears ₹1,000 Crore Rights Issue for Debt Paydown and Product R&amp;D</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/tech/unveilr-ai-raises-pre-seed-ajvc-answer-engine-optimization</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-09-28T06:15:00+00:00</news:publication_date>
+      <news:title>AI Search Company Unveilr AI Closes Pre-Seed Round at ₹16.7 Crore Valuation Led by AJVC</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/startups/primerry-secures-7-crore-pre-seed-ashish-kacholia</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-09-28T04:45:00+00:00</news:publication_date>
+      <news:title>Pediatric Wellness Brand Primerry Secures ₹7.1 Crore Pre-Seed Round from Ashish Kacholia and Family Offices</news:title>
     </news:news>
   </url>
   <url>
@@ -167,6 +552,17 @@
     </news:news>
   </url>
   <url>
+    <loc>https://founderbytes.in/ai/byteask-raises-1m-pre-seed-y-combinator-entrepreneur-first</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-09-27T13:00:00+00:00</news:publication_date>
+      <news:title>AI Coding Agent Startup ByteAsk Raises $1M Pre-Seed Backed by Y Combinator and Entrepreneur First</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://founderbytes.in/startups/bengaluru-captures-4-billion-startup-funding-2026</loc>
     <news:news>
       <news:publication>
@@ -175,6 +571,28 @@
       </news:publication>
       <news:publication_date>2026-09-27T12:30:00+00:00</news:publication_date>
       <news:title>Bengaluru Captures $4.4B in Startup Capital to Dominate National Venture Landscape in 2026</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/innovation/hughes-precision-secures-250-crore-defense-manufacturing</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-09-27T11:30:00+00:00</news:publication_date>
+      <news:title>Defense Manufacturer Hughes Precision Secures ₹250 Crore to Triple Ammunition Output to 220 Million Rounds</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/startups/onya-raises-12-crore-pre-series-a-lab-grown-diamonds</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-09-27T10:30:00+00:00</news:publication_date>
+      <news:title>Lab-Grown Diamond Brand ONYA Bags ₹12.5 Crore Pre-Series A Led by Divisa Family Office and Zeropearl</news:title>
     </news:news>
   </url>
   <url>
@@ -189,6 +607,50 @@
     </news:news>
   </url>
   <url>
+    <loc>https://founderbytes.in/founders/indian-walker-raises-pre-seed-palette-wealth-backpacks</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-09-27T09:45:00+00:00</news:publication_date>
+      <news:title>Carry-First Streetwear Label Indian Walker Raises Pre-Seed Round at ₹20 Crore Valuation Led by Palette Wealth</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/ai/ema-raises-77m-series-b-creaegis-enterprise-agents</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-09-27T08:45:00+00:00</news:publication_date>
+      <news:title>Enterprise AI Agent Pioneer Ema Lands $77M Series B Led by Creaegis to Scale Autonomous Corporate Workflows</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/tech/myrx-raises-seed-funding-steerx-vc-primary-healthcare</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-09-27T08:15:00+00:00</news:publication_date>
+      <news:title>Primary Healthcare Platform MyRx Closes Seed Round Led by SteerX VC to Expand Clinic Telemedicine</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/founders/timbuckdo-raises-bridge-funding-trasa-ventures</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-09-27T06:30:00+00:00</news:publication_date>
+      <news:title>Student Gig Platform TimBuckDo Raises Bridge Funding at ₹90 Crore Valuation Backed by Trasa Ventures</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://founderbytes.in/ai/govt-proposes-20000-crore-frontier-ai-compute-fund</loc>
     <news:news>
       <news:publication>
@@ -200,6 +662,28 @@
     </news:news>
   </url>
   <url>
+    <loc>https://founderbytes.in/business/jsw-one-platforms-files-drhp-sebi-3054-crore-ipo</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-09-26T12:30:00+00:00</news:publication_date>
+      <news:title>B2B E-Commerce Giant JSW One Platforms Files Draft Papers with SEBI for ₹3,054 Crore Public Listing</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/business/ekkaa-electronics-files-drhp-sebi-725-crore-ipo</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-09-26T12:00:00+00:00</news:publication_date>
+      <news:title>Consumer Electronics ODM Ekkaa Electronics Files DRHP for ₹725 Crore IPO to Expand Automated SMT Lines</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://founderbytes.in/startups/betterhood-raises-11-crore-seed-preventive-pain-care</loc>
     <news:news>
       <news:publication>
@@ -208,6 +692,17 @@
       </news:publication>
       <news:publication_date>2026-09-26T11:45:00+00:00</news:publication_date>
       <news:title>Betterhood Raises ₹11.5 Crore Seed Round from Sauce and Kairon Capital for Preventive Pain Care</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/startups/protein-pantry-raises-9-crore-seed-sharrp-ventures</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-09-26T10:00:00+00:00</news:publication_date>
+      <news:title>D2C Clean-Food Brand Protein Pantry Secures ₹9 Crore Seed Round Led by Sharrp Ventures</news:title>
     </news:news>
   </url>
   <url>
@@ -230,6 +725,17 @@
       </news:publication>
       <news:publication_date>2026-09-26T06:00:00+00:00</news:publication_date>
       <news:title>Dextr AI Secures $6.7M Seed Led by Elevation Capital to Deploy Autonomous Hospitality Agents</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/startups/disha-raises-44-crore-series-a-general-catalyst-elevation</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-09-26T05:30:00+00:00</news:publication_date>
+      <news:title>AI Health Platform Disha Raises ₹43.88 Crore Series A Led by General Catalyst and Elevation Capital</news:title>
     </news:news>
   </url>
   <url>

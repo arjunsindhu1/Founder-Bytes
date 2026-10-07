@@ -9,6 +9,7 @@ interface FooterProps {
   onNavigatePolicy: (policyType: PolicyPageType) => void;
   onNavigateHome: () => void;
   onNavigateMagazine: () => void;
+  onNavigateNominations?: () => void;
   onOpenAdminLogin?: () => void;
 }
 
@@ -17,6 +18,7 @@ export const Footer: React.FC<FooterProps> = ({
   onNavigatePolicy,
   onNavigateHome,
   onNavigateMagazine,
+  onNavigateNominations,
   onOpenAdminLogin,
 }) => {
   const { year } = getCurrentISTDate();
@@ -155,6 +157,12 @@ export const Footer: React.FC<FooterProps> = ({
               <li>
                 <button onClick={onNavigateMagazine} className="hover:text-white transition-colors text-left font-semibold text-neutral-200">
                   The Founder Magazine
+                </button>
+              </li>
+              <li>
+                <button onClick={onNavigateNominations} className="hover:text-white transition-colors text-left text-[#F5B800] font-semibold flex items-center gap-1.5">
+                  <span>Magazine Nominations</span>
+                  <span className="text-[9px] font-mono bg-[#F5B800] text-black font-bold px-1 py-0.2 uppercase">Open</span>
                 </button>
               </li>
               <li>

@@ -12,6 +12,7 @@ interface HeaderProps {
   onNavigateHome: () => void;
   onNavigateMagazine: () => void;
   onNavigatePolicy: (policy: PolicyPageType) => void;
+  onNavigateNominations?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -22,6 +23,7 @@ export const Header: React.FC<HeaderProps> = ({
   onNavigateHome,
   onNavigateMagazine,
   onNavigatePolicy,
+  onNavigateNominations,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [istDate, setIstDate] = useState(getCurrentISTDate());
@@ -78,6 +80,13 @@ export const Header: React.FC<HeaderProps> = ({
               className="hover:text-[#F5B800] transition-colors hidden sm:inline"
             >
               Advertise
+            </button>
+            <span className="text-neutral-700 hidden sm:inline">|</span>
+            <button
+              onClick={onNavigateNominations}
+              className="text-[#F5B800] hover:text-white font-bold transition-colors hidden sm:inline"
+            >
+              Nominations
             </button>
             <span className="text-neutral-700 hidden sm:inline">|</span>
             <button
@@ -319,6 +328,15 @@ export const Header: React.FC<HeaderProps> = ({
                   className="block py-1 hover:text-black"
                 >
                   Contact Desk
+                </button>
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onNavigateNominations?.();
+                  }}
+                  className="block py-1 font-bold text-[#DF9E00]"
+                >
+                  Magazine Nominations
                 </button>
               </div>
             </div>

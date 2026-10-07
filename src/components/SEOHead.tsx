@@ -14,7 +14,8 @@ const DEFAULT_DESC =
   'India’s premier digital business, startup news, and founder intelligence publication. In-depth reporting on venture capital, innovation, and Indian enterprise.';
 const SITE_NAME = 'Founder Bytes';
 const BASE_URL = 'https://founderbytes.in';
-const DEFAULT_IMAGE = 'https://founderbytes.in/8051754E-BE89-46BC-8C1F-E63D6C8C856F.png';
+const DEFAULT_IMAGE = 'https://founderbytes.in/founder-bytes-og.png';
+const BRAND_LOGO = 'https://founderbytes.in/logo.png';
 
 export const SEOHead: React.FC<SEOHeadProps> = ({
   title,
@@ -23,7 +24,7 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
   article,
   type = 'website',
 }) => {
-  const pageTitle = article?.seoTitle || (article ? `${article.title} — ${SITE_NAME}` : title ? `${title} — ${SITE_NAME}` : DEFAULT_TITLE);
+  const pageTitle = article?.seoTitle || (article ? `${article.title} — ${SITE_NAME}` : title ? (title.toLowerCase().includes(SITE_NAME.toLowerCase()) ? title : `${title} — ${SITE_NAME}`) : DEFAULT_TITLE);
   const pageDescription = article?.seoDescription || (article ? article.dek : description || DEFAULT_DESC);
   const pageCanonical = article?.canonicalUrl || canonicalUrl || (article ? `${BASE_URL}/${article.slug}` : BASE_URL);
   const pageImage = article?.ogImage || article?.featuredImage || DEFAULT_IMAGE;
@@ -119,38 +120,65 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
 
       const schemaData = {
         '@context': 'https://schema.org',
-        '@type': article.schemaType || (article.isSponsored ? 'Article' : 'NewsArticle'),
-        headline: article.seoTitle || article.title,
-        description: article.seoDescription || article.dek,
-        image: [article.featuredImage],
-        datePublished: article.publishedAt,
-        dateModified: article.updatedAt || article.publishedAt,
-        inLanguage: 'en-IN',
-        mainEntityOfPage: {
-          '@type': 'WebPage',
-          '@id': pageCanonical,
-        },
-        author: [
+        '@graph': [
           {
-            '@type': 'Person',
-            name: article.author.name,
-            url: `${BASE_URL}/author/${article.author.slug}`,
-            jobTitle: article.author.role,
+            '@type': article.schemaType || (article.isSponsored ? 'Article' : 'NewsArticle'),
+            headline: article.seoTitle || article.title,
+            description: article.seoDescription || article.dek,
+            image: [article.featuredImage],
+            datePublished: article.publishedAt,
+            dateModified: article.updatedAt || article.publishedAt,
+            inLanguage: 'en-IN',
+            mainEntityOfPage: {
+              '@type': 'WebPage',
+              '@id': pageCanonical,
+            },
+            author: [
+              {
+                '@type': 'Person',
+                name: article.author.name,
+                url: `${BASE_URL}/author/${article.author.slug}`,
+                jobTitle: article.author.role,
+              },
+            ],
+            publisher: {
+              '@type': 'NewsMediaOrganization',
+              name: SITE_NAME,
+              url: BASE_URL,
+              logo: {
+                '@type': 'ImageObject',
+                url: BRAND_LOGO,
+                width: 800,
+                height: 800,
+              },
+            },
+            articleSection: article.category,
+            keywords: keywordsList.length > 0 ? keywordsList.join(', ') : article.category,
+          },
+          {
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              {
+                '@type': 'ListItem',
+                position: 1,
+                name: 'Home',
+                item: BASE_URL,
+              },
+              {
+                '@type': 'ListItem',
+                position: 2,
+                name: article.category,
+                item: `${BASE_URL}/${article.categorySlug || 'tech'}`,
+              },
+              {
+                '@type': 'ListItem',
+                position: 3,
+                name: article.title,
+                item: pageCanonical,
+              },
+            ],
           },
         ],
-        publisher: {
-          '@type': 'NewsMediaOrganization',
-          name: SITE_NAME,
-          url: BASE_URL,
-          logo: {
-            '@type': 'ImageObject',
-            url: `${BASE_URL}/8051754E-BE89-46BC-8C1F-E63D6C8C856F.png`,
-            width: 512,
-            height: 512,
-          },
-        },
-        articleSection: article.category,
-        keywords: keywordsList.length > 0 ? keywordsList.join(', ') : article.category,
       };
       scriptTag.textContent = JSON.stringify(schemaData);
     } else {
@@ -165,9 +193,9 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
             url: BASE_URL,
             logo: {
               '@type': 'ImageObject',
-              url: `${BASE_URL}/8051754E-BE89-46BC-8C1F-E63D6C8C856F.png`,
-              width: 512,
-              height: 512,
+              url: BRAND_LOGO,
+              width: 800,
+              height: 800,
             },
             publishingPrinciples: `${BASE_URL}/editorial-policy`,
             correctionsPolicy: `${BASE_URL}/corrections-policy`,

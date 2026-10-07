@@ -7,10 +7,15 @@ import { HeroSection } from './components/HeroSection';
 import { LatestAndTrendingSection } from './components/LatestAndTrendingSection';
 import { CategorySection } from './components/CategorySection';
 import { MagazineShowcase } from './components/MagazineShowcase';
+import { FounderSpotlightSection } from './components/FounderSpotlightSection';
+import { FundingBriefSection } from './components/FundingBriefSection';
+import { LatestNewsSection } from './components/LatestNewsSection';
+import { FounderProfilePage } from './components/FounderProfilePage';
 import { NewsletterBox } from './components/NewsletterBox';
 import { SearchModal } from './components/SearchModal';
 import { ArticlePage } from './components/ArticlePage';
 import { MagazinePage } from './components/MagazinePage';
+import { MagazineNominationsPage } from './components/MagazineNominationsPage';
 import { AuthorPage } from './components/AuthorPage';
 import { PolicyPage, PolicyPageType } from './components/PolicyPage';
 import { ArticleCard } from './components/ArticleCard';
@@ -21,7 +26,7 @@ import { MagazineFlipbook } from './components/MagazineFlipbook';
 import { SEOHead } from './components/SEOHead';
 import { EditorialLoadingSkeleton } from './components/EditorialLoadingSkeleton';
 import { ContentService } from './services/contentService';
-import { CMSArticle, CMSSection, CMSMagazineIssue } from './types/cms';
+import { CMSArticle, CMSSection, CMSMagazineIssue, FounderSpotlight } from './types/cms';
 import { Article, MagazineIssue } from './types';
 import { DEFAULT_MAGAZINE_ISSUE } from './constants/magazine';
 
@@ -130,11 +135,13 @@ function mapCMSArticleToArticle(c: CMSArticle): Article {
 
 export default function App() {
   // Navigation / Route state
-  const [currentView, setCurrentView] = useState<'home' | 'article' | 'magazine' | 'author' | 'policy' | 'category' | 'admin'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'article' | 'magazine' | 'author' | 'policy' | 'category' | 'admin' | 'nominations' | 'founder-profile'>('home');
   const [activeArticleSlug, setActiveArticleSlug] = useState<string>('');
   const [activeAuthorSlug, setActiveAuthorSlug] = useState<string>('');
   const [activePolicyType, setActivePolicyType] = useState<PolicyPageType>('about');
   const [activeCategorySlug, setActiveCategorySlug] = useState<string>('');
+  const [activeFounderSlug, setActiveFounderSlug] = useState<string>('');
+  const [activeFounder, setActiveFounder] = useState<FounderSpotlight | null>(null);
   
   // Modals
   const [searchModalOpen, setSearchModalOpen] = useState(false);
@@ -148,6 +155,7 @@ export default function App() {
     return ContentService.getCachedSections() || DEFAULT_FALLBACK_SECTIONS;
   });
   const [magazineIssue, setMagazineIssue] = useState<MagazineIssue>(DEFAULT_MAGAZINE_ISSUE);
+  const [spotlights, setSpotlights] = useState<FounderSpotlight[]>([]);
 
   // Explicit loading and error states to prevent false error flashes
   const [isLoading, setIsLoading] = useState<boolean>(() => {
@@ -164,13 +172,15 @@ export default function App() {
     }
 
     try {
-      const [publishedArticles, activeSections, issues] = await Promise.all([
+      const [publishedArticles, activeSections, issues, activeSpotlights] = await Promise.all([
         ContentService.getArticles({ status: 'published' }),
         ContentService.getSections(),
         ContentService.getMagazineIssues(),
+        ContentService.getActiveHomepageSpotlights(),
       ]);
 
       setArticles(publishedArticles);
+      setSpotlights(activeSpotlights);
       if (activeSections && activeSections.length > 0) {
         setSections(activeSections);
       }
@@ -237,6 +247,27 @@ export default function App() {
         return;
       }
 
+      if (path === 'nominations') {
+        setCurrentView('nominations');
+        return;
+      }
+
+      if (path.startsWith('founders/')) {
+        const founderSlug = path.replace('founders/', '').toLowerCase();
+        setActiveFounderSlug(founderSlug);
+        setCurrentView('founder-profile');
+        ContentService.getFounderSpotlightBySlug(founderSlug).then((found) => {
+          if (found) setActiveFounder(found);
+        });
+        return;
+      }
+
+      if (path === 'founders') {
+        setActiveCategorySlug('founders');
+        setCurrentView('category');
+        return;
+      }
+
       if (path.startsWith('author/')) {
         const authorSlug = path.replace('author/', '');
         setActiveAuthorSlug(authorSlug);
@@ -296,10 +327,20 @@ export default function App() {
   }, [articles]);
 
   // Sync route and scroll to top
-  const navigateTo = (view: 'home' | 'article' | 'magazine' | 'author' | 'policy' | 'category' | 'admin', path: string) => {
+  const navigateTo = (view: 'home' | 'article' | 'magazine' | 'author' | 'policy' | 'category' | 'admin' | 'nominations' | 'founder-profile', path: string) => {
     setCurrentView(view);
     window.history.pushState({}, '', `/${path}`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleSelectFounder = (slug: string) => {
+    setActiveFounderSlug(slug);
+    navigateTo('founder-profile', `founders/${slug}`);
+    ContentService.getFounderSpotlightBySlug(slug).then((found) => {
+      if (found) {
+        setActiveFounder(found);
+      }
+    });
   };
 
   const handleSelectArticle = (slug: string) => {
@@ -341,6 +382,10 @@ export default function App() {
     navigateTo('magazine', 'magazine');
   };
 
+  const handleNavigateNominations = () => {
+    navigateTo('nominations', 'nominations');
+  };
+
   const handleAdminLoginSuccess = () => {
     setAdminLoginOpen(false);
     navigateTo('admin', 'admin');
@@ -353,12 +398,19 @@ export default function App() {
   const currentArticle = mappedArticles.find((a) => a.slug === activeArticleSlug) || mappedArticles[0];
   const currentAuthor = currentArticle?.author;
 
-  // Lead hero resolution
+  // Lead hero resolution: 1 large featured story + 3 smaller supporting stories
   const featuredArticles = mappedArticles.filter((a) => a.isLeadHero);
   const leadHeroArticle = featuredArticles[0] || mappedArticles[0];
   const nonLeadArticles = mappedArticles.filter((a) => a.id !== leadHeroArticle?.id);
-  const subLeadArticles = nonLeadArticles.slice(0, 2);
-  const secondaryHeroArticles = nonLeadArticles.slice(2, 8);
+  const supportingArticles = nonLeadArticles.slice(0, 3);
+
+  // Exclude hero stories so they do not repeat in Latest News
+  const heroStoryIds = new Set([leadHeroArticle?.id, ...supportingArticles.map((a) => a.id)].filter(Boolean));
+  // Latest News: Combine Startup + Business + Tech + AI, 6-8 stories, no repetition
+  const mixedLatestArticles = mappedArticles.filter((a) => !heroStoryIds.has(a.id)).slice(0, 8);
+
+  // Funding articles for Funding Brief
+  const fundingArticles = mappedArticles.filter((a) => matchCategory(a.categorySlug, a.category, 'funding'));
 
   const trendingArticles = mappedArticles.filter((a) => a.isTrending);
 
@@ -366,6 +418,9 @@ export default function App() {
   const categoryArticles = (activeCategorySlug === 'latest' || activeCategorySlug === 'news')
     ? mappedArticles
     : mappedArticles.filter((a) => matchCategory(a.categorySlug, a.category, activeCategorySlug));
+
+  // Active founder resolution
+  const currentFounder = activeFounder || spotlights.find((s) => s.slug.toLowerCase() === activeFounderSlug.toLowerCase()) || spotlights[0];
 
   // If in admin view, render AdminDashboard directly
   if (currentView === 'admin') {
@@ -384,6 +439,15 @@ export default function App() {
       {currentView === 'article' && currentArticle && <SEOHead article={currentArticle} type="article" />}
       {currentView === 'category' && <SEOHead title={activeCategorySlug.toUpperCase()} type="website" />}
       {currentView === 'magazine' && <SEOHead title="The Founder Magazine" type="website" />}
+      {currentView === 'nominations' && <SEOHead title="Magazine Nominations | Founder Bytes" description="Nominate yourself or someone who deserves to be featured in Founder Bytes 30 Under 30 and Founder Timex magazine editions." canonicalUrl="https://founderbytes.in/nominations" type="website" />}
+      {currentView === 'founder-profile' && currentFounder && (
+        <SEOHead 
+          title={`${currentFounder.founder_name} — Founder Spotlight`} 
+          description={currentFounder.short_bio} 
+          canonicalUrl={`https://founderbytes.in/founders/${currentFounder.slug}`}
+          type="website" 
+        />
+      )}
       {currentView === 'author' && <SEOHead title="Arjun Sindhu" type="website" />}
       {currentView === 'policy' && <SEOHead title={activePolicyType.toUpperCase().replace('-', ' ')} type="website" />}
 
@@ -399,6 +463,7 @@ export default function App() {
         onNavigateHome={handleNavigateHome}
         onNavigateMagazine={handleNavigateMagazine}
         onNavigatePolicy={handleNavigatePolicy}
+        onNavigateNominations={handleNavigateNominations}
       />
 
       {/* Top Banner Ad Slot */}
@@ -432,6 +497,14 @@ export default function App() {
           <MagazinePage
             onSelectArticle={handleSelectArticle}
             onNavigateHome={handleNavigateHome}
+          />
+        )}
+
+        {/* VIEW 2b: Magazine Nominations */}
+        {currentView === 'nominations' && (
+          <MagazineNominationsPage
+            onNavigateHome={handleNavigateHome}
+            onNavigateMagazine={handleNavigateMagazine}
           />
         )}
 
@@ -519,7 +592,30 @@ export default function App() {
           </div>
         )}
 
-        {/* VIEW 6: Homepage (DYNAMIC CMS SECTIONS BUILDER) */}
+        {/* VIEW 5b: Dedicated Founder Profile Dossier */}
+        {currentView === 'founder-profile' && (
+          currentFounder ? (
+            <FounderProfilePage
+              founder={currentFounder}
+              onNavigateHome={handleNavigateHome}
+              onNavigateFounders={() => handleSelectCategory('founders')}
+            />
+          ) : (
+            <div className="max-w-4xl mx-auto px-4 py-20 text-center font-mono text-xs">
+              <p className="font-bold uppercase text-neutral-800">
+                FOUNDER PROFILE DOSSIER LOADING OR NOT FOUND
+              </p>
+              <button
+                onClick={handleNavigateHome}
+                className="mt-4 px-4 py-2 bg-neutral-900 text-white text-xs font-bold uppercase tracking-wider cursor-pointer"
+              >
+                Return to Front Page
+              </button>
+            </div>
+          )
+        )}
+
+        {/* VIEW 6: Homepage (Clean Premium Editorial Magazine Layout) */}
         {currentView === 'home' && (
           <>
             {isLoading ? (
@@ -553,82 +649,56 @@ export default function App() {
                 </div>
               </div>
             ) : (
-              (sections.length > 0 ? sections : DEFAULT_FALLBACK_SECTIONS)
-                .filter((sec) => sec.is_visible)
-                .map((section, sIndex) => {
-                // Render Section by Type
-                if (section.section_type === 'hero') {
-                  if (!leadHeroArticle) return null;
-                  return (
-                    <React.Fragment key={section.id}>
-                      <HeroSection
-                        leadArticle={leadHeroArticle}
-                        secondaryArticles={secondaryHeroArticles}
-                        subLeadArticles={subLeadArticles}
-                        onSelectArticle={handleSelectArticle}
-                        onSelectCategory={handleSelectCategory}
-                        onSelectAuthor={handleSelectAuthor}
-                      />
-                      {sIndex === 0 && <AdSlot position="between-sections" />}
-                    </React.Fragment>
-                  );
-                }
-
-                if (section.section_type === 'wire-trending' || section.section_type === 'latest') {
-                  return (
-                    <React.Fragment key={section.id}>
-                      <LatestAndTrendingSection
-                        latestArticles={mappedArticles}
-                        trendingArticles={trendingArticles}
-                        onSelectArticle={handleSelectArticle}
-                        onSelectCategory={handleSelectCategory}
-                      />
-                      <AdSlot pageType="news" placement="news-primary" position="between-sections" />
-                    </React.Fragment>
-                  );
-                }
-
-                if (section.section_type === 'magazine') {
-                  return (
-                    <MagazineShowcase
-                      key={section.id}
-                      issue={magazineIssue}
-                      onNavigateMagazine={handleNavigateMagazine}
-                      onSelectArticle={handleSelectArticle}
-                    />
-                  );
-                }
-
-                // Category or Custom News Section
-                const targetCategory = section.category_slug || section.slug;
-                const sectionStories = mappedArticles.filter((a) =>
-                  matchCategory(a.categorySlug, a.category, targetCategory)
-                );
-
-                // Section 30 Empty States: "If a section has no stories, automatically hide the section"
-                if (sectionStories.length === 0) {
-                  return null;
-                }
-
-                return (
-                  <CategorySection
-                    key={section.id}
-                    title={section.name}
-                    categorySlug={targetCategory}
-                    articles={sectionStories.slice(0, section.story_count || 4)}
-                    layout={section.layout_type}
+              <>
+                {/* 2. HERO / TOP STORIES (1 large featured story + 3 smaller supporting stories) */}
+                {leadHeroArticle && (
+                  <HeroSection
+                    leadArticle={leadHeroArticle}
+                    supportingArticles={supportingArticles}
                     onSelectArticle={handleSelectArticle}
                     onSelectCategory={handleSelectCategory}
                     onSelectAuthor={handleSelectAuthor}
                   />
-                );
-              })
-            )}
+                )}
 
-            {/* Newsletter Dispatch Box */}
-            <div id="newsletter-section">
-              <NewsletterBox />
-            </div>
+                {/* Optional Between-Sections Banner Ad */}
+                <AdSlot position="between-sections" />
+
+                {/* 3. LATEST NEWS (Combined Startup + Business + Tech + AI, 6-8 stories, 4-col responsive grid, no duplicates) */}
+                <LatestNewsSection
+                  articles={mixedLatestArticles}
+                  onSelectArticle={handleSelectArticle}
+                  onSelectCategory={handleSelectCategory}
+                  onViewAllNews={() => handleSelectCategory('latest')}
+                />
+
+                {/* 4. FOUNDER SPOTLIGHT (Max 3 active featured founders, editorial cards) */}
+                <FounderSpotlightSection
+                  spotlights={spotlights}
+                  onSelectFounder={handleSelectFounder}
+                  onViewAllFounders={() => handleSelectCategory('founders')}
+                />
+
+                {/* 5. FUNDING BRIEF (Compact 4 latest funding records) */}
+                <FundingBriefSection
+                  fundingArticles={fundingArticles}
+                  onSelectArticle={handleSelectArticle}
+                  onViewAllFunding={() => handleSelectCategory('funding')}
+                />
+
+                {/* 6. MAGAZINE (One premium Founder Bytes magazine promotional banner) */}
+                <MagazineShowcase
+                  issue={magazineIssue}
+                  onNavigateMagazine={handleNavigateMagazine}
+                  onSelectArticle={handleSelectArticle}
+                />
+
+                {/* Newsletter Dispatch Box */}
+                <div id="newsletter-section">
+                  <NewsletterBox />
+                </div>
+              </>
+            )}
           </>
         )}
       </main>
@@ -642,6 +712,7 @@ export default function App() {
         onNavigatePolicy={handleNavigatePolicy}
         onNavigateHome={handleNavigateHome}
         onNavigateMagazine={handleNavigateMagazine}
+        onNavigateNominations={handleNavigateNominations}
         onOpenAdminLogin={() => setAdminLoginOpen(true)}
       />
 

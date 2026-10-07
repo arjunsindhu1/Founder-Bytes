@@ -2,12 +2,22 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://founderbytes.in/</loc>
-    <changefreq>always</changefreq>
+    <changefreq>hourly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/magazine</loc>
     <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/nominations</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/news</loc>
+    <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
@@ -106,302 +116,428 @@
     <priority>0.4</priority>
   </url>
   <url>
+    <loc>https://founderbytes.in/tech/quanfluence-raises-10-million-photonic-quantum-computer</loc>
+    <lastmod>2026-10-07T10:45:12.384+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/startups/zomint-raises-36-crore-seed-wealth-management</loc>
+    <lastmod>2026-10-07T10:45:12.191+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/tech/sunfox-technologies-raises-7-million-cardiac-diagnostics</loc>
+    <lastmod>2026-10-07T10:45:12.013+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/tech/bytexl-raises-9-million-series-b-ai-tech-education-india</loc>
+    <lastmod>2026-10-07T10:45:11.661+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/ai/lambda-4-billion-funding-round-ai-cloud-ipo</loc>
+    <lastmod>2026-10-07T10:45:14.916+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/ai/spacex-40-billion-financing-nvidia-ai-chips</loc>
+    <lastmod>2026-10-07T10:45:14.804+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/ai/deepseek-12-billion-funding-ai-race</loc>
+    <lastmod>2026-10-07T10:45:14.699+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/ai/fydy-ai-startup-12-million-funding-talks</loc>
+    <lastmod>2026-10-07T10:45:14.592+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/tech/facebook-reels-first-india-meta-video</loc>
+    <lastmod>2026-10-07T10:45:14.476+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/business/jiohotstar-expands-middle-east-north-africa</loc>
+    <lastmod>2026-10-07T10:45:14.372+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/ai/world-bank-india-ai-readiness-2026</loc>
+    <lastmod>2026-10-07T10:45:14.254+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/business/india-data-centre-investment-173-billion-ai</loc>
+    <lastmod>2026-10-07T10:45:13.702+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/startups/refit-global-raises-1-million-refurbished-electronics</loc>
+    <lastmod>2026-10-07T10:45:13.566+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/innovation/indigotex-raises-5-crore-waterless-textile-technology</loc>
+    <lastmod>2026-10-07T10:45:13.398+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/funding/stockgro-raises-110-crore-before-ipo</loc>
+    <lastmod>2026-10-07T10:45:13.249+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/business/beyond-appliances-raises-110-crore-smart-kitchen</loc>
+    <lastmod>2026-10-07T10:45:13.054+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/business/swara-baby-products-1000-crore-ipo-sebi</loc>
+    <lastmod>2026-10-07T10:45:12.92+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/founders/naveli-ventures-deeptech-frontier-startups-india</loc>
+    <lastmod>2026-10-07T10:45:12.806+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/business/india-10000-crore-sme-growth-fund</loc>
+    <lastmod>2026-10-07T10:45:12.673+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/ai/elevenlabs-investment-india-ai-voice</loc>
+    <lastmod>2026-10-07T10:45:12.541+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/news/arjun-sindhu-digital-entrepreneur-brovate-founder</loc>
+    <lastmod>2026-10-05T11:11:28.261+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://founderbytes.in/business/sebi-project-jagrook-mandates-broker-investor-awareness</loc>
-    <lastmod>2026-10-02T09:04:07.456Z</lastmod>
+    <lastmod>2026-10-02T09:04:07.456+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/funding/gravity-secures-15m-home-interiors-3one4-capital</loc>
-    <lastmod>2026-10-01T10:45:00.000Z</lastmod>
+    <lastmod>2026-10-01T10:45:00+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/ai/aignosis-raises-4-crore-seed-antler-nikhil-kamath</loc>
-    <lastmod>2026-10-02T09:04:06.112Z</lastmod>
+    <lastmod>2026-10-02T09:04:06.112+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/startups/simple-energy-raises-1750-crore-series-c-electric-scooters</loc>
-    <lastmod>2026-10-01T09:30:00.000Z</lastmod>
+    <lastmod>2026-10-01T09:30:00+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/innovation/yohan-michelle-poonawalla-invest-in-optimized-solutions-defense</loc>
-    <lastmod>2026-10-02T09:04:07.061Z</lastmod>
+    <lastmod>2026-10-02T09:04:07.061+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/tech/zaperon-raises-7-crore-seed-inflection-point-ventures</loc>
-    <lastmod>2026-10-02T09:04:06.042Z</lastmod>
+    <lastmod>2026-10-02T09:04:06.042+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/ai/arivihan-raises-10m-series-a-accel-prosus-ai-tutoring</loc>
-    <lastmod>2026-10-01T07:00:00.000Z</lastmod>
+    <lastmod>2026-10-01T07:00:00+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/business/moneyview-lists-on-bourses-after-98x-subscription-ipo</loc>
-    <lastmod>2026-10-02T09:04:07.390Z</lastmod>
+    <lastmod>2026-10-02T09:04:07.39+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/funding/seeds-fincap-raises-100-crore-series-b-dell-foundation</loc>
-    <lastmod>2026-10-02T09:04:05.765Z</lastmod>
+    <lastmod>2026-10-02T09:04:05.765+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/business/linux-laboratories-raises-70m-chryscapital-tata-capital</loc>
-    <lastmod>2026-09-30T13:30:00.000Z</lastmod>
+    <lastmod>2026-09-30T13:30:00+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/business/srit-india-closes-218-crore-ipo-125x-subscription</loc>
-    <lastmod>2026-10-02T09:04:07.580Z</lastmod>
+    <lastmod>2026-10-02T09:04:07.58+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/business/inox-clean-energy-files-10000-crore-ipo-sebi</loc>
-    <lastmod>2026-10-02T09:04:07.308Z</lastmod>
+    <lastmod>2026-10-02T09:04:07.308+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/tech/adani-family-office-backs-nudge-ai-consumer-intelligence</loc>
-    <lastmod>2026-09-30T11:45:00.000Z</lastmod>
+    <lastmod>2026-09-30T11:45:00+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/funding/weh-ventures-first-close-250-crore-fund-iii</loc>
-    <lastmod>2026-09-30T08:45:00.000Z</lastmod>
+    <lastmod>2026-09-30T08:45:00+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/tech/sima-ai-raises-150m-series-c-physical-ai-chips</loc>
-    <lastmod>2026-09-30T05:30:00.000Z</lastmod>
+    <lastmod>2026-09-30T05:30:00+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/innovation/balwaan-krishi-secures-100-crore-series-b</loc>
-    <lastmod>2026-09-29T12:55:00.000Z</lastmod>
+    <lastmod>2026-09-29T12:55:00+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/business/sebi-overhauls-portfolio-managers-regulations-2026</loc>
-    <lastmod>2026-10-02T09:04:07.520Z</lastmod>
+    <lastmod>2026-10-02T09:04:07.52+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/innovation/iitm-unicorn-frontier-fund-reaches-450-crore-first-close</loc>
-    <lastmod>2026-09-29T10:30:00.000Z</lastmod>
+    <lastmod>2026-09-29T10:30:00+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/funding/arovia-consumer-secures-100-crore-fireside-ventures</loc>
-    <lastmod>2026-10-02T09:04:06.934Z</lastmod>
+    <lastmod>2026-10-02T09:04:06.934+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/tech/galaxeye-secures-63-crore-rdi-support-optosar-satellite</loc>
-    <lastmod>2026-09-29T07:30:00.000Z</lastmod>
+    <lastmod>2026-09-29T07:30:00+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/innovation/karnataka-government-first-scheme-25-crore-100-startups</loc>
-    <lastmod>2026-10-02T09:04:06.731Z</lastmod>
+    <lastmod>2026-10-02T09:04:06.731+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/business/stockgro-confidentially-files-sebi-ipo-papers</loc>
-    <lastmod>2026-09-29T04:45:00.000Z</lastmod>
+    <lastmod>2026-09-29T04:45:00+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/business/acevector-snapdeal-closes-420-crore-ipo</loc>
-    <lastmod>2026-09-28T14:15:00.000Z</lastmod>
+    <lastmod>2026-09-28T14:15:00+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/business/itc-completes-yoga-bar-acquisition-sproutlife-foods</loc>
-    <lastmod>2026-09-28T12:00:00.000Z</lastmod>
+    <lastmod>2026-09-28T12:00:00+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/ai/prodoc-ai-raises-seed-funding-dr-velumani-family-office</loc>
-    <lastmod>2026-10-02T09:04:06.281Z</lastmod>
+    <lastmod>2026-10-02T09:04:06.281+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/founders/ola-electric-board-approves-1000-crore-rights-issue</loc>
-    <lastmod>2026-09-28T09:30:00.000Z</lastmod>
+    <lastmod>2026-09-28T09:30:00+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/tech/unveilr-ai-raises-pre-seed-ajvc-answer-engine-optimization</loc>
-    <lastmod>2026-10-02T09:04:06.346Z</lastmod>
+    <lastmod>2026-10-02T09:04:06.346+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/startups/primerry-secures-7-crore-pre-seed-ashish-kacholia</loc>
-    <lastmod>2026-10-02T09:04:06.216Z</lastmod>
+    <lastmod>2026-10-02T09:04:06.216+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/latest/india-startup-funding-first-nine-months-2026-10-billion</loc>
-    <lastmod>2026-09-28T05:45:00.000Z</lastmod>
+    <lastmod>2026-09-28T05:45:00+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/ai/byteask-raises-1m-pre-seed-y-combinator-entrepreneur-first</loc>
-    <lastmod>2026-10-02T09:04:06.876Z</lastmod>
+    <lastmod>2026-10-02T09:04:06.876+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/startups/bengaluru-captures-4-billion-startup-funding-2026</loc>
-    <lastmod>2026-09-27T13:15:00.000Z</lastmod>
+    <lastmod>2026-09-27T13:15:00+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/innovation/hughes-precision-secures-250-crore-defense-manufacturing</loc>
-    <lastmod>2026-10-02T09:04:06.798Z</lastmod>
+    <lastmod>2026-10-02T09:04:06.798+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/startups/onya-raises-12-crore-pre-series-a-lab-grown-diamonds</loc>
-    <lastmod>2026-10-02T09:04:06.550Z</lastmod>
+    <lastmod>2026-10-02T09:04:06.55+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/tech/ultraviolette-secures-85m-series-e-yali-capital-tdk</loc>
-    <lastmod>2026-09-27T10:45:00.000Z</lastmod>
+    <lastmod>2026-09-27T10:45:00+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/founders/indian-walker-raises-pre-seed-palette-wealth-backpacks</loc>
-    <lastmod>2026-10-02T09:04:06.669Z</lastmod>
+    <lastmod>2026-10-02T09:04:06.669+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/ai/ema-raises-77m-series-b-creaegis-enterprise-agents</loc>
-    <lastmod>2026-10-02T09:04:05.852Z</lastmod>
+    <lastmod>2026-10-02T09:04:05.852+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/tech/myrx-raises-seed-funding-steerx-vc-primary-healthcare</loc>
-    <lastmod>2026-10-02T09:04:06.609Z</lastmod>
+    <lastmod>2026-10-02T09:04:06.609+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/founders/timbuckdo-raises-bridge-funding-trasa-ventures</loc>
-    <lastmod>2026-10-02T09:04:06.472Z</lastmod>
+    <lastmod>2026-10-02T09:04:06.472+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/ai/govt-proposes-20000-crore-frontier-ai-compute-fund</loc>
-    <lastmod>2026-09-27T06:35:00.000Z</lastmod>
+    <lastmod>2026-09-27T06:35:00+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/business/jsw-one-platforms-files-drhp-sebi-3054-crore-ipo</loc>
-    <lastmod>2026-10-02T09:04:06.998Z</lastmod>
+    <lastmod>2026-10-02T09:04:06.998+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/business/ekkaa-electronics-files-drhp-sebi-725-crore-ipo</loc>
-    <lastmod>2026-10-02T09:04:07.233Z</lastmod>
+    <lastmod>2026-10-02T09:04:07.233+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/startups/betterhood-raises-11-crore-seed-preventive-pain-care</loc>
-    <lastmod>2026-09-26T12:30:00.000Z</lastmod>
+    <lastmod>2026-09-26T12:30:00+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/startups/protein-pantry-raises-9-crore-seed-sharrp-ventures</loc>
-    <lastmod>2026-10-02T09:04:06.419Z</lastmod>
+    <lastmod>2026-10-02T09:04:06.419+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/founders/rivet-raises-10m-seed-peak-xv-social-matching</loc>
-    <lastmod>2026-09-26T09:15:00.000Z</lastmod>
+    <lastmod>2026-09-26T09:15:00+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/ai/dextr-ai-secures-6-million-seed-elevation-capital</loc>
-    <lastmod>2026-09-26T06:45:00.000Z</lastmod>
+    <lastmod>2026-09-26T06:45:00+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/startups/disha-raises-44-crore-series-a-general-catalyst-elevation</loc>
-    <lastmod>2026-10-02T09:04:05.961Z</lastmod>
+    <lastmod>2026-10-02T09:04:05.961+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/innovation/drivn-raises-45-crore-seed-electric-commercial-mobility</loc>
-    <lastmod>2026-09-25T11:45:00.000Z</lastmod>
+    <lastmod>2026-09-25T11:45:00+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/startups/rio-health-raises-43-crore-quick-commerce-medicine</loc>
-    <lastmod>2026-09-25T09:15:00.000Z</lastmod>
+    <lastmod>2026-09-25T09:15:00+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/founders/sol-emerges-from-stealth-4m-seed-general-catalyst-nexus</loc>
-    <lastmod>2026-09-25T07:00:00.000Z</lastmod>
+    <lastmod>2026-09-25T07:00:00+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://founderbytes.in/funding/definedge-raises-22-crore-algo-trading-wealth-tech</loc>
-    <lastmod>2026-09-25T04:30:00.000Z</lastmod>
+    <lastmod>2026-09-25T04:30:00+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>

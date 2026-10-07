@@ -138,9 +138,9 @@ export const ArticleSEOSection: React.FC<ArticleSEOSectionProps> = ({
       url: 'https://founderbytes.in',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://founderbytes.in/8051754E-BE89-46BC-8C1F-E63D6C8C856F.png',
-        width: 512,
-        height: 512,
+        url: 'https://founderbytes.in/logo.png',
+        width: 800,
+        height: 800,
       },
     },
     articleSection: article.category_name || 'Startups',

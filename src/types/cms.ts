@@ -261,3 +261,128 @@ export interface CMSSiteSettings {
 }
 
 export type RealtimeStatus = 'LIVE' | 'CONNECTING' | 'RECONNECTING' | 'LOCAL';
+
+export type NominationStatus = 
+  | 'NEW'
+  | 'UNDER REVIEW'
+  | 'SHORTLISTED'
+  | 'INTERVIEW'
+  | 'SELECTED'
+  | 'REJECTED'
+  | 'ARCHIVED';
+
+export type NominationType = 'Myself' | 'Someone Else';
+
+export interface MagazineNomination {
+  id: string;
+  reference_number: string;
+  magazine: string; // e.g. '30 UNDER 30' | 'FOUNDER TIMEX'
+  nomination_type: NominationType;
+  
+  // Nominee Personal Info
+  full_name: string;
+  email: string;
+  phone: string;
+  city: string;
+  state_country: string;
+  linkedin?: string;
+  instagram?: string;
+  personal_website?: string;
+  
+  // Business Info
+  company_name: string;
+  company_website?: string;
+  designation: string;
+  industry: string;
+  year_founded?: string;
+  company_stage?: string;
+  team_size?: string;
+  
+  // Story
+  story_nominee: string;
+  standout_reason: string;
+  key_achievements: string;
+  biggest_impact: string;
+  
+  // Funding
+  funding_status?: string;
+  funding_stage?: string;
+  total_funding?: string;
+  key_investors?: string;
+  
+  // Nomination Justification
+  feature_reason: string;
+  
+  // Supporting Documents
+  profile_photo_url: string;
+  supporting_docs_url?: string;
+  press_portfolio_url?: string;
+  
+  // Nominator Info (if "Someone Else")
+  nominator_name?: string;
+  nominator_email?: string;
+  nominator_relationship?: string;
+  nominator_reason?: string;
+  
+  // Declarations
+  declaration_accurate: boolean;
+  declaration_no_guarantee: boolean;
+  declaration_contact_consent: boolean;
+  
+  // Admin & Meta
+  status: NominationStatus;
+  admin_notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// ----------------------------------------------------
+// FOUNDER SPOTLIGHT & PACKAGES
+// ----------------------------------------------------
+export type SpotlightPaymentStatus = 'Pending' | 'Paid' | 'Complimentary' | 'Refunded';
+export type SpotlightStatus = 'Draft' | 'Scheduled' | 'Live' | 'Expired' | 'Unpublished';
+
+export interface FounderSpotlight {
+  id: string;
+  slug: string;
+  founder_name: string;
+  founder_photo: string;
+  company_name: string;
+  designation: string;
+  industry: string;
+  short_bio: string;
+  founder_story: string;
+  featured_quote?: string;
+  website_url?: string;
+  linkedin_url?: string;
+  instagram_url?: string;
+  cta_text?: string;
+  cta_url?: string;
+  start_date: string;
+  end_date: string;
+  featured_position: number;
+  package_id?: string;
+  price?: number;
+  payment_status: SpotlightPaymentStatus;
+  admin_notes?: string;
+  status: SpotlightStatus;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FounderSpotlightPackage {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  duration_days: number;
+  homepage_feature: boolean;
+  profile_included: boolean;
+  social_promotion: boolean;
+  magazine_consideration: boolean;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+

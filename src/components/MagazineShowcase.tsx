@@ -179,7 +179,7 @@ export const MagazineShowcase: React.FC<MagazineShowcaseProps> = ({
                 className="px-5 py-2.5 bg-[#F5B800] hover:bg-[#E0A700] text-black font-black text-xs uppercase tracking-wider transition-colors inline-flex items-center gap-2 font-mono"
               >
                 <BookOpen className="w-4 h-4" />
-                <span>Read Digital Issue</span>
+                <span>EXPLORE THE MAGAZINE</span>
               </button>
               <button
                 onClick={onNavigateMagazine}

@@ -54,8 +54,15 @@ import {
   Radio,
   Image as ImageIcon,
   CheckCircle2,
-  RefreshCw
+  RefreshCw,
+  Award,
+  Sparkles,
+  DollarSign
 } from 'lucide-react';
+import { AdminNominationsTab } from './AdminNominationsTab';
+import { AdminFounderSpotlightTab } from './AdminFounderSpotlightTab';
+import { AdminFounderPackagesTab } from './AdminFounderPackagesTab';
+import { MagazineNomination } from '../../types/cms';
 
 interface AdminDashboardProps {
   onExitAdmin: () => void;
@@ -69,7 +76,10 @@ type AdminTab =
   | 'article-editor' 
   | 'homepage-builder' 
   | 'breaking-news' 
+  | 'founder-spotlight'
+  | 'founder-packages'
   | 'magazine' 
+  | 'nominations'
   | 'ads' 
   | 'media'
   | 'authors' 
@@ -130,6 +140,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [authors, setAuthors] = useState<CMSAuthor[]>([]);
   const [categories, setCategories] = useState<CMSCategory[]>([]);
   const [settings, setSettings] = useState<CMSSiteSettings | null>(null);
+  const [nominations, setNominations] = useState<MagazineNomination[]>([]);
   const [realtimeStatus, setRealtimeStatus] = useState<RealtimeStatus>('LOCAL');
 
   // Search & filter states
@@ -199,7 +210,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   // Load all content on mount and subscribe to changes
   const loadAllData = async () => {
-    const [arts, secs, bn, advertisements, issues, auths, cats, siteSet] = await Promise.all([
+    const [arts, secs, bn, advertisements, issues, auths, cats, siteSet, noms] = await Promise.all([
       ContentService.getArticles(),
       ContentService.getSections(),
       ContentService.getBreakingNews(),
@@ -208,6 +219,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       ContentService.getAuthors(),
       ContentService.getCategories(),
       ContentService.getSettings(),
+      ContentService.getNominations(),
     ]);
 
     setArticles(arts);
@@ -218,6 +230,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     setAuthors(auths);
     setCategories(cats);
     setSettings(siteSet);
+    setNominations(noms);
   };
 
   useEffect(() => {
@@ -228,9 +241,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     const unsubscribeStatus = ContentService.subscribeStatus((status) => {
       setRealtimeStatus(status);
     });
+    const unsubscribeNominations = ContentService.subscribeNominations((newNom) => {
+      showToast(`NEW NOMINATION: ${newNom.full_name} · ${newNom.magazine}`);
+      loadAllData();
+    });
     return () => {
       unsubscribeContent();
       unsubscribeStatus();
+      unsubscribeNominations();
     };
   }, []);
 
@@ -241,6 +259,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const scheduledCount = articles.filter((a) => a.status === 'scheduled').length;
   const trendingCount = articles.filter((a) => a.is_trending).length;
   const activeAdsCount = ads.filter((a) => a.is_active).length;
+  const newNominationsCount = nominations.filter((n) => n.status === 'NEW').length;
 
   // Article filter logic
   const filteredArticles = articles.filter((a) => {
@@ -930,6 +949,38 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </div>
           </div>
 
+          {/* FOUNDER SPOTLIGHT GROUP */}
+          <div>
+            <div className="text-[10px] font-black uppercase tracking-wider text-neutral-400 px-3 pb-1">
+              FOUNDER SPOTLIGHT
+            </div>
+            <div className="space-y-0.5">
+              <button
+                onClick={() => setActiveTab('founder-spotlight')}
+                className={`w-full text-left px-3 py-1.5 flex items-center gap-2 cursor-pointer ${
+                  activeTab === 'founder-spotlight'
+                    ? 'bg-neutral-900 text-white font-bold'
+                    : 'text-neutral-700 hover:bg-neutral-100'
+                }`}
+              >
+                <Sparkles className="w-3.5 h-3.5 text-[#F5B800]" />
+                <span>Founder Spotlight</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('founder-packages')}
+                className={`w-full text-left px-3 py-1.5 flex items-center gap-2 cursor-pointer ${
+                  activeTab === 'founder-packages'
+                    ? 'bg-neutral-900 text-white font-bold'
+                    : 'text-neutral-700 hover:bg-neutral-100'
+                }`}
+              >
+                <DollarSign className="w-3.5 h-3.5 text-[#F5B800]" />
+                <span>Spotlight Packages</span>
+              </button>
+            </div>
+          </div>
+
           {/* MAGAZINE GROUP */}
           <div>
             <div className="text-[10px] font-black uppercase tracking-wider text-neutral-400 px-3 pb-1">
@@ -947,6 +998,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <BookOpen className="w-3.5 h-3.5 text-[#F5B800]" />
                 <span>Issues & Digital</span>
                 <span className="ml-auto text-[10px] text-neutral-400">{magazineIssues.length}</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('nominations')}
+                className={`w-full text-left px-3 py-1.5 flex items-center gap-2 cursor-pointer ${
+                  activeTab === 'nominations'
+                    ? 'bg-neutral-900 text-white font-bold'
+                    : 'text-neutral-700 hover:bg-neutral-100'
+                }`}
+              >
+                <Award className="w-3.5 h-3.5 text-[#F5B800]" />
+                <span>Nominations</span>
+                {newNominationsCount > 0 ? (
+                  <span className="ml-auto text-[9px] font-mono bg-[#F5B800] text-black font-bold px-1.5 py-0.2 rounded-full">
+                    {newNominationsCount} NEW
+                  </span>
+                ) : (
+                  <span className="ml-auto text-[10px] text-neutral-400">{nominations.length}</span>
+                )}
               </button>
 
               <button
@@ -1921,6 +1991,27 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 ))}
               </div>
             </div>
+          )}
+
+          {/* 7b. MAGAZINE NOMINATIONS TAB */}
+          {activeTab === 'nominations' && (
+            <AdminNominationsTab onShowToast={showToast} />
+          )}
+
+          {/* 7c. FOUNDER SPOTLIGHT TAB */}
+          {activeTab === 'founder-spotlight' && (
+            <AdminFounderSpotlightTab
+              onViewPublicProfile={(slug) => {
+                if (onViewPublicArticle) {
+                  onViewPublicArticle(slug);
+                }
+              }}
+            />
+          )}
+
+          {/* 7d. FOUNDER SPOTLIGHT PACKAGES TAB */}
+          {activeTab === 'founder-packages' && (
+            <AdminFounderPackagesTab />
           )}
 
           {/* 8. AUTHORS TAB (Requirement 17: Arjun Sindhu Only) */}
