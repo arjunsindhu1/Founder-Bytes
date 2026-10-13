@@ -15,7 +15,7 @@ const DEFAULT_DESC =
 const SITE_NAME = 'Founder Bytes';
 const BASE_URL = 'https://founderbytes.in';
 const DEFAULT_IMAGE = 'https://founderbytes.in/founder-bytes-og.png';
-const BRAND_LOGO = 'https://founderbytes.in/logo.png';
+const BRAND_LOGO = 'https://founderbytes.in/8051754E-BE89-46BC-8C1F-E63D6C8C856F.png';
 
 export const SEOHead: React.FC<SEOHeadProps> = ({
   title,
@@ -194,9 +194,10 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
             logo: {
               '@type': 'ImageObject',
               url: BRAND_LOGO,
-              width: 800,
-              height: 800,
+              width: 1254,
+              height: 1254,
             },
+            image: DEFAULT_IMAGE,
             publishingPrinciples: `${BASE_URL}/editorial-policy`,
             correctionsPolicy: `${BASE_URL}/corrections-policy`,
             ethicsPolicy: `${BASE_URL}/ethics-policy`,

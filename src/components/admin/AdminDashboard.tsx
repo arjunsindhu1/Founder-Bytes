@@ -61,7 +61,6 @@ import {
 } from 'lucide-react';
 import { AdminNominationsTab } from './AdminNominationsTab';
 import { AdminFounderSpotlightTab } from './AdminFounderSpotlightTab';
-import { AdminFounderPackagesTab } from './AdminFounderPackagesTab';
 import { MagazineNomination } from '../../types/cms';
 
 interface AdminDashboardProps {
@@ -77,9 +76,8 @@ type AdminTab =
   | 'homepage-builder' 
   | 'breaking-news' 
   | 'founder-spotlight'
-  | 'founder-packages'
   | 'magazine' 
-  | 'nominations'
+  | 'nominations' 
   | 'ads' 
   | 'media'
   | 'authors' 
@@ -965,18 +963,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               >
                 <Sparkles className="w-3.5 h-3.5 text-[#F5B800]" />
                 <span>Founder Spotlight</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab('founder-packages')}
-                className={`w-full text-left px-3 py-1.5 flex items-center gap-2 cursor-pointer ${
-                  activeTab === 'founder-packages'
-                    ? 'bg-neutral-900 text-white font-bold'
-                    : 'text-neutral-700 hover:bg-neutral-100'
-                }`}
-              >
-                <DollarSign className="w-3.5 h-3.5 text-[#F5B800]" />
-                <span>Spotlight Packages</span>
               </button>
             </div>
           </div>
@@ -2007,11 +1993,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 }
               }}
             />
-          )}
-
-          {/* 7d. FOUNDER SPOTLIGHT PACKAGES TAB */}
-          {activeTab === 'founder-packages' && (
-            <AdminFounderPackagesTab />
           )}
 
           {/* 8. AUTHORS TAB (Requirement 17: Arjun Sindhu Only) */}

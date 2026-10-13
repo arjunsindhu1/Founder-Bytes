@@ -2431,21 +2431,16 @@ export const ContentService = {
       allSpotlights = DEFAULT_FOUNDER_SPOTLIGHTS;
     }
 
-    // Auto-update expired records if end_date has passed
+    // Auto-update expired records if end_date has passed for records that were Live
+    // Note: Unpublished, Draft, or Scheduled records are never overwritten
     const today = new Date().toISOString().slice(0, 10);
-    let hasChanges = false;
     allSpotlights = allSpotlights.map(item => {
       const itemEnd = item.end_date ? item.end_date.slice(0, 10) : '';
       if (itemEnd && itemEnd < today && item.status === 'Live') {
-        hasChanges = true;
-        return { ...item, status: 'Expired' as SpotlightStatus, updated_at: new Date().toISOString() };
+        return { ...item, status: 'Expired' as SpotlightStatus };
       }
       return item;
     });
-
-    if (hasChanges && supabase && isSupabaseConfigured()) {
-      this.syncSpotlightsToPersistence(allSpotlights);
-    }
 
     return allSpotlights;
   },
@@ -2454,18 +2449,17 @@ export const ContentService = {
     const list = await this.getFounderSpotlights();
     const today = new Date().toISOString().slice(0, 10);
 
-    // Active rule:
+    // Active rule per specification:
     // status = LIVE
-    // current date between Start Date and End Date
-    // payment status is Paid or Complimentary
-    // max 3
+    // current date is within start_date/end_date
+    // UNPUBLISHED must never appear on homepage
+    // max 3 items
     const active = list.filter(item => {
       if (item.status !== 'Live') return false;
       const start = item.start_date ? item.start_date.slice(0, 10) : '';
       const end = item.end_date ? item.end_date.slice(0, 10) : '';
       if (start && today < start) return false;
       if (end && today > end) return false;
-      if (item.payment_status !== 'Paid' && item.payment_status !== 'Complimentary') return false;
       return true;
     });
 
@@ -2487,30 +2481,29 @@ export const ContentService = {
     const now = new Date().toISOString();
     const newSpot: FounderSpotlight = { ...input, id, created_at: now, updated_at: now };
 
+    const current = await this.getFounderSpotlights();
+    const filtered = current.filter(s => s.id !== id && s.slug !== newSpot.slug);
+    const updatedList = [newSpot, ...filtered];
+
     if (supabase && isSupabaseConfigured()) {
       await ensureAdminAuth();
       try {
-        const { data, error } = await supabase.from('founder_spotlights').insert(newSpot).select().maybeSingle();
-        if (!error && data) {
-          notifySubscribers();
-          return data as FounderSpotlight;
-        }
+        await supabase.from('founder_spotlights').insert(newSpot);
       } catch {}
 
       try {
-        const current = await this.getFounderSpotlights();
-        const updated = [newSpot, ...current.filter(s => s.id !== id)];
         await supabase.from('site_settings').upsert({
           setting_key: 'founder_spotlights',
-          setting_value: updated,
+          setting_value: updatedList,
           updated_at: now
         });
-      } catch {}
+      } catch (err) {
+        console.warn('Failed to persist in site_settings:', err);
+      }
     }
 
     try {
-      const current = await this.getFounderSpotlights();
-      localStorage.setItem('fb_founder_spotlights', JSON.stringify([newSpot, ...current.filter(s => s.id !== id)]));
+      localStorage.setItem('fb_founder_spotlights', JSON.stringify(updatedList));
     } catch {}
 
     notifySubscribers();
@@ -2523,60 +2516,58 @@ export const ContentService = {
   ): Promise<FounderSpotlight> {
     const supabase = getSupabaseClient();
     const now = new Date().toISOString();
-    let updated: FounderSpotlight | null = null;
+
+    const current = await this.getFounderSpotlights();
+    const idx = current.findIndex(s => s.id === id);
+    if (idx === -1) throw new Error(`Founder Spotlight with id ${id} not found.`);
+
+    const updatedItem: FounderSpotlight = {
+      ...current[idx],
+      ...updates,
+      updated_at: now,
+    };
+    const updatedList = [...current];
+    updatedList[idx] = updatedItem;
 
     if (supabase && isSupabaseConfigured()) {
       await ensureAdminAuth();
       try {
-        const { data, error } = await supabase
+        await supabase
           .from('founder_spotlights')
           .update({ ...updates, updated_at: now })
-          .eq('id', id)
-          .select()
-          .maybeSingle();
-        if (!error && data) updated = data as FounderSpotlight;
+          .eq('id', id);
       } catch {}
 
       try {
-        const current = await this.getFounderSpotlights();
-        const idx = current.findIndex(s => s.id === id);
-        if (idx !== -1) {
-          current[idx] = { ...current[idx], ...updates, updated_at: now };
-          updated = current[idx];
-          await supabase.from('site_settings').upsert({
-            setting_key: 'founder_spotlights',
-            setting_value: current,
-            updated_at: now
-          });
-        }
-      } catch {}
+        await supabase.from('site_settings').upsert({
+          setting_key: 'founder_spotlights',
+          setting_value: updatedList,
+          updated_at: now
+        });
+      } catch (err) {
+        console.warn('Failed to persist in site_settings:', err);
+      }
     }
 
     try {
-      const current = await this.getFounderSpotlights();
-      const idx = current.findIndex(s => s.id === id);
-      if (idx !== -1) {
-        current[idx] = { ...current[idx], ...updates, updated_at: now };
-        if (!updated) updated = current[idx];
-        localStorage.setItem('fb_founder_spotlights', JSON.stringify(current));
-      }
+      localStorage.setItem('fb_founder_spotlights', JSON.stringify(updatedList));
     } catch {}
 
-    if (!updated) throw new Error(`Founder Spotlight with id ${id} not found.`);
     notifySubscribers();
-    return updated;
+    return updatedItem;
   },
 
   async deleteFounderSpotlight(id: string): Promise<boolean> {
     const supabase = getSupabaseClient();
+    const current = await this.getFounderSpotlights();
+    const filtered = current.filter(s => s.id !== id);
+
     if (supabase && isSupabaseConfigured()) {
       await ensureAdminAuth();
       try {
         await supabase.from('founder_spotlights').delete().eq('id', id);
       } catch {}
       try {
-        const current = await this.getFounderSpotlights();
-        const filtered = current.filter(s => s.id !== id);
         await supabase.from('site_settings').upsert({
           setting_key: 'founder_spotlights',
           setting_value: filtered,
@@ -2586,8 +2577,6 @@ export const ContentService = {
     }
 
     try {
-      const current = await this.getFounderSpotlights();
-      const filtered = current.filter(s => s.id !== id);
       localStorage.setItem('fb_founder_spotlights', JSON.stringify(filtered));
     } catch {}
 

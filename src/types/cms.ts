@@ -363,7 +363,7 @@ export interface FounderSpotlight {
   featured_position: number;
   package_id?: string;
   price?: number;
-  payment_status: SpotlightPaymentStatus;
+  payment_status?: SpotlightPaymentStatus;
   admin_notes?: string;
   status: SpotlightStatus;
   created_at: string;

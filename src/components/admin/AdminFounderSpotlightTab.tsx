@@ -1,34 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { 
   FounderSpotlight, 
-  FounderSpotlightPackage, 
-  SpotlightPaymentStatus, 
   SpotlightStatus 
 } from '../../types/cms';
 import { ContentService } from '../../services/contentService';
 import { 
   Search, 
-  Filter, 
   Plus, 
   Edit3, 
   Trash2, 
   Eye, 
   Sparkles, 
-  Calendar, 
-  DollarSign, 
   ExternalLink, 
   CheckCircle2, 
   Clock, 
   AlertCircle, 
   X, 
   Upload, 
-  ArrowUpDown,
-  Building,
-  UserCheck,
-  Globe,
-  Linkedin,
-  Instagram,
-  RefreshCw
+  Building, 
+  Globe, 
+  Linkedin, 
+  Instagram, 
+  RefreshCw 
 } from 'lucide-react';
 
 interface AdminFounderSpotlightTabProps {
@@ -39,12 +32,10 @@ export const AdminFounderSpotlightTab: React.FC<AdminFounderSpotlightTabProps> =
   onViewPublicProfile,
 }) => {
   const [spotlights, setSpotlights] = useState<FounderSpotlight[]>([]);
-  const [packages, setPackages] = useState<FounderSpotlightPackage[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [paymentFilter, setPaymentFilter] = useState<string>('all');
-  const [sortBy, setSortBy] = useState<'position' | 'created' | 'end_date' | 'price'>('position');
+  const [sortBy, setSortBy] = useState<'position' | 'created' | 'end_date'>('position');
   
   // Modals
   const [showFormModal, setShowFormModal] = useState(false);
@@ -53,7 +44,7 @@ export const AdminFounderSpotlightTab: React.FC<AdminFounderSpotlightTabProps> =
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
 
-  // Form State
+  // Form State (Cleaned: NO package, price, or payment fields)
   const [formData, setFormData] = useState({
     founder_name: '',
     founder_photo: '',
@@ -71,9 +62,6 @@ export const AdminFounderSpotlightTab: React.FC<AdminFounderSpotlightTabProps> =
     start_date: new Date().toISOString().slice(0, 10),
     end_date: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
     featured_position: 1,
-    package_id: '',
-    price: 75000,
-    payment_status: 'Paid' as SpotlightPaymentStatus,
     admin_notes: '',
     status: 'Live' as SpotlightStatus,
   });
@@ -81,12 +69,8 @@ export const AdminFounderSpotlightTab: React.FC<AdminFounderSpotlightTabProps> =
   const loadData = async () => {
     setLoading(true);
     try {
-      const [spots, pkgs] = await Promise.all([
-        ContentService.getFounderSpotlights(),
-        ContentService.getSpotlightPackages(),
-      ]);
+      const spots = await ContentService.getFounderSpotlights();
       setSpotlights(spots);
-      setPackages(pkgs);
     } catch (err) {
       console.error('Failed to load spotlights data', err);
     } finally {
@@ -109,7 +93,6 @@ export const AdminFounderSpotlightTab: React.FC<AdminFounderSpotlightTabProps> =
 
   const handleOpenNew = () => {
     setEditingItem(null);
-    const defaultPkg = packages.find(p => p.name === 'PREMIUM') || packages[0];
     setFormData({
       founder_name: '',
       founder_photo: '',
@@ -125,11 +108,8 @@ export const AdminFounderSpotlightTab: React.FC<AdminFounderSpotlightTabProps> =
       cta_text: 'Explore Venture',
       cta_url: '',
       start_date: new Date().toISOString().slice(0, 10),
-      end_date: new Date(Date.now() + (defaultPkg ? defaultPkg.duration_days : 30) * 86400000).toISOString().slice(0, 10),
+      end_date: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
       featured_position: (spotlights.length + 1),
-      package_id: defaultPkg?.id || '',
-      price: defaultPkg?.price || 75000,
-      payment_status: 'Paid',
       admin_notes: '',
       status: 'Live',
     });
@@ -155,30 +135,10 @@ export const AdminFounderSpotlightTab: React.FC<AdminFounderSpotlightTabProps> =
       start_date: item.start_date.slice(0, 10),
       end_date: item.end_date.slice(0, 10),
       featured_position: item.featured_position,
-      package_id: item.package_id || '',
-      price: item.price ?? 75000,
-      payment_status: item.payment_status,
       admin_notes: item.admin_notes || '',
       status: item.status,
     });
     setShowFormModal(true);
-  };
-
-  const handlePackageSelect = (pkgId: string) => {
-    const pkg = packages.find(p => p.id === pkgId);
-    if (pkg) {
-      const days = pkg.duration_days || 30;
-      const start = new Date(formData.start_date || Date.now());
-      const end = new Date(start.getTime() + days * 86400000);
-      setFormData(prev => ({
-        ...prev,
-        package_id: pkg.id,
-        price: pkg.price,
-        end_date: end.toISOString().slice(0, 10),
-      }));
-    } else {
-      setFormData(prev => ({ ...prev, package_id: '' }));
-    }
   };
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -252,43 +212,52 @@ export const AdminFounderSpotlightTab: React.FC<AdminFounderSpotlightTabProps> =
     }
   };
 
+  // Status toggle handler:
+  // LIVE -> UNPUBLISHED (saves as Unpublished, removes from homepage, keeps record in admin)
+  // UNPUBLISHED -> LIVE (saves as Live, makes visible on homepage if schedule is valid)
   const handleToggleStatus = async (item: FounderSpotlight) => {
     const nextStatus: SpotlightStatus = item.status === 'Live' ? 'Unpublished' : 'Live';
     try {
-      await ContentService.updateFounderSpotlight(item.id, { status: nextStatus });
-      showNotification(`"${item.founder_name}" status changed to ${nextStatus}.`);
+      const updates: Partial<FounderSpotlight> = { status: nextStatus };
+      const today = new Date().toISOString().slice(0, 10);
+      
+      // If switching to Live and the scheduled end_date is in the past, adjust end_date to make it active
+      if (nextStatus === 'Live' && item.end_date.slice(0, 10) < today) {
+        updates.end_date = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
+        if (item.start_date.slice(0, 10) > today) {
+          updates.start_date = today;
+        }
+      }
+
+      await ContentService.updateFounderSpotlight(item.id, updates);
+      showNotification(`"${item.founder_name}" status updated to ${nextStatus}.`);
       await loadData();
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      alert(err.message || 'Error updating spotlight status.');
     }
   };
 
-  // Metrics
+  // Metrics (Cleaned: Total, Live on Homepage, Scheduled, Expired. NO billing metric.)
   const todayStr = new Date().toISOString().slice(0, 10);
   const totalCount = spotlights.length;
   const liveCount = spotlights.filter(s => {
     if (s.status !== 'Live') return false;
     const start = s.start_date.slice(0, 10);
     const end = s.end_date.slice(0, 10);
-    return todayStr >= start && todayStr <= end && (s.payment_status === 'Paid' || s.payment_status === 'Complimentary');
+    return todayStr >= start && todayStr <= end;
   }).length;
   const scheduledCount = spotlights.filter(s => s.status === 'Scheduled' || (s.status === 'Live' && s.start_date.slice(0, 10) > todayStr)).length;
-  const expiredCount = spotlights.filter(s => s.status === 'Expired' || s.end_date.slice(0, 10) < todayStr).length;
-  const totalRevenue = spotlights
-    .filter(s => s.payment_status === 'Paid')
-    .reduce((acc, curr) => acc + (curr.price || 0), 0);
+  const expiredCount = spotlights.filter(s => s.status === 'Expired' || (s.status === 'Live' && s.end_date.slice(0, 10) < todayStr)).length;
 
   // Filtered & Sorted
   const filtered = spotlights.filter(s => {
     if (statusFilter !== 'all') {
       if (statusFilter === 'Live' && s.status !== 'Live') return false;
-      if (statusFilter === 'Scheduled' && s.status !== 'Scheduled') return false;
-      if (statusFilter === 'Expired' && s.status !== 'Expired' && s.end_date.slice(0, 10) >= todayStr) return false;
+      if (statusFilter === 'Scheduled' && s.status !== 'Scheduled' && !(s.status === 'Live' && s.start_date.slice(0, 10) > todayStr)) return false;
+      if (statusFilter === 'Expired' && s.status !== 'Expired' && !(s.status === 'Live' && s.end_date.slice(0, 10) < todayStr)) return false;
       if (statusFilter === 'Draft' && s.status !== 'Draft') return false;
       if (statusFilter === 'Unpublished' && s.status !== 'Unpublished') return false;
-    }
-    if (paymentFilter !== 'all' && s.payment_status !== paymentFilter) {
-      return false;
     }
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
@@ -304,7 +273,6 @@ export const AdminFounderSpotlightTab: React.FC<AdminFounderSpotlightTabProps> =
     if (sortBy === 'position') return (a.featured_position || 1) - (b.featured_position || 1);
     if (sortBy === 'created') return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     if (sortBy === 'end_date') return new Date(a.end_date).getTime() - new Date(b.end_date).getTime();
-    if (sortBy === 'price') return (b.price || 0) - (a.price || 0);
     return 0;
   });
 
@@ -327,18 +295,18 @@ export const AdminFounderSpotlightTab: React.FC<AdminFounderSpotlightTabProps> =
               FOUNDER SPOTLIGHT
             </h1>
             <span className="px-2 py-0.5 bg-neutral-900 text-[#F5B800] text-[10px] font-mono font-bold uppercase tracking-wider">
-              MONETIZABLE EDITORIAL
+              EDITORIAL FEATURE
             </span>
           </div>
           <p className="text-xs text-neutral-600 font-serif mt-1">
-            Manage high-profile sponsored profiles, commercial packages, editorial placement, and live schedules.
+            Curate featured founder profiles, editorial placement, schedules, and dossier visibility.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
           <button
             onClick={loadData}
-            className="p-2 border border-neutral-300 text-neutral-700 hover:text-black hover:border-black transition-colors"
+            className="p-2 border border-neutral-300 text-neutral-700 hover:text-black hover:border-black transition-colors cursor-pointer"
             title="Refresh Data"
           >
             <RefreshCw className="w-4 h-4" />
@@ -353,8 +321,8 @@ export const AdminFounderSpotlightTab: React.FC<AdminFounderSpotlightTabProps> =
         </div>
       </div>
 
-      {/* Metric Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 font-mono">
+      {/* Metric Cards (Requirement 4: Total Records, Live on Homepage, Scheduled, Expired) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 font-mono">
         <div className="p-4 bg-white border border-neutral-200 border-l-4 border-l-neutral-900">
           <div className="text-[10px] text-neutral-500 uppercase tracking-wider">Total Records</div>
           <div className="text-2xl font-black text-neutral-900 mt-1">{totalCount}</div>
@@ -369,7 +337,7 @@ export const AdminFounderSpotlightTab: React.FC<AdminFounderSpotlightTabProps> =
           <div className="text-2xl font-black text-green-700 mt-1">
             {liveCount} <span className="text-xs font-normal text-neutral-400">/ 3 max</span>
           </div>
-          <div className="text-[10px] text-neutral-400 mt-0.5">Active & verified</div>
+          <div className="text-[10px] text-neutral-400 mt-0.5">Active schedule</div>
         </div>
 
         <div className="p-4 bg-white border border-neutral-200 border-l-4 border-l-blue-600">
@@ -381,15 +349,7 @@ export const AdminFounderSpotlightTab: React.FC<AdminFounderSpotlightTabProps> =
         <div className="p-4 bg-white border border-neutral-200 border-l-4 border-l-amber-600">
           <div className="text-[10px] text-neutral-500 uppercase tracking-wider">Expired</div>
           <div className="text-2xl font-black text-amber-700 mt-1">{expiredCount}</div>
-          <div className="text-[10px] text-neutral-400 mt-0.5">Auto-withdrawn</div>
-        </div>
-
-        <div className="p-4 bg-white border border-neutral-200 border-l-4 border-l-[#F5B800] col-span-2 lg:col-span-1">
-          <div className="text-[10px] text-neutral-500 uppercase tracking-wider">Recorded Billing</div>
-          <div className="text-2xl font-black text-neutral-900 mt-1">
-            ₹{totalRevenue.toLocaleString('en-IN')}
-          </div>
-          <div className="text-[10px] text-neutral-400 mt-0.5">Paid spotlights</div>
+          <div className="text-[10px] text-neutral-400 mt-0.5">Past end date</div>
         </div>
       </div>
 
@@ -426,21 +386,6 @@ export const AdminFounderSpotlightTab: React.FC<AdminFounderSpotlightTabProps> =
           </div>
 
           <div className="flex items-center gap-1 bg-white border border-neutral-300 px-2 py-1">
-            <span className="text-[10px] text-neutral-500 uppercase font-bold">Payment:</span>
-            <select
-              value={paymentFilter}
-              onChange={(e) => setPaymentFilter(e.target.value)}
-              className="bg-transparent focus:outline-none font-bold text-neutral-900 text-xs"
-            >
-              <option value="all">All Payments</option>
-              <option value="Paid">Paid</option>
-              <option value="Complimentary">Complimentary</option>
-              <option value="Pending">Pending</option>
-              <option value="Refunded">Refunded</option>
-            </select>
-          </div>
-
-          <div className="flex items-center gap-1 bg-white border border-neutral-300 px-2 py-1">
             <span className="text-[10px] text-neutral-500 uppercase font-bold">Sort:</span>
             <select
               value={sortBy}
@@ -450,32 +395,29 @@ export const AdminFounderSpotlightTab: React.FC<AdminFounderSpotlightTabProps> =
               <option value="position">Position (#1-#3)</option>
               <option value="created">Recently Created</option>
               <option value="end_date">End Date</option>
-              <option value="price">Highest Price</option>
             </select>
           </div>
         </div>
       </div>
 
-      {/* Spotlight List Table */}
+      {/* Spotlight List Table (Requirement 4: POS, FOUNDER & ENTERPRISE, INDUSTRY, SCHEDULE, STATUS, ACTIONS) */}
       <div className="bg-white border border-neutral-200 overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="bg-neutral-900 text-white font-mono uppercase tracking-wider text-[11px] border-b border-neutral-800">
-                <th className="py-3 px-3 font-bold w-12 text-center">Pos</th>
-                <th className="py-3 px-3 font-bold">Founder & Enterprise</th>
-                <th className="py-3 px-3 font-bold hidden sm:table-cell">Industry</th>
-                <th className="py-3 px-3 font-bold">Schedule</th>
-                <th className="py-3 px-3 font-bold">Package & Price</th>
-                <th className="py-3 px-3 font-bold">Payment</th>
-                <th className="py-3 px-3 font-bold">Status</th>
-                <th className="py-3 px-3 font-bold text-right">Actions</th>
+                <th className="py-3 px-3 font-bold w-12 text-center">POS</th>
+                <th className="py-3 px-3 font-bold">FOUNDER & ENTERPRISE</th>
+                <th className="py-3 px-3 font-bold hidden sm:table-cell">INDUSTRY</th>
+                <th className="py-3 px-3 font-bold">SCHEDULE</th>
+                <th className="py-3 px-3 font-bold">STATUS</th>
+                <th className="py-3 px-3 font-bold text-right">ACTIONS</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-200">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-neutral-500 font-mono text-xs">
+                  <td colSpan={6} className="py-12 text-center text-neutral-500 font-mono text-xs">
                     No founder spotlights found matching your filters.
                   </td>
                 </tr>
@@ -483,21 +425,21 @@ export const AdminFounderSpotlightTab: React.FC<AdminFounderSpotlightTabProps> =
                 filtered.map((item) => {
                   const isEndPassed = item.end_date.slice(0, 10) < todayStr;
                   const isStartFuture = item.start_date.slice(0, 10) > todayStr;
-                  const isCurrentlyLive = item.status === 'Live' && !isEndPassed && !isStartFuture && (item.payment_status === 'Paid' || item.payment_status === 'Complimentary');
+                  const isCurrentlyLive = item.status === 'Live' && !isEndPassed && !isStartFuture;
 
                   return (
                     <tr 
                       key={item.id} 
                       className={`hover:bg-neutral-50/80 transition-colors ${isCurrentlyLive ? 'bg-amber-50/20' : ''}`}
                     >
-                      {/* Position */}
+                      {/* POS */}
                       <td className="py-3 px-3 text-center font-mono">
                         <span className={`inline-block px-1.5 py-0.5 text-[10px] font-bold ${item.featured_position <= 3 ? 'bg-[#F5B800] text-black' : 'bg-neutral-100 text-neutral-600'}`}>
                           #{item.featured_position}
                         </span>
                       </td>
 
-                      {/* Photo & Founder */}
+                      {/* FOUNDER & ENTERPRISE */}
                       <td className="py-3 px-3">
                         <div className="flex items-center gap-3">
                           <img
@@ -518,19 +460,23 @@ export const AdminFounderSpotlightTab: React.FC<AdminFounderSpotlightTabProps> =
                         </div>
                       </td>
 
-                      {/* Industry */}
+                      {/* INDUSTRY */}
                       <td className="py-3 px-3 hidden sm:table-cell">
                         <span className="px-2 py-0.5 bg-neutral-100 text-neutral-800 text-[10px] font-mono font-bold uppercase">
                           {item.industry}
                         </span>
                       </td>
 
-                      {/* Schedule */}
+                      {/* SCHEDULE */}
                       <td className="py-3 px-3 font-mono text-[11px]">
                         <div className="text-neutral-900 font-medium">
                           {new Date(item.start_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} – {new Date(item.end_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                         </div>
-                        {isEndPassed ? (
+                        {item.status === 'Unpublished' ? (
+                          <span className="text-neutral-400 text-[10px] font-bold flex items-center gap-1">
+                            <span>Unpublished</span>
+                          </span>
+                        ) : isEndPassed ? (
                           <span className="text-red-600 text-[10px] font-bold flex items-center gap-1">
                             <AlertCircle className="w-2.5 h-2.5" />
                             <span>Expired</span>
@@ -538,7 +484,7 @@ export const AdminFounderSpotlightTab: React.FC<AdminFounderSpotlightTabProps> =
                         ) : isStartFuture ? (
                           <span className="text-blue-600 text-[10px] font-bold flex items-center gap-1">
                             <Clock className="w-2.5 h-2.5" />
-                            <span>Starts in future</span>
+                            <span>Scheduled (Future)</span>
                           </span>
                         ) : (
                           <span className="text-green-700 text-[10px] font-bold flex items-center gap-1">
@@ -548,67 +494,50 @@ export const AdminFounderSpotlightTab: React.FC<AdminFounderSpotlightTabProps> =
                         )}
                       </td>
 
-                      {/* Package & Price */}
-                      <td className="py-3 px-3 font-mono text-[11px]">
-                        <div className="font-bold text-neutral-900">
-                          {item.price ? `₹${item.price.toLocaleString('en-IN')}` : 'Custom'}
-                        </div>
-                        <div className="text-[10px] text-neutral-500 uppercase">
-                          {packages.find(p => p.id === item.package_id)?.name || 'Custom Plan'}
-                        </div>
-                      </td>
-
-                      {/* Payment Status */}
-                      <td className="py-3 px-3 font-mono">
-                        <span className={`inline-block px-2 py-0.5 text-[10px] font-bold uppercase ${
-                          item.payment_status === 'Paid' ? 'bg-green-100 text-green-800 border border-green-300' :
-                          item.payment_status === 'Complimentary' ? 'bg-blue-100 text-blue-800 border border-blue-300' :
-                          item.payment_status === 'Pending' ? 'bg-yellow-100 text-yellow-800 border border-yellow-300' :
-                          'bg-neutral-100 text-neutral-800'
-                        }`}>
-                          {item.payment_status}
-                        </span>
-                      </td>
-
-                      {/* Status */}
+                      {/* STATUS */}
                       <td className="py-3 px-3 font-mono">
                         <span className={`inline-block px-2 py-0.5 text-[10px] font-bold uppercase ${
                           item.status === 'Live' ? 'bg-black text-[#F5B800] border border-black' :
                           item.status === 'Scheduled' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
                           item.status === 'Expired' ? 'bg-red-50 text-red-700 border border-red-200' :
+                          item.status === 'Unpublished' ? 'bg-neutral-200 text-neutral-700 border border-neutral-300' :
                           'bg-neutral-100 text-neutral-600'
                         }`}>
                           {item.status}
                         </span>
                       </td>
 
-                      {/* Actions */}
+                      {/* ACTIONS */}
                       <td className="py-3 px-3 text-right">
                         <div className="inline-flex items-center gap-1">
                           <button
                             onClick={() => setPreviewItem(item)}
-                            className="p-1.5 text-neutral-500 hover:text-black hover:bg-neutral-100 transition-colors"
+                            className="p-1.5 text-neutral-500 hover:text-black hover:bg-neutral-100 transition-colors cursor-pointer"
                             title="Preview Dossier"
                           >
                             <Eye className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={() => handleToggleStatus(item)}
-                            className="p-1.5 text-neutral-500 hover:text-black hover:bg-neutral-100 transition-colors"
-                            title={item.status === 'Live' ? 'Unpublish' : 'Publish Live'}
+                            className={`p-1.5 transition-colors cursor-pointer ${
+                              item.status === 'Live'
+                                ? 'text-[#DF9E00] hover:text-black hover:bg-neutral-100'
+                                : 'text-neutral-400 hover:text-green-700 hover:bg-green-50'
+                            }`}
+                            title={item.status === 'Live' ? 'Unpublish from Homepage' : 'Publish Live to Homepage'}
                           >
-                            <Sparkles className={`w-3.5 h-3.5 ${item.status === 'Live' ? 'text-[#DF9E00]' : ''}`} />
+                            <Sparkles className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={() => handleOpenEdit(item)}
-                            className="p-1.5 text-neutral-500 hover:text-black hover:bg-neutral-100 transition-colors"
+                            className="p-1.5 text-neutral-500 hover:text-black hover:bg-neutral-100 transition-colors cursor-pointer"
                             title="Edit"
                           >
                             <Edit3 className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={() => handleDelete(item)}
-                            className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
+                            className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors cursor-pointer"
                             title="Delete"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -638,7 +567,7 @@ export const AdminFounderSpotlightTab: React.FC<AdminFounderSpotlightTabProps> =
               </div>
               <button
                 onClick={() => setShowFormModal(false)}
-                className="text-neutral-400 hover:text-white transition-colors"
+                className="text-neutral-400 hover:text-white transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -650,10 +579,11 @@ export const AdminFounderSpotlightTab: React.FC<AdminFounderSpotlightTabProps> =
                 {/* SECTION 1: Personal & Venture Information */}
                 <div className="space-y-4">
                   <h4 className="font-mono font-bold text-neutral-900 border-b border-neutral-200 pb-1 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
-                    <UserCheck className="w-3.5 h-3.5 text-[#DF9E00]" />
+                    <Building className="w-3.5 h-3.5 text-[#DF9E00]" />
                     <span>Founder & Company Info</span>
                   </h4>
 
+                  {/* Founder Name */}
                   <div>
                     <label className="block font-mono text-[11px] font-bold text-neutral-700 uppercase mb-1">
                       Founder Name *
@@ -664,25 +594,25 @@ export const AdminFounderSpotlightTab: React.FC<AdminFounderSpotlightTabProps> =
                       value={formData.founder_name}
                       onChange={(e) => setFormData({ ...formData, founder_name: e.target.value })}
                       placeholder="e.g. Tarun Mehta"
-                      className="w-full p-2.5 border border-neutral-300 focus:outline-none focus:border-black font-sans text-sm"
+                      className="w-full p-2.5 border border-neutral-300 focus:outline-none focus:border-black font-sans text-xs"
                     />
                   </div>
 
-                  <div>
-                    <label className="block font-mono text-[11px] font-bold text-neutral-700 uppercase mb-1">
-                      Company Name *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.company_name}
-                      onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
-                      placeholder="e.g. Ather Energy"
-                      className="w-full p-2.5 border border-neutral-300 focus:outline-none focus:border-black font-sans text-sm"
-                    />
-                  </div>
-
+                  {/* Company Name & Designation */}
                   <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block font-mono text-[11px] font-bold text-neutral-700 uppercase mb-1">
+                        Company Name *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.company_name}
+                        onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
+                        placeholder="e.g. Ather Energy"
+                        className="w-full p-2.5 border border-neutral-300 focus:outline-none focus:border-black font-sans text-xs"
+                      />
+                    </div>
                     <div>
                       <label className="block font-mono text-[11px] font-bold text-neutral-700 uppercase mb-1">
                         Designation *
@@ -693,60 +623,60 @@ export const AdminFounderSpotlightTab: React.FC<AdminFounderSpotlightTabProps> =
                         value={formData.designation}
                         onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
                         placeholder="e.g. Co-founder & CEO"
-                        className="w-full p-2.5 border border-neutral-300 focus:outline-none focus:border-black"
-                      />
-                    </div>
-                    <div>
-                      <label className="block font-mono text-[11px] font-bold text-neutral-700 uppercase mb-1">
-                        Industry *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        value={formData.industry}
-                        onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
-                        placeholder="e.g. CleanTech & Mobility"
-                        className="w-full p-2.5 border border-neutral-300 focus:outline-none focus:border-black"
+                        className="w-full p-2.5 border border-neutral-300 focus:outline-none focus:border-black font-sans text-xs"
                       />
                     </div>
                   </div>
 
-                  {/* Photo Upload & Preview */}
+                  {/* Industry */}
                   <div>
                     <label className="block font-mono text-[11px] font-bold text-neutral-700 uppercase mb-1">
-                      Founder Photo URL or Upload *
+                      Industry / Sector *
                     </label>
-                    <div className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      required
+                      value={formData.industry}
+                      onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
+                      placeholder="e.g. CleanTech & EV, Enterprise AI"
+                      className="w-full p-2.5 border border-neutral-300 focus:outline-none focus:border-black font-sans text-xs"
+                    />
+                  </div>
+
+                  {/* Photo URL & Upload */}
+                  <div>
+                    <label className="block font-mono text-[11px] font-bold text-neutral-700 uppercase mb-1">
+                      Founder Portrait Photo *
+                    </label>
+                    <div className="flex gap-2">
                       <input
-                        type="text"
+                        type="url"
                         required
                         value={formData.founder_photo}
                         onChange={(e) => setFormData({ ...formData, founder_photo: e.target.value })}
-                        placeholder="https://..."
+                        placeholder="https://... photo URL"
                         className="flex-1 p-2 border border-neutral-300 focus:outline-none focus:border-black font-mono text-xs"
                       />
-                      <label className="px-3 py-2 bg-neutral-100 hover:bg-neutral-200 border border-neutral-300 font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-1 cursor-pointer shrink-0">
+                      <label className="px-3 py-2 bg-neutral-100 hover:bg-neutral-200 border border-neutral-300 font-mono text-xs uppercase cursor-pointer flex items-center gap-1 transition-colors">
                         <Upload className="w-3.5 h-3.5" />
-                        <span>{uploadingPhoto ? 'Uploading...' : 'Upload'}</span>
+                        <span>{uploadingPhoto ? '...' : 'Upload'}</span>
                         <input
                           type="file"
                           accept="image/*"
+                          className="hidden"
                           onChange={handlePhotoUpload}
                           disabled={uploadingPhoto}
-                          className="hidden"
                         />
                       </label>
                     </div>
                     {formData.founder_photo && (
-                      <div className="flex items-center gap-2 p-2 bg-neutral-50 border border-neutral-200">
+                      <div className="mt-2 flex items-center gap-2">
                         <img
                           src={formData.founder_photo}
-                          alt="Preview"
+                          alt="Portrait Preview"
                           className="w-12 h-12 object-cover border border-neutral-300"
                         />
-                        <span className="text-[10px] text-neutral-500 font-mono truncate">
-                          {formData.founder_photo}
-                        </span>
+                        <span className="text-[10px] font-mono text-neutral-500">Preview Portrait</span>
                       </div>
                     )}
                   </div>
@@ -781,65 +711,17 @@ export const AdminFounderSpotlightTab: React.FC<AdminFounderSpotlightTabProps> =
                   </div>
                 </div>
 
-                {/* SECTION 2: Commercial Package, Dates & Editorial Positioning */}
+                {/* SECTION 2: Placement, Schedule & Editorial Status */}
                 <div className="space-y-4">
                   <h4 className="font-mono font-bold text-neutral-900 border-b border-neutral-200 pb-1 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
-                    <DollarSign className="w-3.5 h-3.5 text-[#DF9E00]" />
-                    <span>Package, Placement & Billing</span>
+                    <Sparkles className="w-3.5 h-3.5 text-[#DF9E00]" />
+                    <span>Placement & Schedule</span>
                   </h4>
 
-                  {/* Package Selector */}
-                  <div>
-                    <label className="block font-mono text-[11px] font-bold text-neutral-700 uppercase mb-1">
-                      Commercial Package
-                    </label>
-                    <select
-                      value={formData.package_id}
-                      onChange={(e) => handlePackageSelect(e.target.value)}
-                      className="w-full p-2.5 border border-neutral-300 focus:outline-none focus:border-black font-mono text-xs"
-                    >
-                      <option value="">Custom Package</option>
-                      {packages.map((pkg) => (
-                        <option key={pkg.id} value={pkg.id}>
-                          {pkg.name} — ₹{pkg.price.toLocaleString('en-IN')} ({pkg.duration_days} days)
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block font-mono text-[11px] font-bold text-neutral-700 uppercase mb-1">
-                        Price (₹)
-                      </label>
-                      <input
-                        type="number"
-                        value={formData.price}
-                        onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
-                        className="w-full p-2.5 border border-neutral-300 focus:outline-none focus:border-black font-mono"
-                      />
-                    </div>
-                    <div>
-                      <label className="block font-mono text-[11px] font-bold text-neutral-700 uppercase mb-1">
-                        Payment Status
-                      </label>
-                      <select
-                        value={formData.payment_status}
-                        onChange={(e) => setFormData({ ...formData, payment_status: e.target.value as any })}
-                        className="w-full p-2.5 border border-neutral-300 focus:outline-none focus:border-black font-mono"
-                      >
-                        <option value="Paid">Paid</option>
-                        <option value="Complimentary">Complimentary</option>
-                        <option value="Pending">Pending</option>
-                        <option value="Refunded">Refunded</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block font-mono text-[11px] font-bold text-neutral-700 uppercase mb-1">
-                        Editorial Status
+                        Editorial Status *
                       </label>
                       <select
                         value={formData.status}
@@ -856,7 +738,7 @@ export const AdminFounderSpotlightTab: React.FC<AdminFounderSpotlightTabProps> =
 
                     <div>
                       <label className="block font-mono text-[11px] font-bold text-neutral-700 uppercase mb-1">
-                        Featured Position
+                        Featured Position (1 to 10)
                       </label>
                       <input
                         type="number"
@@ -864,7 +746,7 @@ export const AdminFounderSpotlightTab: React.FC<AdminFounderSpotlightTabProps> =
                         max={10}
                         value={formData.featured_position}
                         onChange={(e) => setFormData({ ...formData, featured_position: Number(e.target.value) })}
-                        className="w-full p-2.5 border border-neutral-300 focus:outline-none focus:border-black font-mono"
+                        className="w-full p-2.5 border border-neutral-300 focus:outline-none focus:border-black font-mono font-bold"
                       />
                     </div>
                   </div>
@@ -873,7 +755,7 @@ export const AdminFounderSpotlightTab: React.FC<AdminFounderSpotlightTabProps> =
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block font-mono text-[11px] font-bold text-neutral-700 uppercase mb-1">
-                        Start Date
+                        Start Date *
                       </label>
                       <input
                         type="date"
@@ -885,7 +767,7 @@ export const AdminFounderSpotlightTab: React.FC<AdminFounderSpotlightTabProps> =
                     </div>
                     <div>
                       <label className="block font-mono text-[11px] font-bold text-neutral-700 uppercase mb-1">
-                        End Date
+                        End Date *
                       </label>
                       <input
                         type="date"
@@ -898,7 +780,7 @@ export const AdminFounderSpotlightTab: React.FC<AdminFounderSpotlightTabProps> =
                   </div>
 
                   {/* URLs & Socials */}
-                  <div className="space-y-2">
+                  <div className="space-y-2 pt-2 border-t border-neutral-100">
                     <div>
                       <label className="block font-mono text-[10px] font-bold text-neutral-600 uppercase">
                         Company Website URL
@@ -960,7 +842,7 @@ export const AdminFounderSpotlightTab: React.FC<AdminFounderSpotlightTabProps> =
                           type="url"
                           value={formData.cta_url}
                           onChange={(e) => setFormData({ ...formData, cta_url: e.target.value })}
-                          placeholder="https://company.com/deck"
+                          placeholder="https://company.com"
                           className="w-full p-2 border border-neutral-300 focus:outline-none focus:border-black font-mono text-xs"
                         />
                       </div>
@@ -976,14 +858,14 @@ export const AdminFounderSpotlightTab: React.FC<AdminFounderSpotlightTabProps> =
                       type="text"
                       value={formData.admin_notes}
                       onChange={(e) => setFormData({ ...formData, admin_notes: e.target.value })}
-                      placeholder="PO number, contract terms, contact person..."
+                      placeholder="Editorial notes, contact person..."
                       className="w-full p-2 border border-neutral-300 focus:outline-none focus:border-black font-mono text-xs"
                     />
                   </div>
                 </div>
               </div>
 
-              {/* SECTION 3: Full Founder Story (Markdown / Editorial Content) */}
+              {/* SECTION 3: Full Founder Story */}
               <div>
                 <label className="block font-mono text-[11px] font-bold text-neutral-700 uppercase mb-1">
                   Full Founder Story (Detailed Profile Dossier) *
@@ -993,7 +875,7 @@ export const AdminFounderSpotlightTab: React.FC<AdminFounderSpotlightTabProps> =
                   rows={6}
                   value={formData.founder_story}
                   onChange={(e) => setFormData({ ...formData, founder_story: e.target.value })}
-                  placeholder="Comprehensive editorial narrative: the early origins, core technology, unit economics, market expansion, setbacks, and future aspirations..."
+                  placeholder="Comprehensive editorial narrative: the early origins, core technology, market expansion, setbacks, and future aspirations..."
                   className="w-full p-3 border border-neutral-300 focus:outline-none focus:border-black font-serif text-sm leading-relaxed"
                 />
               </div>
@@ -1003,7 +885,7 @@ export const AdminFounderSpotlightTab: React.FC<AdminFounderSpotlightTabProps> =
                 <button
                   type="button"
                   onClick={() => setShowFormModal(false)}
-                  className="px-4 py-2 border border-neutral-300 text-neutral-700 font-mono text-xs uppercase font-bold hover:bg-neutral-100 transition-colors"
+                  className="px-4 py-2 border border-neutral-300 text-neutral-700 font-mono text-xs uppercase font-bold hover:bg-neutral-100 transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -1040,7 +922,7 @@ export const AdminFounderSpotlightTab: React.FC<AdminFounderSpotlightTabProps> =
                       onViewPublicProfile(previewItem.slug);
                       setPreviewItem(null);
                     }}
-                    className="text-xs font-mono text-[#F5B800] hover:underline flex items-center gap-1"
+                    className="text-xs font-mono text-[#F5B800] hover:underline flex items-center gap-1 cursor-pointer"
                   >
                     <span>Open /founders/{previewItem.slug}</span>
                     <ExternalLink className="w-3.5 h-3.5" />
@@ -1048,88 +930,107 @@ export const AdminFounderSpotlightTab: React.FC<AdminFounderSpotlightTabProps> =
                 )}
                 <button
                   onClick={() => setPreviewItem(null)}
-                  className="text-neutral-400 hover:text-white transition-colors"
+                  className="text-neutral-400 hover:text-white transition-colors cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
             </div>
 
-            {/* Preview Content */}
-            <div className="p-6 overflow-y-auto space-y-6">
-              {/* Homepage Card Preview */}
-              <div>
-                <div className="text-[10px] font-mono uppercase tracking-widest text-neutral-500 font-bold mb-2">
-                  1. HOMEPAGE SPOTLIGHT CARD (Compact Grid View)
+            {/* Dossier Preview Body */}
+            <div className="p-6 md:p-8 overflow-y-auto space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+                <div className="md:col-span-1">
+                  <img
+                    src={previewItem.founder_photo}
+                    alt={previewItem.founder_name}
+                    className="w-full aspect-4/5 object-cover border border-neutral-300 shadow-xs"
+                  />
+                  <div className="mt-3 p-3 bg-neutral-50 border border-neutral-200 text-xs font-mono space-y-1">
+                    <div className="text-[10px] text-neutral-500 uppercase">Enterprise</div>
+                    <div className="font-bold text-neutral-900">{previewItem.company_name}</div>
+                    <div className="text-neutral-600">{previewItem.designation}</div>
+                    <div className="text-[10px] text-neutral-500 uppercase mt-2">Sector</div>
+                    <div className="font-bold text-neutral-800">{previewItem.industry}</div>
+                  </div>
                 </div>
-                <div className="max-w-sm p-4 bg-neutral-50 border border-neutral-300">
-                  <div className="aspect-[4/3] bg-neutral-200 overflow-hidden mb-3 relative border border-neutral-300">
-                    <img
-                      src={previewItem.founder_photo}
-                      alt={previewItem.founder_name}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute bottom-2 left-2">
-                      <span className="px-2 py-0.5 bg-black text-[#F5B800] text-[9px] font-mono uppercase font-bold">
-                        {previewItem.industry}
-                      </span>
-                    </div>
+
+                <div className="md:col-span-2 space-y-4">
+                  <div>
+                    <span className="text-[11px] font-mono uppercase tracking-widest text-[#B38000] font-bold">
+                      FOUNDER SPOTLIGHT · POSITION #{previewItem.featured_position}
+                    </span>
+                    <h2 className="text-3xl font-black text-neutral-900 font-serif tracking-tight mt-1">
+                      {previewItem.founder_name}
+                    </h2>
+                    <p className="text-xs font-mono text-neutral-500 mt-0.5">
+                      {previewItem.designation}, {previewItem.company_name}
+                    </p>
                   </div>
-                  <h4 className="text-lg font-black text-neutral-900 font-serif leading-tight">
-                    {previewItem.founder_name}
-                  </h4>
-                  <div className="text-xs font-mono text-neutral-700 mt-1">
-                    {previewItem.designation} · <span className="font-bold text-black">{previewItem.company_name}</span>
-                  </div>
-                  <p className="text-xs text-neutral-600 mt-2 font-serif line-clamp-2">
-                    {previewItem.short_bio}
+
+                  <p className="text-sm font-serif text-neutral-800 leading-relaxed italic border-l-2 border-[#F5B800] pl-3">
+                    "{previewItem.short_bio}"
                   </p>
-                  <div className="mt-3 pt-2 border-t border-neutral-200 flex justify-between text-xs font-mono font-bold text-neutral-900">
-                    <span>{previewItem.cta_text || 'View Spotlight'}</span>
-                    <span>→</span>
-                  </div>
-                </div>
-              </div>
 
-              {/* Dedicated Profile Header Preview */}
-              <div className="pt-4 border-t border-neutral-200">
-                <div className="text-[10px] font-mono uppercase tracking-widest text-neutral-500 font-bold mb-2">
-                  2. FULL PROFILE VIEW (/founders/{previewItem.slug})
-                </div>
-                <div className="bg-[#111111] text-white p-6 border-b-2 border-[#F5B800]">
-                  <span className="text-[10px] font-mono text-[#F5B800] uppercase font-bold">
-                    FOUNDER BYTES SPOTLIGHT DOSSIER
-                  </span>
-                  <h2 className="text-3xl font-black uppercase font-serif text-white mt-1">
-                    {previewItem.founder_name}
-                  </h2>
-                  <div className="text-sm font-mono text-neutral-300 mt-2">
-                    {previewItem.designation} · <span className="text-[#F5B800] font-bold">{previewItem.company_name}</span> · {previewItem.industry}
-                  </div>
-                </div>
-
-                <div className="p-6 bg-neutral-50 border border-neutral-200 space-y-4">
                   {previewItem.featured_quote && (
-                    <div className="p-4 bg-neutral-900 text-white border-l-4 border-[#F5B800] italic font-serif text-base">
+                    <blockquote className="p-4 bg-neutral-900 text-white font-serif text-sm italic">
                       "{previewItem.featured_quote}"
-                    </div>
+                    </blockquote>
                   )}
 
-                  <div className="font-serif text-sm text-neutral-800 leading-relaxed whitespace-pre-line">
+                  <div className="prose prose-sm max-w-none font-serif text-neutral-800 leading-relaxed whitespace-pre-line text-xs">
                     {previewItem.founder_story}
+                  </div>
+
+                  {/* Links */}
+                  <div className="pt-4 border-t border-neutral-200 flex flex-wrap items-center gap-3 text-xs font-mono">
+                    {previewItem.website_url && (
+                      <a
+                        href={previewItem.website_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="px-3 py-1.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 flex items-center gap-1.5"
+                      >
+                        <Globe className="w-3.5 h-3.5" />
+                        <span>Visit Website</span>
+                      </a>
+                    )}
+                    {previewItem.linkedin_url && (
+                      <a
+                        href={previewItem.linkedin_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="px-3 py-1.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 flex items-center gap-1.5"
+                      >
+                        <Linkedin className="w-3.5 h-3.5" />
+                        <span>LinkedIn</span>
+                      </a>
+                    )}
+                    {previewItem.instagram_url && (
+                      <a
+                        href={previewItem.instagram_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="px-3 py-1.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 flex items-center gap-1.5"
+                      >
+                        <Instagram className="w-3.5 h-3.5" />
+                        <span>Instagram</span>
+                      </a>
+                    )}
+                    {previewItem.cta_url && (
+                      <a
+                        href={previewItem.cta_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="px-4 py-1.5 bg-[#F5B800] text-black font-bold uppercase tracking-wider flex items-center gap-1.5"
+                      >
+                        <span>{previewItem.cta_text || 'Learn More'}</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    )}
                   </div>
                 </div>
               </div>
-            </div>
-
-            {/* Footer */}
-            <div className="p-4 bg-neutral-100 border-t border-neutral-200 flex justify-end">
-              <button
-                onClick={() => setPreviewItem(null)}
-                className="px-5 py-2 bg-neutral-900 text-white font-mono text-xs font-bold uppercase tracking-wider"
-              >
-                Close Preview
-              </button>
             </div>
           </div>
         </div>
