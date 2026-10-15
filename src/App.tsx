@@ -85,13 +85,13 @@ function mapCMSArticleToArticle(c: CMSArticle): Article {
     subCategory: c.sub_category,
     author: {
       id: c.author_id,
-      name: c.author_name,
-      slug: c.author_name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-      role: c.author_role,
+      name: (c.author_name && c.author_name !== 'Arjun Sindhu') ? c.author_name : 'Founder Bytes Team',
+      slug: (c.author_name && c.author_name !== 'Arjun Sindhu') ? c.author_name.toLowerCase().replace(/[^a-z0-9]+/g, '-') : 'founder-bytes-team',
+      role: (c.author_role && c.author_role !== 'Founder & Editor-in-Chief') ? c.author_role : 'Editorial Desk & Research Bureau',
       organization: 'Founder Bytes',
-      bio: 'Editorial Staff at Founder Bytes',
-      avatar: c.author_avatar,
-      totalArticles: 1,
+      bio: 'The Founder Bytes Team delivers verified newsroom reporting on venture capital, emerging technologies, enterprise innovation, and high-growth Indian business ecosystems.',
+      avatar: (c.author_avatar && !c.author_avatar.includes('photo-1534528741775-53994a69daeb')) ? c.author_avatar : '/Founder Bytes Media Logo.png',
+      totalArticles: 94,
     },
     authorId: c.author_id,
     featuredImage: c.featured_image,
@@ -448,7 +448,7 @@ export default function App() {
           type="website" 
         />
       )}
-      {currentView === 'author' && <SEOHead title="Arjun Sindhu" type="website" />}
+      {currentView === 'author' && <SEOHead title={currentAuthor?.name || 'Founder Bytes Team'} type="website" />}
       {currentView === 'policy' && <SEOHead title={activePolicyType.toUpperCase().replace('-', ' ')} type="website" />}
 
       {/* 1. TOP UTILITY BAR + 2. BRAND MASTHEAD + 3. PRIMARY NAVIGATION */}
@@ -489,6 +489,7 @@ export default function App() {
             onSelectArticle={handleSelectArticle}
             onSelectAuthor={handleSelectAuthor}
             onSelectCategory={handleSelectCategory}
+            onNavigateNominations={(query) => navigateTo('nominations', query ? `nominations${query}` : 'nominations')}
           />
         )}
 
@@ -512,7 +513,7 @@ export default function App() {
         {currentView === 'author' && currentAuthor && (
           <AuthorPage
             author={currentAuthor}
-            articles={mappedArticles.filter((a) => a.author.name.toLowerCase().includes(activeAuthorSlug.replace(/-/g, ' ')))}
+            articles={mappedArticles.filter((a) => !activeAuthorSlug || activeAuthorSlug.includes('arjun') || activeAuthorSlug.includes('founder') || activeAuthorSlug.includes('team') || a.author.name.toLowerCase().includes(activeAuthorSlug.replace(/-/g, ' ')))}
             onNavigateBack={handleNavigateHome}
             onSelectArticle={handleSelectArticle}
             onSelectCategory={handleSelectCategory}

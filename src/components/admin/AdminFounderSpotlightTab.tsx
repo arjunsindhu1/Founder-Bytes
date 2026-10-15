@@ -176,18 +176,21 @@ export const AdminFounderSpotlightTab: React.FC<AdminFounderSpotlightTabProps> =
       ? editingItem.slug 
       : formData.founder_name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
+    const today = new Date().toISOString().slice(0, 10);
+    const savePayload = { ...formData, slug };
+    if (savePayload.status === 'Live' && savePayload.end_date.slice(0, 10) < today) {
+      savePayload.end_date = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
+      if (savePayload.start_date.slice(0, 10) > today) {
+        savePayload.start_date = today;
+      }
+    }
+
     try {
       if (editingItem) {
-        await ContentService.updateFounderSpotlight(editingItem.id, {
-          ...formData,
-          slug,
-        });
+        await ContentService.updateFounderSpotlight(editingItem.id, savePayload);
         showNotification(`Spotlight for "${formData.founder_name}" updated.`);
       } else {
-        await ContentService.createFounderSpotlight({
-          ...formData,
-          slug,
-        });
+        await ContentService.createFounderSpotlight(savePayload);
         showNotification(`Spotlight for "${formData.founder_name}" created.`);
       }
       setShowFormModal(false);

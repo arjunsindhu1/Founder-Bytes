@@ -38,7 +38,7 @@ export const MagazineFlipbook: React.FC<MagazineFlipbookProps> = ({ issue, onClo
     {
       pageNumber: 2,
       title: "Letter from the Editor",
-      author: "Arjun Sindhu",
+      author: "Founder Bytes Team",
       type: 'editorial',
       content: [
         "Welcome to this landmark edition of The Founder Magazine.",
@@ -46,17 +46,17 @@ export const MagazineFlipbook: React.FC<MagazineFlipbookProps> = ({ issue, onClo
         "Through exhaustive reporting and direct access to production lines in Bengaluru, Pune, Hosur, and Gurugram, our editorial team brings you the unfiltered mechanics of high-growth leadership.",
         "We invite you to read deeply, examine the financial filings, and join us in documenting India's most ambitious decade."
       ],
-      signature: "Arjun Sindhu\nFounder & Editor-in-Chief, Founder Bytes"
+      signature: "Founder Bytes Team\nEditorial Desk & Research Bureau, Founder Bytes"
     },
     {
       pageNumber: 3,
       title: "Table of Contents & Executive Summary",
       type: 'toc',
       items: issue.table_of_contents && issue.table_of_contents.length > 0 ? issue.table_of_contents : [
-        { section: "Cover Story", title: "100 Startups Powering Bharat's Global Ambition", author: "Arjun Sindhu", page: "04" },
-        { section: "Hardware & Mobility", title: "Ather Energy: The Architecture of Electric Precision", author: "Arjun Sindhu", page: "08" },
-        { section: "Enterprise AI", title: "The Sovereign LLM Playbook: Sarvam & Krutrim", author: "Arjun Sindhu", page: "12" },
-        { section: "Agritech Deep Dive", title: "KisanGrid and the Autonomous Tractor Revolution", author: "Arjun Sindhu", page: "14" },
+        { section: "Cover Story", title: "100 Startups Powering Bharat's Global Ambition", author: "Founder Bytes Team", page: "04" },
+        { section: "Hardware & Mobility", title: "Ather Energy: The Architecture of Electric Precision", author: "Founder Bytes Team", page: "08" },
+        { section: "Enterprise AI", title: "The Sovereign LLM Playbook: Sarvam & Krutrim", author: "Founder Bytes Team", page: "12" },
+        { section: "Agritech Deep Dive", title: "KisanGrid and the Autonomous Tractor Revolution", author: "Founder Bytes Team", page: "14" },
       ]
     },
     {

@@ -19,7 +19,7 @@ import {
   SpotlightPaymentStatus,
   SpotlightStatus
 } from '../types/cms';
-import { getSupabaseClient, isSupabaseConfigured, ensureAdminAuth } from '../lib/supabase';
+import { getSupabaseClient, isSupabaseConfigured, ensureAdminAuth, getAdminAuthenticatedClient } from '../lib/supabase';
 import { convertBlocksToArticleBody, calculateReadingTime, isValidUUID } from '../utils/articleBodyUtils';
 
 // In-memory subscribers
@@ -35,9 +35,9 @@ let broadcastChannel: BroadcastChannel | null = null;
 let realtimeChannel: any = null;
 
 // Lightweight caching layer for instant initial page render & zero flash
-const CACHE_KEY_ARTICLES = 'fb_cache_articles_v3';
-const CACHE_KEY_SECTIONS = 'fb_cache_sections_v3';
-const CACHE_KEY_ISSUES = 'fb_cache_issues_v3';
+const CACHE_KEY_ARTICLES = 'fb_cache_articles_v4';
+const CACHE_KEY_SECTIONS = 'fb_cache_sections_v4';
+const CACHE_KEY_ISSUES = 'fb_cache_issues_v4';
 
 let memCachedArticles: CMSArticle[] | null = null;
 let memCachedSections: CMSSection[] | null = null;
@@ -207,6 +207,12 @@ export function initSupabaseRealtime() {
           if (table === 'magazine_nominations' && payload?.eventType === 'INSERT' && payload?.new) {
             notifyNominationLocalOnly(payload.new as MagazineNomination);
           }
+          if (table === 'site_settings' && payload?.new?.setting_key === 'magazine_nominations') {
+            const list = payload.new.setting_value;
+            if (Array.isArray(list) && list.length > 0) {
+              notifyNominationLocalOnly(list[0] as MagazineNomination);
+            }
+          }
         }
       );
     });
@@ -280,11 +286,18 @@ function mapDbRowToCMSArticle(d: any): CMSArticle {
 
   const categoryName = d.categories?.name || 'Startups';
   const categorySlug = d.categories?.slug || 'startups';
-  const authorName = d.authors?.name || 'Arjun Sindhu';
-  const authorRole = d.authors?.designation || 'Founder & Editor-in-Chief';
-  const authorAvatar =
-    d.authors?.photo_url ||
-    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
+  let authorName = d.authors?.name || 'Founder Bytes Team';
+  if (authorName === 'Arjun Sindhu') {
+    authorName = 'Founder Bytes Team';
+  }
+  let authorRole = d.authors?.designation || 'Editorial Desk & Research Bureau';
+  if (authorRole === 'Founder & Editor-in-Chief') {
+    authorRole = 'Editorial Desk & Research Bureau';
+  }
+  let authorAvatar = d.authors?.photo_url || '/Founder Bytes Media Logo.png';
+  if (!authorAvatar || authorAvatar.includes('photo-1534528741775-53994a69daeb')) {
+    authorAvatar = '/Founder Bytes Media Logo.png';
+  }
 
   return {
     id: d.id,
@@ -880,7 +893,7 @@ export const ContentService = {
       const { data: authData } = await supabase
         .from('authors')
         .select('id')
-        .eq('slug', 'arjun-sindhu')
+        .or('slug.eq.founder-bytes-team,slug.eq.arjun-sindhu')
         .limit(1)
         .single();
       authorId = authData?.id || 'a925a3a4-abd9-4ebb-8966-b5fed4592371';
@@ -905,7 +918,7 @@ export const ContentService = {
       featured_image_alt: article.featured_image_alt || article.title,
       featured_image_caption: article.image_caption || null,
       featured_image_credit: article.image_credit || 'Founder Bytes',
-      status: article.status || 'published',
+      status: (article.status?.toLowerCase() === 'unpublished' ? 'draft' : (article.status?.toLowerCase() || 'published')),
       is_featured: Boolean(article.is_featured),
       is_trending: Boolean(article.is_trending),
       seo_title: article.seo_title || article.title,
@@ -1519,16 +1532,16 @@ export const ContentService = {
   async getAuthors(): Promise<CMSAuthor[]> {
     const fallbackAuthor: CMSAuthor = {
       id: 'a925a3a4-abd9-4ebb-8966-b5fed4592371',
-      name: 'Arjun Sindhu',
-      slug: 'arjun-sindhu',
-      role: 'Founder & Editor-in-Chief',
+      name: 'Founder Bytes Team',
+      slug: 'founder-bytes-team',
+      role: 'Editorial Desk & Research Bureau',
       organization: 'Founder Bytes',
-      bio: 'Arjun Sindhu covers high-growth venture capital, Indian digital economy policy, and macro business shifts.',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+      bio: 'The Founder Bytes Team delivers verified newsroom reporting on venture capital, emerging technologies, enterprise innovation, and high-growth Indian business ecosystems.',
+      avatar: '/Founder Bytes Media Logo.png',
       twitter: 'https://twitter.com/founderbytes',
-      linkedin: 'https://linkedin.com/in/founderbytes',
-      email: 'arjun@founderbytes.in',
-      total_articles: 25,
+      linkedin: 'https://linkedin.com/company/founderbytes',
+      email: 'desk@founderbytes.in',
+      total_articles: 94,
     };
 
     const supabase = getSupabaseClient();
@@ -1538,19 +1551,26 @@ export const ContentService = {
       const { data, error } = await supabase.from('authors').select('*').eq('is_active', true);
       if (error || !data || data.length === 0) return [fallbackAuthor];
 
-      return data.map((a: any) => ({
-        id: a.id,
-        name: a.name,
-        slug: a.slug,
-        role: a.designation || 'Founder & Editor-in-Chief',
-        organization: 'Founder Bytes',
-        bio: a.bio || '',
-        avatar: a.photo_url || fallbackAuthor.avatar,
-        twitter: 'https://twitter.com/founderbytes',
-        linkedin: 'https://linkedin.com/company/founderbytes',
-        email: a.email || 'arjun@founderbytes.in',
-        total_articles: 25,
-      }));
+      return data.map((a: any) => {
+        const isOldAuthor = a.name === 'Arjun Sindhu' || a.slug === 'arjun-sindhu';
+        return {
+          id: a.id,
+          name: isOldAuthor ? 'Founder Bytes Team' : a.name,
+          slug: isOldAuthor ? 'founder-bytes-team' : a.slug,
+          role: isOldAuthor ? 'Editorial Desk & Research Bureau' : (a.designation || 'Editorial Desk & Research Bureau'),
+          organization: 'Founder Bytes',
+          bio: isOldAuthor
+            ? 'The Founder Bytes Team delivers verified newsroom reporting on venture capital, emerging technologies, enterprise innovation, and high-growth Indian business ecosystems.'
+            : (a.bio || ''),
+          avatar: (isOldAuthor || !a.photo_url || a.photo_url.includes('photo-1534528741775-53994a69daeb'))
+            ? '/Founder Bytes Media Logo.png'
+            : a.photo_url,
+          twitter: 'https://twitter.com/founderbytes',
+          linkedin: 'https://linkedin.com/company/founderbytes',
+          email: (isOldAuthor || !a.email || a.email.includes('arjun')) ? 'desk@founderbytes.in' : a.email,
+          total_articles: 94,
+        };
+      });
     } catch {
       return [fallbackAuthor];
     }
@@ -1640,7 +1660,7 @@ export const ContentService = {
       tips_email: 'tips@founderbytes.in',
       social_twitter: 'https://x.com/founderbytes',
       social_linkedin: 'https://linkedin.com/company/founderbytes',
-      social_instagram: 'https://instagram.com/founderbytes',
+      social_instagram: 'https://www.instagram.com/thefounderbytes/',
       social_youtube: 'https://youtube.com/@founderbytes',
       seo_default_title: 'FOUNDER BYTES — India’s Business & Startup Magazine',
       seo_default_description: 'India’s premier digital business, startup news, and founder intelligence publication.',
@@ -1801,7 +1821,6 @@ export const ContentService = {
   async submitNomination(
     input: Omit<MagazineNomination, 'id' | 'reference_number' | 'status' | 'created_at' | 'updated_at'>
   ): Promise<MagazineNomination> {
-    const supabase = getSupabaseClient();
     const referenceNumber = await this.generateReferenceNumber(input.magazine);
     const id = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `nom-${Date.now()}`;
     const now = new Date().toISOString();
@@ -1816,44 +1835,72 @@ export const ContentService = {
       updated_at: now,
     };
 
-    if (supabase && isSupabaseConfigured()) {
-      // 1. Attempt direct insert into magazine_nominations table
-      try {
-        const { error: insErr } = await supabase
-          .from('magazine_nominations')
-          .insert(nomination);
+    let persisted = false;
 
-        if (!insErr) {
-          broadcastNewNomination(nomination);
-          notifySubscribers();
-          return nomination;
+    if (isSupabaseConfigured()) {
+      // 1. Attempt direct insert into native magazine_nominations table if it exists
+      const supabase = getSupabaseClient();
+      if (supabase) {
+        try {
+          const { error: insErr } = await supabase
+            .from('magazine_nominations')
+            .insert(nomination);
+
+          if (!insErr) {
+            persisted = true;
+          }
+        } catch {
+          // fallback to site_settings
         }
-      } catch (e) {
-        console.warn('Exception inserting to magazine_nominations:', e);
       }
 
-      // 2. Fallback to site_settings persistence
+      // 2. Persist to Supabase site_settings using isolated in-memory admin client
+      // This guarantees persistence while preventing public users from storing admin session in localStorage.
       try {
-        await ensureAdminAuth();
-        const { data: existingSettings } = await supabase
-          .from('site_settings')
-          .select('setting_value')
-          .eq('setting_key', 'magazine_nominations')
-          .maybeSingle();
+        const adminClient = await getAdminAuthenticatedClient();
+        if (adminClient) {
+          const { data: existingSettings, error: fetchErr } = await adminClient
+            .from('site_settings')
+            .select('setting_value')
+            .eq('setting_key', 'magazine_nominations')
+            .maybeSingle();
 
-        const currentList: MagazineNomination[] = Array.isArray(existingSettings?.setting_value)
-          ? existingSettings.setting_value
-          : [];
+          if (fetchErr) {
+            console.warn('Notice fetching existing nominations in site_settings:', fetchErr.message);
+          }
 
-        const updatedList = [nomination, ...currentList];
+          const currentList: MagazineNomination[] = Array.isArray(existingSettings?.setting_value)
+            ? existingSettings.setting_value
+            : [];
 
-        await supabase.from('site_settings').upsert({
-          setting_key: 'magazine_nominations',
-          setting_value: updatedList,
-          updated_at: now
-        });
-      } catch (err) {
-        console.warn('Failed to persist in site_settings:', err);
+          // Prepend new nomination, avoiding duplicate IDs or reference numbers
+          const updatedList = [
+            nomination,
+            ...currentList.filter(n => n.id !== nomination.id && n.reference_number !== nomination.reference_number)
+          ];
+
+          const { error: saveErr } = await adminClient
+            .from('site_settings')
+            .upsert({
+              setting_key: 'magazine_nominations',
+              setting_value: updatedList,
+              updated_at: now
+            }, { onConflict: 'setting_key' });
+
+          if (!saveErr) {
+            persisted = true;
+          } else {
+            console.error('Supabase site_settings save error:', saveErr);
+            if (!persisted) {
+              throw new Error(`Database error saving nomination: ${saveErr.message}`);
+            }
+          }
+        }
+      } catch (err: any) {
+        console.error('Failed to persist nomination to site_settings:', err);
+        if (!persisted) {
+          throw err;
+        }
       }
     }
 
@@ -1861,7 +1908,10 @@ export const ContentService = {
     try {
       const stored = localStorage.getItem('fb_magazine_nominations');
       const localList: MagazineNomination[] = stored ? JSON.parse(stored) : [];
-      localStorage.setItem('fb_magazine_nominations', JSON.stringify([nomination, ...localList]));
+      localStorage.setItem(
+        'fb_magazine_nominations', 
+        JSON.stringify([nomination, ...localList.filter(n => n.id !== nomination.id && n.reference_number !== nomination.reference_number)])
+      );
     } catch {
       // ignore
     }
@@ -2004,11 +2054,14 @@ export const ContentService = {
             };
             updatedNomination = list[idx];
 
-            await supabase.from('site_settings').upsert({
+            const { error: upErr } = await supabase.from('site_settings').upsert({
               setting_key: 'magazine_nominations',
               setting_value: list,
               updated_at: now,
-            });
+            }, { onConflict: 'setting_key' });
+            if (upErr) {
+              console.error('Failed to update nomination in site_settings:', upErr);
+            }
           }
         }
       } catch {
@@ -2092,11 +2145,14 @@ export const ContentService = {
             };
             updatedNomination = list[idx];
 
-            await supabase.from('site_settings').upsert({
+            const { error: upErr } = await supabase.from('site_settings').upsert({
               setting_key: 'magazine_nominations',
               setting_value: list,
               updated_at: now,
-            });
+            }, { onConflict: 'setting_key' });
+            if (upErr) {
+              console.error('Failed to update nomination in site_settings:', upErr);
+            }
           }
         }
       } catch {
@@ -2299,7 +2355,7 @@ export const ContentService = {
           setting_key: 'founder_spotlight_packages',
           setting_value: updated,
           updated_at: now
-        });
+        }, { onConflict: 'setting_key' });
       } catch {}
     }
 
@@ -2342,7 +2398,7 @@ export const ContentService = {
             setting_key: 'founder_spotlight_packages',
             setting_value: current,
             updated_at: now
-          });
+          }, { onConflict: 'setting_key' });
         }
       } catch {}
     }
@@ -2376,7 +2432,7 @@ export const ContentService = {
           setting_key: 'founder_spotlight_packages',
           setting_value: filtered,
           updated_at: new Date().toISOString()
-        });
+        }, { onConflict: 'setting_key' });
       } catch {}
     }
 
@@ -2491,14 +2547,14 @@ export const ContentService = {
         await supabase.from('founder_spotlights').insert(newSpot);
       } catch {}
 
-      try {
-        await supabase.from('site_settings').upsert({
-          setting_key: 'founder_spotlights',
-          setting_value: updatedList,
-          updated_at: now
-        });
-      } catch (err) {
-        console.warn('Failed to persist in site_settings:', err);
+      const { error: saveErr } = await supabase.from('site_settings').upsert({
+        setting_key: 'founder_spotlights',
+        setting_value: updatedList,
+        updated_at: now
+      }, { onConflict: 'setting_key' });
+      if (saveErr) {
+        console.error('Failed to persist founder_spotlights in site_settings:', saveErr);
+        throw new Error(`Database error saving founder spotlight: ${saveErr.message}`);
       }
     }
 
@@ -2538,14 +2594,14 @@ export const ContentService = {
           .eq('id', id);
       } catch {}
 
-      try {
-        await supabase.from('site_settings').upsert({
-          setting_key: 'founder_spotlights',
-          setting_value: updatedList,
-          updated_at: now
-        });
-      } catch (err) {
-        console.warn('Failed to persist in site_settings:', err);
+      const { error: saveErr } = await supabase.from('site_settings').upsert({
+        setting_key: 'founder_spotlights',
+        setting_value: updatedList,
+        updated_at: now
+      }, { onConflict: 'setting_key' });
+      if (saveErr) {
+        console.error('Failed to update founder_spotlights in site_settings:', saveErr);
+        throw new Error(`Database error updating founder spotlight: ${saveErr.message}`);
       }
     }
 
@@ -2567,13 +2623,15 @@ export const ContentService = {
       try {
         await supabase.from('founder_spotlights').delete().eq('id', id);
       } catch {}
-      try {
-        await supabase.from('site_settings').upsert({
-          setting_key: 'founder_spotlights',
-          setting_value: filtered,
-          updated_at: new Date().toISOString()
-        });
-      } catch {}
+      const { error: saveErr } = await supabase.from('site_settings').upsert({
+        setting_key: 'founder_spotlights',
+        setting_value: filtered,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'setting_key' });
+      if (saveErr) {
+        console.error('Failed to delete founder_spotlights from site_settings:', saveErr);
+        throw new Error(`Database error deleting founder spotlight: ${saveErr.message}`);
+      }
     }
 
     try {
@@ -2592,7 +2650,7 @@ export const ContentService = {
           setting_key: 'founder_spotlights',
           setting_value: list,
           updated_at: new Date().toISOString()
-        });
+        }, { onConflict: 'setting_key' });
       } catch {}
     }
     try {

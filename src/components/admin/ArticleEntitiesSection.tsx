@@ -100,7 +100,7 @@ export const ArticleEntitiesSection: React.FC<ArticleEntitiesSectionProps> = ({
               ))
             ) : (
               <option value="a925a3a4-abd9-4ebb-8966-b5fed4592371">
-                Arjun Sindhu (Founder & Editor-in-Chief)
+                Founder Bytes Team (Editorial Desk & Research Bureau)
               </option>
             )}
           </select>
@@ -206,7 +206,7 @@ export const ArticleEntitiesSection: React.FC<ArticleEntitiesSectionProps> = ({
                 value={newPerson}
                 onChange={(e) => setNewPerson(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addEntityItem('people', newPerson, setNewPerson))}
-                placeholder="e.g. Arjun Sindhu"
+                placeholder="e.g. Tarun Mehta"
                 className="flex-1 px-2 py-1 border border-neutral-300 text-[11px] bg-white"
               />
               <button

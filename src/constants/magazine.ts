@@ -33,9 +33,9 @@ export const DEFAULT_MAGAZINE_ISSUE: MagazineIssue = {
     },
   ],
   tableOfContents: [
-    { section: 'Cover Story', title: 'The Next Indian Decade: 100 Builders Powering Bharat', author: 'Arjun Sindhu', page: '42' },
-    { section: 'Deep Dive', title: 'The Fabless Revolution: Inside India’s Chip Architecture Renaissance', author: 'Arjun Sindhu', page: '64' },
-    { section: 'Markets', title: 'The ₹10,000 Crore IPO Class of 2026: Profitability Audited', author: 'Arjun Sindhu', page: '88' },
-    { section: 'Frontier Deeptech', title: 'GalaxEye, SiMa.ai & Sovereign Silicon Foundations', author: 'Arjun Sindhu', page: '112' },
+    { section: 'Cover Story', title: 'The Next Indian Decade: 100 Builders Powering Bharat', author: 'Founder Bytes Team', page: '42' },
+    { section: 'Deep Dive', title: 'The Fabless Revolution: Inside India’s Chip Architecture Renaissance', author: 'Founder Bytes Team', page: '64' },
+    { section: 'Markets', title: 'The ₹10,000 Crore IPO Class of 2026: Profitability Audited', author: 'Founder Bytes Team', page: '88' },
+    { section: 'Frontier Deeptech', title: 'GalaxEye, SiMa.ai & Sovereign Silicon Foundations', author: 'Founder Bytes Team', page: '112' },
   ],
 };

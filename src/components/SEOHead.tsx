@@ -15,7 +15,7 @@ const DEFAULT_DESC =
 const SITE_NAME = 'Founder Bytes';
 const BASE_URL = 'https://founderbytes.in';
 const DEFAULT_IMAGE = 'https://founderbytes.in/founder-bytes-og.png';
-const BRAND_LOGO = 'https://founderbytes.in/8051754E-BE89-46BC-8C1F-E63D6C8C856F.png';
+const BRAND_LOGO = 'https://founderbytes.in/Founder Bytes Media Logo.png';
 
 export const SEOHead: React.FC<SEOHeadProps> = ({
   title,
@@ -148,8 +148,8 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
               logo: {
                 '@type': 'ImageObject',
                 url: BRAND_LOGO,
-                width: 800,
-                height: 800,
+                width: 2172,
+                height: 724,
               },
             },
             articleSection: article.category,
@@ -194,8 +194,8 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
             logo: {
               '@type': 'ImageObject',
               url: BRAND_LOGO,
-              width: 1254,
-              height: 1254,
+              width: 2172,
+              height: 724,
             },
             image: DEFAULT_IMAGE,
             publishingPrinciples: `${BASE_URL}/editorial-policy`,
@@ -206,7 +206,7 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
             sameAs: [
               'https://twitter.com/founderbytes',
               'https://linkedin.com/company/founderbytes',
-              'https://instagram.com/founderbytes',
+              'https://www.instagram.com/thefounderbytes/',
             ],
           },
           {

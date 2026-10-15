@@ -2,6 +2,270 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
   <url>
+    <loc>https://founderbytes.in/30-under-30-india-2026-nominations</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-15T08:00:00+00:00</news:publication_date>
+      <news:title>FOUNDER BYTES: 30 UNDER 30 INDIA 2026 — Open Nominations</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/business/hyundai-motor-india-raises-8315-crore-anchor-investors-largest-ipo</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-14T11:30:00+00:00</news:publication_date>
+      <news:title>Hyundai Motor India Raises ₹8,315 Crore from 225 Global and Domestic Anchor Investors Ahead of Historic Public Issue</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/startups/giva-closes-255-crore-series-b-premji-invest-lab-grown-diamonds</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-14T09:45:00+00:00</news:publication_date>
+      <news:title>Fine Jewellery Brand GIVA Closes ₹255 Crore Extended Series B Led by Premji Invest for Lab-Grown Diamond Expansion</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/ai/neuron7-ai-secures-44m-series-b-smith-point-capital-service-intelligence</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-14T07:15:00+00:00</news:publication_date>
+      <news:title>AI Service Resolution Platform Neuron7.ai Secures $44 Million Series B Led by Keith Block’s Smith Point Capital</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/tech/everstage-raises-30m-series-b-eight-roads-ai-agent-creation-studio</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-14T05:00:00+00:00</news:publication_date>
+      <news:title>Sales Performance Platform Everstage Bags $30 Million Series B Led by Eight Roads Ventures to Launch AI Agent Studio</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/funding/finova-capital-raises-135m-series-e-avataar-sofina-madison</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-13T16:00:00+00:00</news:publication_date>
+      <news:title>MSME Lender Finova Capital Raises $135 Million Series E Led by Avataar, Sofina and Madison India</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/innovation/haber-secures-38m-series-c-creaegis-accel-industrial-robotics</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-13T13:30:00+00:00</news:publication_date>
+      <news:title>Industrial Robotics Startup Haber Lands $38 Million Series C Led by Creaegis to Automate Factory Quality Testing</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/startups/purplle-closes-180m-series-f-round-60m-adia-infusion</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-13T10:15:00+00:00</news:publication_date>
+      <news:title>Omnichannel Beauty Retailer Purplle Closes $180 Million Series F Round with $60 Million Infusion from ADIA</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/business/samunnati-mobilises-1123-crore-fresh-capital-14-institutional-lenders</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-13T06:30:00+00:00</news:publication_date>
+      <news:title>Agri-Commerce Enterprise Samunnati Mobilises ₹1,123 Crore in Fresh Capital from 14 Institutional Lenders</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/ai/sarvam-ai-reported-300-million-funding-talks-3-billion-valuation</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-12T09:30:00+00:00</news:publication_date>
+      <news:title>Sarvam AI in Reported Talks to Raise Up to $300 Million at Potential $3 Billion Valuation</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/tech/hcltech-anthropic-enterprise-ai-partnership-claude</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-12T07:15:00+00:00</news:publication_date>
+      <news:title>HCLTech and Anthropic Form Global Alliance to Deploy Claude-Powered Enterprise AI Solutions</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/ai/manus-ai-funding-exceeds-500-million-independent-return</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-11T16:00:00+00:00</news:publication_date>
+      <news:title>Manus AI Secures Over $500 Million in Capital After Regaining Full Independence</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/startups/curvetai-raises-6-crore-pre-seed-ai-workspace</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-11T11:30:00+00:00</news:publication_date>
+      <news:title>CurvetAI Bags ₹6 Crore Pre-Seed Funding to Build Context-Aware AI Workspace for Distributed Teams</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/business/dailyobjects-secures-332-crore-funding-retail-expansion</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-11T09:00:00+00:00</news:publication_date>
+      <news:title>DailyObjects Secures ₹332 Crore in Fresh Funding to Accelerate Nationwide Offline Retail Expansion</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/funding/indian-startup-funding-weekly-trends-deal-breakdown-october-2026</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-10T14:45:00+00:00</news:publication_date>
+      <news:title>Indian Startup Funding Intelligence: Weekly Trends, Deal Breakdown, and Sector Shifts (October 2026)</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/business/imf-world-economic-outlook-ai-investment-global-economy</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-10T11:00:00+00:00</news:publication_date>
+      <news:title>IMF World Economic Outlook: How Trillion-Dollar AI Capital Outlays Are Reshaping Global Productivity</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/tech/ai-chip-market-volatility-chinese-semiconductor-competition</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-09T15:30:00+00:00</news:publication_date>
+      <news:title>Global AI Chip Market Braces for Volatility as Chinese Silicon Challengers Accelerate Domestic Independence</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/ai/anthropic-100-million-initiative-10000-deployed-ai-engineers</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-09T10:15:00+00:00</news:publication_date>
+      <news:title>Anthropic Launches $100 Million Initiative to Certify and Deploy 10,000 Enterprise AI Engineers</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/innovation/enterprise-ai-agents-operational-deployment-shift</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-08T16:00:00+00:00</news:publication_date>
+      <news:title>The Shift to Enterprise AI Agents: How Corporations Are Transitioning from Pilots to Mission-Critical Operations</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/ai/india-voice-ai-opportunity-vernacular-enterprise-adoption</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-08T12:00:00+00:00</news:publication_date>
+      <news:title>Unlocking India’s Voice-AI Frontier: Vernacular Speech Models Drive Mass Enterprise Adoption</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/funding/indian-healthcare-startup-funding-september-2026-trends</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-08T09:30:00+00:00</news:publication_date>
+      <news:title>Indian Healthcare Startup Funding Intelligence: Diagnostic Deeptech and Preventive Care Dominate September Trends</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/innovation/indian-deep-tech-startups-semiconductor-quantum-opportunities</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-07T14:00:00+00:00</news:publication_date>
+      <news:title>The New Wave of Indian Deep-Tech: Semiconductor Design, Optoelectronics, and Quantum Innovation Gather Steam</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/startups/ai-startup-economics-inference-costs-sustainable-growth</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-07T11:15:00+00:00</news:publication_date>
+      <news:title>The Unit Economics of AI Startups: Managing Skyrocketing Inference Bills and Building Sustainable Gross Margins</news:title>
+    </news:news>
+  </url>
+  <url>
+    <loc>https://founderbytes.in/founders/indian-startup-ecosystem-emerging-hubs-beyond-major-metros</loc>
+    <news:news>
+      <news:publication>
+        <news:name>Founder Bytes</news:name>
+        <news:language>en</news:language>
+      </news:publication>
+      <news:publication_date>2026-10-07T08:30:00+00:00</news:publication_date>
+      <news:title>Beyond the Metros: How Tier-2 and Tier-3 Indian Cities Are Emerging as High-Growth Startup Hubs</news:title>
+    </news:news>
+  </url>
+  <url>
     <loc>https://founderbytes.in/tech/quanfluence-raises-10-million-photonic-quantum-computer</loc>
     <news:news>
       <news:publication>

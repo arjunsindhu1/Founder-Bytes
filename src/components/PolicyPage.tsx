@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Shield, Mail, FileText, CheckCircle2, Phone, MapPin } from 'lucide-react';
+import { ArrowLeft, Shield, Mail, FileText, CheckCircle2, Phone, MapPin, Instagram, Twitter, Linkedin, ExternalLink } from 'lucide-react';
 import { ContentService } from '../services/contentService';
 import { CMSAuthor } from '../types/cms';
 
@@ -238,6 +238,72 @@ export const PolicyPage: React.FC<PolicyPageProps> = ({
                   <div>Bengaluru, Karnataka 560038, India</div>
                   <div className="text-neutral-500 pt-2 font-mono">GST / Corporate ID: Verified MCA</div>
                 </div>
+              </div>
+            </div>
+
+            {/* Official Social & Digital Channels */}
+            <div className="p-5 bg-white border-2 border-neutral-200">
+              <div className="flex items-center justify-between pb-3 border-b border-neutral-200">
+                <div className="font-bold text-neutral-900 text-sm flex items-center gap-2">
+                  <Instagram className="w-4 h-4 text-[#DF9E00]" />
+                  <span>Official Social & Real-Time Broadcasts</span>
+                </div>
+                <span className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider">Verified Handles</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3">
+                <a
+                  href="https://www.instagram.com/thefounderbytes/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center justify-between p-3 bg-neutral-50 hover:bg-[#F5B800]/10 border border-neutral-200 hover:border-[#DF9E00] transition-colors group"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-2 bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white rounded">
+                      <Instagram className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold text-neutral-900">Instagram</div>
+                      <div className="text-[11px] text-neutral-500">@thefounderbytes</div>
+                    </div>
+                  </div>
+                  <ExternalLink className="w-3.5 h-3.5 text-neutral-400 group-hover:text-neutral-900 transition-colors" />
+                </a>
+
+                <a
+                  href="https://x.com/founderbytes"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center justify-between p-3 bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 transition-colors group"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-2 bg-black text-white rounded">
+                      <Twitter className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold text-neutral-900">X (Twitter)</div>
+                      <div className="text-[11px] text-neutral-500">@founderbytes</div>
+                    </div>
+                  </div>
+                  <ExternalLink className="w-3.5 h-3.5 text-neutral-400 group-hover:text-neutral-900 transition-colors" />
+                </a>
+
+                <a
+                  href="https://linkedin.com/company/founderbytes"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center justify-between p-3 bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 transition-colors group"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-2 bg-[#0A66C2] text-white rounded">
+                      <Linkedin className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold text-neutral-900">LinkedIn</div>
+                      <div className="text-[11px] text-neutral-500">founderbytes</div>
+                    </div>
+                  </div>
+                  <ExternalLink className="w-3.5 h-3.5 text-neutral-400 group-hover:text-neutral-900 transition-colors" />
+                </a>
               </div>
             </div>
           </div>

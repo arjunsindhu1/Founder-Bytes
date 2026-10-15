@@ -157,7 +157,7 @@ CREATE TABLE IF NOT EXISTS site_settings (
   tips_email TEXT NOT NULL DEFAULT 'tips@founderbytes.in',
   social_twitter TEXT DEFAULT 'https://x.com/founderbytes',
   social_linkedin TEXT DEFAULT 'https://linkedin.com/company/founderbytes',
-  social_instagram TEXT DEFAULT 'https://instagram.com/founderbytes',
+  social_instagram TEXT DEFAULT 'https://www.instagram.com/thefounderbytes/',
   social_youtube TEXT DEFAULT 'https://youtube.com/@founderbytes',
   seo_default_title TEXT DEFAULT 'FOUNDER BYTES — India’s Business & Startup Magazine',
   seo_default_description TEXT DEFAULT 'India’s premier digital business, startup news, and founder intelligence publication.',

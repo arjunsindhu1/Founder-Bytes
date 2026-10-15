@@ -127,9 +127,9 @@ export const ArticleSEOSection: React.FC<ArticleSEOSectionProps> = ({
     author: [
       {
         '@type': 'Person',
-        name: article.author_name || 'Arjun Sindhu',
-        url: `https://founderbytes.in/author/arjun-sindhu`,
-        jobTitle: article.author_role || 'Founder & Editor-in-Chief',
+        name: (article.author_name && article.author_name !== 'Arjun Sindhu') ? article.author_name : 'Founder Bytes Team',
+        url: `https://founderbytes.in/author/founder-bytes-team`,
+        jobTitle: (article.author_role && article.author_role !== 'Founder & Editor-in-Chief') ? article.author_role : 'Editorial Desk & Research Bureau',
       },
     ],
     publisher: {
@@ -138,9 +138,9 @@ export const ArticleSEOSection: React.FC<ArticleSEOSectionProps> = ({
       url: 'https://founderbytes.in',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://founderbytes.in/logo.png',
-        width: 800,
-        height: 800,
+        url: 'https://founderbytes.in/Founder Bytes Media Logo.png',
+        width: 2172,
+        height: 724,
       },
     },
     articleSection: article.category_name || 'Startups',

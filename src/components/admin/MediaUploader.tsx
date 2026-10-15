@@ -252,7 +252,7 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({
                   type="text"
                   value={altText || ''}
                   onChange={(e) => onAltTextChange(e.target.value)}
-                  placeholder="Accurate visual description of photograph (e.g. Arjun Sindhu speaking at Bengaluru Tech Summit)..."
+                  placeholder="Accurate visual description of photograph (e.g. Founder Bytes editorial team covering Bengaluru Tech Summit)..."
                   className={`w-full px-2.5 py-1.5 bg-white border text-xs ${
                     !altText?.trim() ? 'border-red-400 focus:border-red-600 bg-red-50/20' : 'border-neutral-300 focus:border-black'
                   }`}

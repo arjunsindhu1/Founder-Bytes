@@ -24,6 +24,7 @@ interface ArticlePageProps {
   onSelectArticle: (slug: string) => void;
   onSelectAuthor: (authorSlug: string) => void;
   onSelectCategory: (categorySlug: string) => void;
+  onNavigateNominations?: (query?: string) => void;
 }
 
 export const ArticlePage: React.FC<ArticlePageProps> = ({
@@ -33,6 +34,7 @@ export const ArticlePage: React.FC<ArticlePageProps> = ({
   onSelectArticle,
   onSelectAuthor,
   onSelectCategory,
+  onNavigateNominations,
 }) => {
   const [copiedLink, setCopiedLink] = useState(false);
 
@@ -67,6 +69,23 @@ export const ArticlePage: React.FC<ArticlePageProps> = ({
   const relatedArticles = categoryMatches.length > 0 ? categoryMatches.slice(0, 3) : otherStories.slice(0, 3);
   const trendingArticles = allArticles.filter((a) => a.isTrending && a.id !== article.id).slice(0, 4);
 
+  const handleBodyClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const target = (e.target as HTMLElement).closest('a');
+    if (!target) return;
+    const href = target.getAttribute('href');
+    if (href && href.startsWith('/nominations')) {
+      e.preventDefault();
+      const query = href.includes('?') ? href.substring(href.indexOf('?')) : '';
+      if (onNavigateNominations) {
+        onNavigateNominations(query);
+      } else {
+        window.history.pushState({}, '', href);
+        window.dispatchEvent(new PopStateEvent('popstate'));
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+  };
+
   return (
     <article className="w-full bg-white pb-16">
       <SEOHead article={article} type="article" />
@@ -97,7 +116,9 @@ export const ArticlePage: React.FC<ArticlePageProps> = ({
               url: 'https://founderbytes.in',
               logo: {
                 '@type': 'ImageObject',
-                url: 'https://founderbytes.in/logo.png',
+                url: 'https://founderbytes.in/Founder Bytes Media Logo.png',
+                width: 2172,
+                height: 724,
               },
             },
             mainEntityOfPage: {
@@ -283,6 +304,7 @@ export const ArticlePage: React.FC<ArticlePageProps> = ({
             {/* Article Body (700-800px reading measure) */}
             {article.articleBody ? (
               <div
+                onClick={handleBodyClick}
                 className="article-rich-body space-y-5 text-base sm:text-lg text-neutral-800 leading-[1.8] font-sans"
                 dangerouslySetInnerHTML={{ __html: article.articleBody }}
               />

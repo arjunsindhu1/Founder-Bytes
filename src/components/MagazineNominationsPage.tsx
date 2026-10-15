@@ -108,12 +108,39 @@ export const MagazineNominationsPage: React.FC<MagazineNominationsPageProps> = (
   // Load dynamic magazine options on mount
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Parse URL query parameters to support direct deep-linking from articles and social announcements
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const typeParam = params.get('type')?.toLowerCase();
+      if (typeParam === 'someone-else' || typeParam === 'someone_else' || typeParam === 'peer' || typeParam === 'other' || typeParam === 'nominate-founder') {
+        setNominationType('Someone Else');
+      } else if (typeParam === 'myself' || typeParam === 'self' || typeParam === 'nominate-yourself') {
+        setNominationType('Myself');
+      }
+
+      const magParam = params.get('magazine')?.toLowerCase() || params.get('edition')?.toLowerCase();
+      if (magParam) {
+        if (magParam.includes('30') || magParam.includes('under')) {
+          setSelectedMagazine('30 UNDER 30');
+        } else if (magParam.includes('timex')) {
+          setSelectedMagazine('FOUNDER TIMEX');
+        }
+      }
+    } catch {
+      // ignore
+    }
+
     const loadOptions = async () => {
       try {
         const options = await ContentService.getMagazineOptions();
         if (options && options.length > 0) {
           setMagazineOptions(options);
-          if (!options.includes(selectedMagazine)) {
+          const params = new URLSearchParams(window.location.search);
+          const magParam = params.get('magazine')?.toLowerCase() || params.get('edition')?.toLowerCase();
+          if (magParam && (magParam.includes('30') || magParam.includes('under'))) {
+            setSelectedMagazine('30 UNDER 30');
+          } else if (!options.includes(selectedMagazine)) {
             setSelectedMagazine(options[0]);
           }
         }

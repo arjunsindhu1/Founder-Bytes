@@ -270,15 +270,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     return matchesSearch && matchesStatus && matchesCategory;
   });
 
-  // Start new article with Arjun Sindhu as default author
+  // Start new article with Founder Bytes Team as default author
   const handleStartNewArticle = () => {
-    const defaultAuthor = authors.find((a) => a.slug === 'arjun-sindhu') || authors[0];
+    const defaultAuthor = authors.find((a) => a.slug === 'founder-bytes-team') || authors.find((a) => a.slug === 'arjun-sindhu') || authors[0];
     const defaultAuthorId = (defaultAuthor && isValidUUID(defaultAuthor.id)) 
       ? defaultAuthor.id 
       : 'a925a3a4-abd9-4ebb-8966-b5fed4592371';
-    const defaultAuthorName = defaultAuthor?.name || 'Arjun Sindhu';
-    const defaultAuthorRole = defaultAuthor?.role || 'Founder & Editor-in-Chief';
-    const defaultAuthorAvatar = defaultAuthor?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
+    const defaultAuthorName = defaultAuthor?.name || 'Founder Bytes Team';
+    const defaultAuthorRole = defaultAuthor?.role || 'Editorial Desk & Research Bureau';
+    const defaultAuthorAvatar = defaultAuthor?.avatar || '/Founder Bytes Media Logo.png';
 
     const defaultCat = categories.find((c) => c.slug === 'founders') || categories.find((c) => c.slug === 'startups') || categories[0];
     const defaultCatId = (defaultCat && isValidUUID(defaultCat.id)) 
@@ -342,9 +342,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
     // Resolve author_id to genuine UUID from authors table
     if (!isValidUUID(cloned.author_id)) {
-      const matched = authors.find((a) => a.id === cloned.author_id || a.slug === cloned.author_id || a.slug === 'arjun-sindhu');
+      const matched = authors.find((a) => a.id === cloned.author_id || a.slug === cloned.author_id || a.slug === 'founder-bytes-team' || a.slug === 'arjun-sindhu');
       cloned.author_id = matched?.id || 'a925a3a4-abd9-4ebb-8966-b5fed4592371';
-      cloned.author_name = matched?.name || cloned.author_name || 'Arjun Sindhu';
+      cloned.author_name = matched?.name || cloned.author_name || 'Founder Bytes Team';
+    }
+    if (cloned.author_name === 'Arjun Sindhu') {
+      cloned.author_name = 'Founder Bytes Team';
+      cloned.author_role = 'Editorial Desk & Research Bureau';
+      cloned.author_avatar = '/Founder Bytes Media Logo.png';
     }
 
     // Resolve category_id to genuine UUID from categories table
@@ -387,7 +392,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     // Author UUID Validation
     let resolvedAuthorId = editingArticle.author_id;
     if (!isValidUUID(resolvedAuthorId)) {
-      const matchedAuth = authors.find((a) => a.id === resolvedAuthorId || a.slug === 'arjun-sindhu');
+      const matchedAuth = authors.find((a) => a.id === resolvedAuthorId || a.slug === 'founder-bytes-team' || a.slug === 'arjun-sindhu');
       if (matchedAuth && isValidUUID(matchedAuth.id)) {
         resolvedAuthorId = matchedAuth.id;
       } else {
@@ -421,8 +426,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         article_body: bodyHtml,
         status: targetStatus,
         author_id: resolvedAuthorId,
-        author_name: matchedAuthorObj?.name || editingArticle.author_name || 'Arjun Sindhu',
-        author_role: matchedAuthorObj?.role || editingArticle.author_role || 'Founder & Editor-in-Chief',
+        author_name: (matchedAuthorObj?.name && matchedAuthorObj.name !== 'Arjun Sindhu') ? matchedAuthorObj.name : (editingArticle.author_name !== 'Arjun Sindhu' && editingArticle.author_name) || 'Founder Bytes Team',
+        author_role: (matchedAuthorObj?.role && matchedAuthorObj.role !== 'Founder & Editor-in-Chief') ? matchedAuthorObj.role : 'Editorial Desk & Research Bureau',
         category_id: resolvedCategoryId,
         category_name: matchedCategoryObj?.name || editingArticle.category_name,
         category_slug: matchedCategoryObj?.slug || editingArticle.category_slug,
@@ -690,7 +695,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       pdf_link: newIssuePdfLink || undefined,
       featured_founders: [],
       table_of_contents: [
-        { section: 'Cover Story', title: newIssueTitle, author: 'Arjun Sindhu', page: '04' }
+        { section: 'Cover Story', title: newIssueTitle, author: 'Founder Bytes Team', page: '04' }
       ]
     };
 
@@ -774,7 +779,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       {/* Admin Top Utility Bar */}
       <header className="bg-[#111111] text-white border-b border-neutral-800 px-4 sm:px-6 py-2.5 flex items-center justify-between shrink-0 font-mono text-xs">
         <div className="flex items-center gap-4">
-          <FounderBytesLogo size="sm" variant="dark" />
+          <FounderBytesLogo size="sm" variant="light" />
           <div className="h-4 w-px bg-neutral-700 hidden sm:block"></div>
           <span className="hidden sm:inline font-bold text-neutral-300">NEWSROOM EDITORIAL CONSOLE</span>
         </div>
@@ -1468,7 +1473,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       ))
                     ) : (
                       <option value="a925a3a4-abd9-4ebb-8966-b5fed4592371">
-                        Arjun Sindhu (Founder & Editor-in-Chief)
+                        Founder Bytes Team (Editorial Desk & Research Bureau)
                       </option>
                     )}
                   </select>
@@ -1995,7 +2000,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             />
           )}
 
-          {/* 8. AUTHORS TAB (Requirement 17: Arjun Sindhu Only) */}
+          {/* 8. AUTHORS TAB (Requirement 17: Founder Bytes Team) */}
           {activeTab === 'authors' && (
             <div className="space-y-6">
               <div className="pb-3 border-b border-neutral-900 font-mono">
@@ -2003,7 +2008,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   Newsroom Authors & Masthead
                 </h1>
                 <p className="text-xs text-neutral-500">
-                  Author profiles for Founder Bytes editorial reporting (Arjun Sindhu)
+                  Author profiles for Founder Bytes editorial reporting (Founder Bytes Team)
                 </p>
               </div>
 

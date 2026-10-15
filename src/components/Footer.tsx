@@ -253,7 +253,7 @@ export const Footer: React.FC<FooterProps> = ({
               <a href="https://linkedin.com/company/founderbytes" target="_blank" rel="noreferrer" className="hover:text-white" aria-label="LinkedIn">
                 <Linkedin className="w-4 h-4" />
               </a>
-              <a href="https://instagram.com/founderbytes" target="_blank" rel="noreferrer" className="hover:text-white" aria-label="Instagram">
+              <a href="https://www.instagram.com/thefounderbytes/" target="_blank" rel="noreferrer" className="hover:text-white" aria-label="Instagram (@thefounderbytes)">
                 <Instagram className="w-4 h-4" />
               </a>
               <a href="https://youtube.com/@founderbytes" target="_blank" rel="noreferrer" className="hover:text-white" aria-label="YouTube">

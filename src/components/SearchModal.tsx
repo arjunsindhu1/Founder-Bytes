@@ -58,14 +58,14 @@ export const SearchModal: React.FC<SearchModalProps> = ({
   const matchedAuthors = useMemo(() => {
     if (!debouncedQuery) return [];
     const q = debouncedQuery.toLowerCase();
-    if ('arjun sindhu'.includes(q) || 'editor'.includes(q) || 'founder'.includes(q)) {
+    if ('founder bytes team'.includes(q) || 'founder bytes'.includes(q) || 'team'.includes(q) || 'editor'.includes(q) || 'desk'.includes(q)) {
       return [
         {
           id: 'a925a3a4-abd9-4ebb-8966-b5fed4592371',
-          name: 'Arjun Sindhu',
-          slug: 'arjun-sindhu',
-          role: 'Founder & Editor-in-Chief',
-          avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+          name: 'Founder Bytes Team',
+          slug: 'founder-bytes-team',
+          role: 'Editorial Desk & Research Bureau',
+          avatar: '/Founder Bytes Media Logo.png',
         },
       ];
     }

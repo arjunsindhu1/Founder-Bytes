@@ -116,7 +116,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <Linkedin className="w-3 h-3" />
               </a>
               <a
-                href="https://instagram.com/founderbytes"
+                href="https://www.instagram.com/thefounderbytes/"
                 target="_blank"
                 rel="noreferrer"
                 className="hover:text-white"
@@ -341,13 +341,45 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             </div>
 
-            <div className="pt-4 border-t border-neutral-200">
+            <div className="pt-4 border-t border-neutral-200 space-y-3">
+              <div className="flex items-center justify-between text-xs text-neutral-600">
+                <span className="font-semibold uppercase tracking-wider text-[11px] text-neutral-500">Follow Founder Bytes</span>
+                <div className="flex items-center gap-2">
+                  <a
+                    href="https://www.instagram.com/thefounderbytes/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="p-1.5 rounded bg-neutral-100 hover:bg-[#F5B800] hover:text-black text-neutral-700 transition-colors"
+                    aria-label="Founder Bytes on Instagram"
+                  >
+                    <Instagram className="w-3.5 h-3.5" />
+                  </a>
+                  <a
+                    href="https://x.com/founderbytes"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="p-1.5 rounded bg-neutral-100 hover:bg-[#F5B800] hover:text-black text-neutral-700 transition-colors"
+                    aria-label="Founder Bytes on X"
+                  >
+                    <Twitter className="w-3.5 h-3.5" />
+                  </a>
+                  <a
+                    href="https://linkedin.com/company/founderbytes"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="p-1.5 rounded bg-neutral-100 hover:bg-[#F5B800] hover:text-black text-neutral-700 transition-colors"
+                    aria-label="Founder Bytes on LinkedIn"
+                  >
+                    <Linkedin className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              </div>
               <button
                 onClick={() => {
                   setMobileMenuOpen(false);
                   onOpenSubscribe();
                 }}
-                className="w-full py-2.5 bg-[#111111] text-white text-xs font-bold uppercase tracking-wider"
+                className="w-full py-2.5 bg-[#111111] text-white text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors"
               >
                 Subscribe to Daily Briefing
               </button>
