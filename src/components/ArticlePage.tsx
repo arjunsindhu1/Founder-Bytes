@@ -5,6 +5,7 @@ import { ArticleCard } from './ArticleCard';
 import { NewsletterBox } from './NewsletterBox';
 import { AdSlot } from './AdSlot';
 import { SEOHead } from './SEOHead';
+import { EditorialImage } from './EditorialImage';
 import { 
   Share2, 
   Check, 
@@ -271,14 +272,16 @@ export const ArticlePage: React.FC<ArticlePageProps> = ({
           <div className="lg:col-span-8">
             {/* Lead Feature Photograph */}
             <figure className="mb-6">
-              <div className="w-full aspect-[16/10] bg-neutral-100 overflow-hidden">
-                <img
-                  src={article.featuredImage}
-                  alt={article.featuredImageAlt || article.imageCaption || article.title}
-                  className="w-full h-full object-cover"
-                  loading="eager"
-                />
-              </div>
+              <EditorialImage
+                src={article.featuredImage}
+                alt={article.featuredImageAlt || article.imageCaption || article.title}
+                category={article.category}
+                title={article.title}
+                aspectRatioClass="aspect-[16/10]"
+                priority={true}
+                className="w-full h-full object-cover"
+                containerClassName="border border-neutral-200"
+              />
               {(article.imageCaption || article.imageCredit) && (
                 <figcaption className="text-xs text-neutral-500 font-serif italic mt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                   <span>{article.imageCaption}</span>

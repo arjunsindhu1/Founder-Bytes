@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { CMSMagazineIssue } from '../types/cms';
+import { PdfMagazineReader } from './PdfMagazineReader';
 import { 
   X, 
   ChevronLeft, 
@@ -21,6 +22,23 @@ interface MagazineFlipbookProps {
 }
 
 export const MagazineFlipbook: React.FC<MagazineFlipbookProps> = ({ issue, onClose }) => {
+  // When an actual PDF edition is attached, render the full interactive PDF.js magazine reader
+  if (issue.pdf_link) {
+    return (
+      <PdfMagazineReader
+        pdfUrl={issue.pdf_link}
+        title={issue.title}
+        issueLabel={`${issue.issue_number}${issue.season ? ` · ${issue.season}` : ''}`}
+        mode="modal"
+        onClose={onClose}
+      />
+    );
+  }
+
+  return <LegacyDigitalFlipbook issue={issue} onClose={onClose} />;
+};
+
+const LegacyDigitalFlipbook: React.FC<MagazineFlipbookProps> = ({ issue, onClose }) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [zoomLevel, setZoomLevel] = useState<number>(1);
   const [isFullscreen, setIsFullscreen] = useState(false);

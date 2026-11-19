@@ -7,6 +7,9 @@ interface SEOHeadProps {
   canonicalUrl?: string;
   article?: Article | null;
   type?: 'website' | 'article';
+  image?: string;
+  imageAlt?: string;
+  customSchema?: Record<string, unknown>;
 }
 
 const DEFAULT_TITLE = 'FOUNDER BYTES — India’s Business & Startup Magazine';
@@ -23,22 +26,30 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
   canonicalUrl,
   article,
   type = 'website',
+  image,
+  imageAlt,
+  customSchema,
 }) => {
   const pageTitle = article?.seoTitle || (article ? `${article.title} — ${SITE_NAME}` : title ? (title.toLowerCase().includes(SITE_NAME.toLowerCase()) ? title : `${title} — ${SITE_NAME}`) : DEFAULT_TITLE);
   const pageDescription = article?.seoDescription || (article ? article.dek : description || DEFAULT_DESC);
   const pageCanonical = article?.canonicalUrl || canonicalUrl || (article ? `${BASE_URL}/${article.slug}` : BASE_URL);
-  const pageImage = article?.ogImage || article?.featuredImage || DEFAULT_IMAGE;
-  const pageImageAlt = article?.featuredImageAlt || article?.imageCaption || article?.title || SITE_NAME;
+  const pageImage = article?.ogImage || article?.featuredImage || image || DEFAULT_IMAGE;
+  const pageImageAlt = article?.featuredImageAlt || article?.imageCaption || article?.title || imageAlt || SITE_NAME;
   const pageRobots = article?.robotsMeta || 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
   const isArticle = type === 'article' || Boolean(article);
 
+  const toAbsoluteUrl = (u: string | undefined | null) => {
+    if (!u) return DEFAULT_IMAGE;
+    return u.startsWith('/') ? `${BASE_URL}${u}` : u;
+  };
+
   const ogTitle = article?.ogTitle || pageTitle;
   const ogDescription = article?.ogDescription || pageDescription;
-  const ogImage = article?.ogImage || pageImage;
+  const ogImage = toAbsoluteUrl(article?.ogImage || pageImage);
 
   const twitterTitle = article?.twitterTitle || pageTitle;
   const twitterDescription = article?.twitterDescription || pageDescription;
-  const twitterImage = article?.twitterImage || pageImage;
+  const twitterImage = toAbsoluteUrl(article?.twitterImage || pageImage);
 
   useEffect(() => {
     // 1. Title
@@ -111,7 +122,9 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
       document.head.appendChild(scriptTag);
     }
 
-    if (article) {
+    if (customSchema) {
+      scriptTag.textContent = JSON.stringify(customSchema);
+    } else if (article) {
       const keywordsList = [
         ...(article.focusKeyword ? [article.focusKeyword] : []),
         ...(article.secondaryKeywords || []),
@@ -222,7 +235,7 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
       };
       scriptTag.textContent = JSON.stringify(schemaData);
     }
-  }, [pageTitle, pageDescription, pageCanonical, pageImage, pageImageAlt, isArticle, article]);
+  }, [pageTitle, pageDescription, pageCanonical, pageImage, pageImageAlt, isArticle, article, customSchema]);
 
   return null;
 };

@@ -5,6 +5,7 @@ import { ArrowRight, Sparkles, BookOpen, Award, Compass } from 'lucide-react';
 interface MagazineShowcaseProps {
   issue: MagazineIssue;
   onNavigateMagazine: () => void;
+  onNavigateThirtyUnderThirty?: () => void;
   onSelectArticle: (slug: string) => void;
   onOpenFlipbook?: () => void;
 }
@@ -12,6 +13,7 @@ interface MagazineShowcaseProps {
 export const MagazineShowcase: React.FC<MagazineShowcaseProps> = ({
   issue,
   onNavigateMagazine,
+  onNavigateThirtyUnderThirty,
   onSelectArticle,
   onOpenFlipbook,
 }) => {
@@ -32,31 +34,31 @@ export const MagazineShowcase: React.FC<MagazineShowcaseProps> = ({
               THE FOUNDER MAGAZINE
             </h2>
             <p className="text-xs sm:text-sm text-neutral-400 mt-1 font-sans">
-              India’s Business & Startup Magazine · Quarterly Issue 01 (Fall 2026 Edition)
+              India’s Business & Startup Magazine · October 2026 · Volume 01, Issue 01 (38-Page Digital Edition)
             </p>
           </div>
 
           {/* Quick links to special packages */}
           <div className="flex items-center gap-3">
             <button
-              onClick={onNavigateMagazine}
-              className="inline-flex items-center gap-1.5 text-xs font-mono font-bold uppercase tracking-wider text-neutral-300 hover:text-[#F5B800] transition-colors"
+              onClick={onNavigateThirtyUnderThirty || onNavigateMagazine}
+              className="inline-flex items-center gap-1.5 text-xs font-mono font-bold uppercase tracking-wider text-neutral-300 hover:text-[#F5B800] transition-colors cursor-pointer"
             >
               <Award className="w-3.5 h-3.5 text-[#F5B800]" />
-              <span>30 Under 30</span>
+              <span>30 Under 30 India 2026</span>
             </button>
             <span className="text-neutral-700">|</span>
             <button
               onClick={onNavigateMagazine}
-              className="inline-flex items-center gap-1.5 text-xs font-mono font-bold uppercase tracking-wider text-neutral-300 hover:text-[#F5B800] transition-colors"
+              className="inline-flex items-center gap-1.5 text-xs font-mono font-bold uppercase tracking-wider text-neutral-300 hover:text-[#F5B800] transition-colors cursor-pointer"
             >
               <Compass className="w-3.5 h-3.5 text-[#F5B800]" />
-              <span>Founders to Watch</span>
+              <span>Read 38-Page PDF</span>
             </button>
             <span className="text-neutral-700">|</span>
             <button
               onClick={onNavigateMagazine}
-              className="inline-flex items-center gap-1 text-xs font-mono font-bold uppercase tracking-wider text-[#F5B800] hover:text-white transition-colors group"
+              className="inline-flex items-center gap-1 text-xs font-mono font-bold uppercase tracking-wider text-[#F5B800] hover:text-white transition-colors group cursor-pointer"
             >
               <span>Explore All Issues</span>
               <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
@@ -66,54 +68,24 @@ export const MagazineShowcase: React.FC<MagazineShowcaseProps> = ({
 
         {/* Magazine Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-          {/* Cover Presentation (5 cols on lg) */}
+          {/* Cover Presentation (5 cols on lg — exact uncropped magazine cover) */}
           <div className="lg:col-span-5 flex justify-center">
             <div
               onClick={onOpenFlipbook || onNavigateMagazine}
               className="group relative cursor-pointer max-w-sm w-full transition-transform duration-300 hover:-translate-y-1"
             >
-              <div className="relative aspect-[3/4] bg-neutral-900 shadow-2xl border border-neutral-700 overflow-hidden">
+              <div className="relative bg-black p-2 shadow-2xl border border-neutral-800 overflow-hidden">
                 <img
-                  src={issue.coverImage}
+                  src={issue.coverImage || '/fb-30u30-cover-page.png'}
                   alt={`${issue.title} Cover`}
                   referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-102"
+                  className="w-full h-auto block"
                 />
-
-                {/* Magazine Masthead Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-black/85 p-6 flex flex-col justify-between">
-                  <div className="text-center pt-2">
-                    <div className="text-[10px] font-mono tracking-[0.25em] uppercase text-[#F5B800] font-bold">
-                      {issue.issueNumber} · {issue.season}
-                    </div>
-                    <div className="text-2xl sm:text-3xl font-serif font-black tracking-tight text-white mt-0.5">
-                      THE FOUNDER
-                    </div>
-                    <div className="text-[9px] font-sans tracking-[0.2em] text-neutral-300 uppercase">
-                      INDIA’S BUSINESS & STARTUP MAGAZINE
-                    </div>
-                  </div>
-
-                  <div className="pb-1">
-                    <div className="inline-block bg-[#F5B800] text-black font-extrabold text-[10px] uppercase tracking-wider px-2 py-0.5 mb-1.5 font-mono">
-                      COVER FEATURE
-                    </div>
-                    <h3 className="text-xl sm:text-2xl font-serif font-bold text-white leading-tight">
-                      {issue.title}
-                    </h3>
-                    <p className="text-xs text-neutral-300 mt-2 line-clamp-3 leading-relaxed">
-                      {issue.dek}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Spine sheen */}
-                <div className="absolute inset-y-0 left-0 w-3 bg-gradient-to-r from-white/20 to-transparent pointer-events-none"></div>
               </div>
 
-              <div className="mt-2.5 text-center">
-                <span className="text-xs text-neutral-400 group-hover:text-[#F5B800] font-mono transition-colors">
-                  [ Click to read digital edition / view table of contents ]
+              <div className="mt-3 text-center">
+                <span className="text-xs text-neutral-300 group-hover:text-[#F5B800] font-mono transition-colors">
+                  [ Click to read full 38-page digital edition ]
                 </span>
               </div>
             </div>
@@ -175,17 +147,18 @@ export const MagazineShowcase: React.FC<MagazineShowcaseProps> = ({
             {/* Action Bar */}
             <div className="pt-2 flex flex-wrap items-center gap-4">
               <button
-                onClick={onNavigateMagazine}
-                className="px-5 py-2.5 bg-[#F5B800] hover:bg-[#E0A700] text-black font-black text-xs uppercase tracking-wider transition-colors inline-flex items-center gap-2 font-mono"
+                onClick={onNavigateThirtyUnderThirty || onNavigateMagazine}
+                className="px-5 py-2.5 bg-[#F5B800] hover:bg-[#E0A700] text-black font-black text-xs uppercase tracking-wider transition-colors inline-flex items-center gap-2 font-mono cursor-pointer"
               >
-                <BookOpen className="w-4 h-4" />
-                <span>EXPLORE THE MAGAZINE</span>
+                <Award className="w-4 h-4" />
+                <span>30 UNDER 30 INDIA 2026</span>
               </button>
               <button
                 onClick={onNavigateMagazine}
-                className="px-5 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-white font-bold text-xs uppercase tracking-wider border border-neutral-700 transition-colors font-mono"
+                className="px-5 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-white font-bold text-xs uppercase tracking-wider border border-neutral-700 transition-colors inline-flex items-center gap-2 font-mono cursor-pointer"
               >
-                Print Hardcover Inquiries
+                <BookOpen className="w-4 h-4 text-[#F5B800]" />
+                <span>Explore The Magazine</span>
               </button>
             </div>
           </div>

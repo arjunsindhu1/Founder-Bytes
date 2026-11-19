@@ -9,6 +9,7 @@ interface FooterProps {
   onNavigatePolicy: (policyType: PolicyPageType) => void;
   onNavigateHome: () => void;
   onNavigateMagazine: () => void;
+  onNavigateThirtyUnderThirty?: () => void;
   onNavigateNominations?: () => void;
   onOpenAdminLogin?: () => void;
 }
@@ -18,6 +19,7 @@ export const Footer: React.FC<FooterProps> = ({
   onNavigatePolicy,
   onNavigateHome,
   onNavigateMagazine,
+  onNavigateThirtyUnderThirty,
   onNavigateNominations,
   onOpenAdminLogin,
 }) => {
@@ -166,8 +168,11 @@ export const Footer: React.FC<FooterProps> = ({
                 </button>
               </li>
               <li>
-                <button onClick={onNavigateMagazine} className="hover:text-white transition-colors text-left">
-                  30 Under 30 Class of 2026
+                <button
+                  onClick={onNavigateThirtyUnderThirty || onNavigateMagazine}
+                  className="hover:text-white transition-colors text-left font-semibold text-neutral-200 cursor-pointer"
+                >
+                  30 Under 30 India 2026
                 </button>
               </li>
               <li>

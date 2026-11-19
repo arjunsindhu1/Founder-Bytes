@@ -35,9 +35,9 @@ let broadcastChannel: BroadcastChannel | null = null;
 let realtimeChannel: any = null;
 
 // Lightweight caching layer for instant initial page render & zero flash
-const CACHE_KEY_ARTICLES = 'fb_cache_articles_v4';
-const CACHE_KEY_SECTIONS = 'fb_cache_sections_v4';
-const CACHE_KEY_ISSUES = 'fb_cache_issues_v4';
+const CACHE_KEY_ARTICLES = 'fb_cache_articles_v7';
+const CACHE_KEY_SECTIONS = 'fb_cache_sections_v7';
+const CACHE_KEY_ISSUES = 'fb_cache_issues_v7';
 
 let memCachedArticles: CMSArticle[] | null = null;
 let memCachedSections: CMSSection[] | null = null;

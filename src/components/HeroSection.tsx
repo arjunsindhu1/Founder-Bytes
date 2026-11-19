@@ -2,6 +2,7 @@ import React from 'react';
 import { Article } from '../types';
 import { getRelativeTime } from '../utils/dateUtils';
 import { Clock } from 'lucide-react';
+import { EditorialImage } from './EditorialImage';
 
 interface HeroSectionProps {
   leadArticle: Article;
@@ -57,15 +58,16 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             </h1>
 
             {/* Large Real News Photography */}
-            <div className="w-full aspect-[16/9] bg-neutral-100 overflow-hidden mb-3 relative border border-neutral-200">
-              <img
-                src={leadArticle.featuredImage}
-                alt={leadArticle.title}
-                referrerPolicy="no-referrer"
-                loading="eager"
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-102"
-              />
-            </div>
+            <EditorialImage
+              src={leadArticle.featuredImage}
+              alt={leadArticle.title}
+              category={leadArticle.category}
+              title={leadArticle.title}
+              aspectRatioClass="aspect-[16/9]"
+              priority={true}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-102"
+              containerClassName="mb-3 border border-neutral-200"
+            />
 
             {/* Excerpt / Dek */}
             <p className="text-sm sm:text-base text-neutral-700 leading-relaxed font-serif line-clamp-2 mb-2">
@@ -106,13 +108,16 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                   className="group py-3.5 first:pt-1 last:pb-1 cursor-pointer flex gap-3.5 items-start"
                 >
                   {/* Real Thumbnail Image */}
-                  <div className="w-24 sm:w-28 aspect-[16/11] bg-neutral-100 shrink-0 overflow-hidden border border-neutral-200">
-                    <img
+                  <div className="w-24 sm:w-28 shrink-0">
+                    <EditorialImage
                       src={story.featuredImage}
                       alt={story.title}
+                      category={story.category}
+                      title={story.title}
+                      aspectRatioClass="aspect-[16/11]"
                       loading="lazy"
-                      referrerPolicy="no-referrer"
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      containerClassName="border border-neutral-200"
                     />
                   </div>
 

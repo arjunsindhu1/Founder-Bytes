@@ -2,6 +2,7 @@ import React from 'react';
 import { Article } from '../types';
 import { getRelativeTime } from '../utils/dateUtils';
 import { ArrowRight, Clock } from 'lucide-react';
+import { EditorialImage } from './EditorialImage';
 
 interface LatestNewsSectionProps {
   articles: Article[];
@@ -53,21 +54,23 @@ export const LatestNewsSection: React.FC<LatestNewsSectionProps> = ({
             >
               <div>
                 {/* Photo Thumbnail */}
-                <div className="w-full aspect-[16/10] bg-neutral-100 overflow-hidden mb-2.5 relative border border-neutral-200">
-                  <img
+                <div className="w-full relative mb-2.5 border border-neutral-200">
+                  <EditorialImage
                     src={story.featuredImage}
                     alt={story.title}
+                    category={story.category}
+                    title={story.title}
+                    aspectRatioClass="aspect-[16/10]"
                     loading="lazy"
-                    referrerPolicy="no-referrer"
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-103"
                   />
-                  <div className="absolute top-2 left-2">
+                  <div className="absolute top-2 left-2 z-10 pointer-events-auto">
                     <span
                       onClick={(e) => {
                         e.stopPropagation();
                         onSelectCategory(story.categorySlug);
                       }}
-                      className="px-1.5 py-0.5 bg-black/85 text-[#F5B800] text-[9px] font-mono uppercase font-bold tracking-wider hover:bg-black"
+                      className="px-1.5 py-0.5 bg-black/85 text-[#F5B800] text-[9px] font-mono uppercase font-bold tracking-wider hover:bg-black cursor-pointer shadow-sm"
                     >
                       {story.category}
                     </span>

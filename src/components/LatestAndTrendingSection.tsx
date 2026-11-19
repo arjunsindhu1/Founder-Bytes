@@ -2,6 +2,7 @@ import React from 'react';
 import { Article } from '../types';
 import { formatISTTimeOnly, getRelativeTime } from '../utils/dateUtils';
 import { ArrowRight, Flame, Clock } from 'lucide-react';
+import { EditorialImage } from './EditorialImage';
 
 interface LatestAndTrendingSectionProps {
   latestArticles: Article[];
@@ -74,12 +75,14 @@ export const LatestAndTrendingSection: React.FC<LatestAndTrendingSectionProps> =
                   </div>
 
                   {/* Thumbnail on right */}
-                  <div className="w-16 h-12 sm:w-20 sm:h-14 bg-neutral-200 shrink-0 overflow-hidden">
-                    <img
+                  <div className="w-16 sm:w-20 shrink-0">
+                    <EditorialImage
                       src={article.featuredImage}
                       alt={article.title}
+                      category={article.category}
+                      title={article.title}
+                      aspectRatioClass="aspect-[4/3]"
                       loading="lazy"
-                      referrerPolicy="no-referrer"
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                   </div>

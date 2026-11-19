@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Article } from '../types';
 import { Search, X, Calendar, User, ArrowRight } from 'lucide-react';
 import { formatISTDateTime } from '../utils/dateUtils';
+import { EditorialImage } from './EditorialImage';
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -184,10 +185,14 @@ export const SearchModal: React.FC<SearchModalProps> = ({
                       }}
                       className="group flex gap-4 cursor-pointer hover:bg-neutral-50 p-2 transition-colors"
                     >
-                      <div className="w-20 h-16 sm:w-24 sm:h-20 bg-neutral-100 shrink-0 overflow-hidden">
-                        <img
+                      <div className="w-20 sm:w-24 shrink-0">
+                        <EditorialImage
                           src={article.featuredImage}
                           alt={article.title}
+                          category={article.category}
+                          title={article.title}
+                          aspectRatioClass="aspect-[4/3]"
+                          loading="lazy"
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                         />
                       </div>

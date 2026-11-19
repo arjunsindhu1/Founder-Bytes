@@ -11,6 +11,7 @@ interface HeaderProps {
   onOpenSubscribe: () => void;
   onNavigateHome: () => void;
   onNavigateMagazine: () => void;
+  onNavigateThirtyUnderThirty?: () => void;
   onNavigatePolicy: (policy: PolicyPageType) => void;
   onNavigateNominations?: () => void;
 }
@@ -22,6 +23,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenSubscribe,
   onNavigateHome,
   onNavigateMagazine,
+  onNavigateThirtyUnderThirty,
   onNavigatePolicy,
   onNavigateNominations,
 }) => {
@@ -50,6 +52,7 @@ export const Header: React.FC<HeaderProps> = ({
     { label: 'MARKETS', slug: 'markets' },
     { label: 'INNOVATION', slug: 'innovation' },
     { label: 'MAGAZINE', slug: 'magazine', isMagazine: true },
+    { label: '30 UNDER 30', slug: '30-under-30-india-2026', isThirtyUnderThirty: true },
   ];
 
   return (
@@ -203,13 +206,14 @@ export const Header: React.FC<HeaderProps> = ({
                     onClick={() => {
                       if (item.isHome) onNavigateHome();
                       else if (item.isMagazine) onNavigateMagazine();
+                      else if (item.isThirtyUnderThirty) onNavigateThirtyUnderThirty?.();
                       else onSelectCategory(item.slug);
                     }}
-                    className={`px-2.5 py-1 transition-colors relative hover:text-black shrink-0 ${
+                    className={`px-2.5 py-1 transition-colors relative hover:text-black shrink-0 cursor-pointer ${
                       isActive ? 'text-black bg-neutral-100 font-black' : 'text-neutral-700 hover:bg-neutral-50'
-                    } ${item.isMagazine ? 'text-neutral-950 font-black flex items-center gap-1.5' : ''}`}
+                    } ${item.isMagazine || item.isThirtyUnderThirty ? 'text-neutral-950 font-black flex items-center gap-1.5' : ''}`}
                   >
-                    {item.isMagazine && (
+                    {(item.isMagazine || item.isThirtyUnderThirty) && (
                       <span className="w-1.5 h-1.5 rounded-full bg-[#F5B800]"></span>
                     )}
                     <span>{item.label}</span>
@@ -223,18 +227,21 @@ export const Header: React.FC<HeaderProps> = ({
 
             {/* Mobile / Tablet Horizontal Overflow Nav */}
             <div className="lg:hidden flex items-center space-x-2 overflow-x-auto no-scrollbar py-2 text-xs font-bold tracking-wider uppercase">
-              {navItems.slice(0, 7).map((item) => (
+              {[...navItems.slice(0, 6), navItems[navItems.length - 1]].map((item) => (
                 <button
                   key={item.label}
                   onClick={() => {
                     if (item.isHome) onNavigateHome();
                     else if (item.isMagazine) onNavigateMagazine();
+                    else if (item.isThirtyUnderThirty) onNavigateThirtyUnderThirty?.();
                     else onSelectCategory(item.slug);
                   }}
-                  className={`px-2 py-0.5 shrink-0 whitespace-nowrap ${
+                  className={`px-2 py-0.5 shrink-0 whitespace-nowrap cursor-pointer ${
                     (item.isHome && !currentCategory) || currentCategory === item.slug
                       ? 'text-black border-b-2 border-[#F5B800] font-black'
-                      : 'text-neutral-700'
+                      : item.isThirtyUnderThirty
+                        ? 'text-neutral-950 font-black'
+                        : 'text-neutral-700'
                   }`}
                 >
                   {item.label}
@@ -282,9 +289,10 @@ export const Header: React.FC<HeaderProps> = ({
                       setMobileMenuOpen(false);
                       if (item.isHome) onNavigateHome();
                       else if (item.isMagazine) onNavigateMagazine();
+                      else if (item.isThirtyUnderThirty) onNavigateThirtyUnderThirty?.();
                       else onSelectCategory(item.slug);
                     }}
-                    className="w-full text-left px-3 py-2 text-sm font-bold uppercase tracking-wider text-neutral-800 hover:bg-neutral-100 transition-colors"
+                    className="w-full text-left px-3 py-2 text-sm font-bold uppercase tracking-wider text-neutral-800 hover:bg-neutral-100 transition-colors cursor-pointer"
                   >
                     {item.label}
                   </button>

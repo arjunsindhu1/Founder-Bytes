@@ -16,6 +16,7 @@ import { SearchModal } from './components/SearchModal';
 import { ArticlePage } from './components/ArticlePage';
 import { MagazinePage } from './components/MagazinePage';
 import { MagazineNominationsPage } from './components/MagazineNominationsPage';
+import { ThirtyUnderThirtyPage } from './components/ThirtyUnderThirtyPage';
 import { AuthorPage } from './components/AuthorPage';
 import { PolicyPage, PolicyPageType } from './components/PolicyPage';
 import { ArticleCard } from './components/ArticleCard';
@@ -28,7 +29,11 @@ import { EditorialLoadingSkeleton } from './components/EditorialLoadingSkeleton'
 import { ContentService } from './services/contentService';
 import { CMSArticle, CMSSection, CMSMagazineIssue, FounderSpotlight } from './types/cms';
 import { Article, MagazineIssue } from './types';
-import { DEFAULT_MAGAZINE_ISSUE } from './constants/magazine';
+import { DEFAULT_MAGAZINE_ISSUE, THIRTY_UNDER_THIRTY_MAGAZINE_CMS } from './constants/magazine';
+import {
+  THIRTY_UNDER_THIRTY_META,
+  buildThirtyUnderThirtySchema,
+} from './data/thirtyUnderThirty2026';
 
 function matchCategory(articleCategorySlug?: string, articleCategoryName?: string, targetCategory?: string): boolean {
   if (!targetCategory || targetCategory === 'all' || targetCategory === 'news' || targetCategory === 'latest') return true;
@@ -135,7 +140,7 @@ function mapCMSArticleToArticle(c: CMSArticle): Article {
 
 export default function App() {
   // Navigation / Route state
-  const [currentView, setCurrentView] = useState<'home' | 'article' | 'magazine' | 'author' | 'policy' | 'category' | 'admin' | 'nominations' | 'founder-profile'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'article' | 'magazine' | '30-under-30' | 'author' | 'policy' | 'category' | 'admin' | 'nominations' | 'founder-profile'>('home');
   const [activeArticleSlug, setActiveArticleSlug] = useState<string>('');
   const [activeAuthorSlug, setActiveAuthorSlug] = useState<string>('');
   const [activePolicyType, setActivePolicyType] = useState<PolicyPageType>('about');
@@ -146,6 +151,7 @@ export default function App() {
   // Modals
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [adminLoginOpen, setAdminLoginOpen] = useState(false);
+  const [homeMagazineReaderOpen, setHomeMagazineReaderOpen] = useState(false);
 
   // Dynamic CMS state initialized from fast cache if available
   const [articles, setArticles] = useState<CMSArticle[]>(() => {
@@ -186,19 +192,27 @@ export default function App() {
       }
 
       if (issues && issues.length > 0) {
-        const topIssue = issues[0];
-        setMagazineIssue({
-          issueNumber: topIssue.issue_number,
-          season: topIssue.season,
-          title: topIssue.title,
-          dek: topIssue.dek,
-          coverImage: topIssue.cover_image,
-          coverStorySlug: topIssue.featured_founders[0]?.slug || 'news/latest',
-          theme: topIssue.theme,
-          publishedDate: topIssue.published_date,
-          featuredFounders: topIssue.featured_founders,
-          tableOfContents: topIssue.table_of_contents,
-        });
+        const topIssue = issues.find((i) => i.title.toLowerCase().includes('30 under 30')) || issues[0];
+        if (topIssue && topIssue.pdf_link) {
+          setMagazineIssue({
+            issueNumber: topIssue.issue_number,
+            season: topIssue.season,
+            title: topIssue.title,
+            dek: topIssue.dek,
+            coverImage: topIssue.cover_image || DEFAULT_MAGAZINE_ISSUE.coverImage,
+            coverStorySlug: topIssue.featured_founders[0]?.slug || '30-under-30-india-2026',
+            theme: topIssue.theme,
+            publishedDate: topIssue.published_date,
+            featuredFounders:
+              topIssue.featured_founders && topIssue.featured_founders.length > 0
+                ? topIssue.featured_founders
+                : DEFAULT_MAGAZINE_ISSUE.featuredFounders,
+            tableOfContents:
+              topIssue.table_of_contents && topIssue.table_of_contents.length > 0
+                ? topIssue.table_of_contents
+                : DEFAULT_MAGAZINE_ISSUE.tableOfContents,
+          });
+        }
       }
 
       setIsError(false);
@@ -239,6 +253,15 @@ export default function App() {
           setCurrentView('home');
           setAdminLoginOpen(true);
         }
+        return;
+      }
+
+      if (
+        path === '30-under-30-india-2026' ||
+        path === '30-under-30' ||
+        path === 'magazine/30-under-30-india-2026'
+      ) {
+        setCurrentView('30-under-30');
         return;
       }
 
@@ -327,7 +350,7 @@ export default function App() {
   }, [articles]);
 
   // Sync route and scroll to top
-  const navigateTo = (view: 'home' | 'article' | 'magazine' | 'author' | 'policy' | 'category' | 'admin' | 'nominations' | 'founder-profile', path: string) => {
+  const navigateTo = (view: 'home' | 'article' | 'magazine' | '30-under-30' | 'author' | 'policy' | 'category' | 'admin' | 'nominations' | 'founder-profile', path: string) => {
     setCurrentView(view);
     window.history.pushState({}, '', `/${path}`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -380,6 +403,10 @@ export default function App() {
 
   const handleNavigateMagazine = () => {
     navigateTo('magazine', 'magazine');
+  };
+
+  const handleNavigateThirtyUnderThirty = () => {
+    navigateTo('30-under-30', '30-under-30-india-2026');
   };
 
   const handleNavigateNominations = () => {
@@ -439,6 +466,17 @@ export default function App() {
       {currentView === 'article' && currentArticle && <SEOHead article={currentArticle} type="article" />}
       {currentView === 'category' && <SEOHead title={activeCategorySlug.toUpperCase()} type="website" />}
       {currentView === 'magazine' && <SEOHead title="The Founder Magazine" type="website" />}
+      {currentView === '30-under-30' && (
+        <SEOHead
+          title={THIRTY_UNDER_THIRTY_META.pageTitle}
+          description={THIRTY_UNDER_THIRTY_META.metaDescription}
+          canonicalUrl={THIRTY_UNDER_THIRTY_META.canonicalUrl}
+          image={THIRTY_UNDER_THIRTY_META.coverImageAbsoluteUrl}
+          imageAlt={THIRTY_UNDER_THIRTY_META.coverImageAlt}
+          type="article"
+          customSchema={buildThirtyUnderThirtySchema()}
+        />
+      )}
       {currentView === 'nominations' && <SEOHead title="Magazine Nominations | Founder Bytes" description="Nominate yourself or someone who deserves to be featured in Founder Bytes 30 Under 30 and Founder Timex magazine editions." canonicalUrl="https://founderbytes.in/nominations" type="website" />}
       {currentView === 'founder-profile' && currentFounder && (
         <SEOHead 
@@ -453,7 +491,15 @@ export default function App() {
 
       {/* 1. TOP UTILITY BAR + 2. BRAND MASTHEAD + 3. PRIMARY NAVIGATION */}
       <Header
-        currentCategory={currentView === 'category' ? activeCategorySlug : undefined}
+        currentCategory={
+          currentView === 'category'
+            ? activeCategorySlug
+            : currentView === 'magazine'
+              ? 'magazine'
+              : currentView === '30-under-30'
+                ? '30-under-30-india-2026'
+                : undefined
+        }
         onSelectCategory={handleSelectCategory}
         onOpenSearch={() => setSearchModalOpen(true)}
         onOpenSubscribe={() => {
@@ -462,6 +508,7 @@ export default function App() {
         }}
         onNavigateHome={handleNavigateHome}
         onNavigateMagazine={handleNavigateMagazine}
+        onNavigateThirtyUnderThirty={handleNavigateThirtyUnderThirty}
         onNavigatePolicy={handleNavigatePolicy}
         onNavigateNominations={handleNavigateNominations}
       />
@@ -498,6 +545,18 @@ export default function App() {
           <MagazinePage
             onSelectArticle={handleSelectArticle}
             onNavigateHome={handleNavigateHome}
+            onNavigateThirtyUnderThirty={handleNavigateThirtyUnderThirty}
+          />
+        )}
+
+        {/* VIEW 2a: Founder Bytes – 30 Under 30 India 2026 Feature Page */}
+        {currentView === '30-under-30' && (
+          <ThirtyUnderThirtyPage
+            onNavigateHome={handleNavigateHome}
+            onNavigateMagazine={handleNavigateMagazine}
+            onNavigateNominations={handleNavigateNominations}
+            onNavigatePolicy={handleNavigatePolicy}
+            onSelectCategory={handleSelectCategory}
           />
         )}
 
@@ -691,7 +750,15 @@ export default function App() {
                 <MagazineShowcase
                   issue={magazineIssue}
                   onNavigateMagazine={handleNavigateMagazine}
-                  onSelectArticle={handleSelectArticle}
+                  onNavigateThirtyUnderThirty={handleNavigateThirtyUnderThirty}
+                  onOpenFlipbook={() => setHomeMagazineReaderOpen(true)}
+                  onSelectArticle={(slug) => {
+                    if (slug === '30-under-30-india-2026') {
+                      handleNavigateThirtyUnderThirty();
+                    } else {
+                      handleSelectArticle(slug);
+                    }
+                  }}
                 />
 
                 {/* Newsletter Dispatch Box */}
@@ -713,6 +780,7 @@ export default function App() {
         onNavigatePolicy={handleNavigatePolicy}
         onNavigateHome={handleNavigateHome}
         onNavigateMagazine={handleNavigateMagazine}
+        onNavigateThirtyUnderThirty={handleNavigateThirtyUnderThirty}
         onNavigateNominations={handleNavigateNominations}
         onOpenAdminLogin={() => setAdminLoginOpen(true)}
       />
@@ -732,6 +800,14 @@ export default function App() {
         onClose={() => setAdminLoginOpen(false)}
         onLoginSuccess={handleAdminLoginSuccess}
       />
+
+      {/* Homepage Quick Digital Magazine Reader Modal */}
+      {homeMagazineReaderOpen && (
+        <MagazineFlipbook
+          issue={THIRTY_UNDER_THIRTY_MAGAZINE_CMS}
+          onClose={() => setHomeMagazineReaderOpen(false)}
+        />
+      )}
     </div>
   );
 }

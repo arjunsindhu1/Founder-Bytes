@@ -2,6 +2,7 @@ import React from 'react';
 import { Article } from '../types';
 import { formatISTDateTime, getRelativeTime } from '../utils/dateUtils';
 import { ArrowRight, TrendingUp, DollarSign } from 'lucide-react';
+import { EditorialImage } from './EditorialImage';
 
 interface CategorySectionProps {
   title: string;
@@ -54,15 +55,16 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                   onClick={() => onSelectArticle(articles[0].slug)}
                   className="group cursor-pointer"
                 >
-                  <div className="w-full aspect-[16/10] bg-neutral-100 overflow-hidden mb-3">
-                    <img
-                      src={articles[0].featuredImage}
-                      alt={articles[0].title}
-                      loading="lazy"
-                      referrerPolicy="no-referrer"
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-102"
-                    />
-                  </div>
+                  <EditorialImage
+                    src={articles[0].featuredImage}
+                    alt={articles[0].title}
+                    category={articles[0].category}
+                    title={articles[0].title}
+                    aspectRatioClass="aspect-[16/10]"
+                    loading="lazy"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-102"
+                    containerClassName="mb-3"
+                  />
                   <div className="flex items-center gap-2 text-xs font-mono text-neutral-500 mb-1">
                     <span className="font-bold text-neutral-900 uppercase">
                       {articles[0].category}
@@ -88,12 +90,14 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                     className="group cursor-pointer py-4 first:pt-0 last:pb-0"
                   >
                     <div className="flex gap-4">
-                      <div className="w-28 sm:w-32 aspect-[16/11] bg-neutral-100 shrink-0 overflow-hidden">
-                        <img
+                      <div className="w-28 sm:w-32 shrink-0">
+                        <EditorialImage
                           src={story.featuredImage}
                           alt={story.title}
+                          category={story.category}
+                          title={story.title}
+                          aspectRatioClass="aspect-[16/11]"
                           loading="lazy"
-                          referrerPolicy="no-referrer"
                           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                         />
                       </div>
@@ -150,15 +154,16 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                   onClick={() => onSelectArticle(story.slug)}
                   className={`group cursor-pointer ${i !== 0 ? 'pt-4 md:pt-0 md:pl-6' : ''}`}
                 >
-                  <div className="aspect-[16/10] bg-neutral-100 overflow-hidden mb-2.5">
-                    <img
-                      src={story.featuredImage}
-                      alt={story.title}
-                      loading="lazy"
-                      referrerPolicy="no-referrer"
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-103"
-                    />
-                  </div>
+                  <EditorialImage
+                    src={story.featuredImage}
+                    alt={story.title}
+                    category={story.category}
+                    title={story.title}
+                    aspectRatioClass="aspect-[16/10]"
+                    loading="lazy"
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-103"
+                    containerClassName="mb-2.5"
+                  />
                   <div className="text-[10px] font-mono text-neutral-500 mb-1 uppercase">
                     {story.category} · {getRelativeTime(story.publishedAt)}
                   </div>
@@ -185,17 +190,18 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
               >
                 <div>
                   {/* Portrait with varied crops & genuine editorial presence */}
-                  <div className={`w-full overflow-hidden mb-3 bg-neutral-100 ${
-                    index === 0 ? 'aspect-[4/3]' : index === 1 ? 'aspect-[16/10]' : 'aspect-[5/4]'
-                  }`}>
-                    <img
-                      src={story.featuredImage}
-                      alt={story.title}
-                      loading="lazy"
-                      referrerPolicy="no-referrer"
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-103"
-                    />
-                  </div>
+                  <EditorialImage
+                    src={story.featuredImage}
+                    alt={story.title}
+                    category={story.category}
+                    title={story.title}
+                    aspectRatioClass={
+                      index === 0 ? 'aspect-[4/3]' : index === 1 ? 'aspect-[16/10]' : 'aspect-[5/4]'
+                    }
+                    loading="lazy"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-103"
+                    containerClassName="mb-3"
+                  />
                   <div className="flex items-center gap-1.5 text-[10px] font-mono text-neutral-500 mb-1">
                     <span className="font-bold text-[#DF9E00] uppercase tracking-wider">
                       FOUNDER INTERVIEW
@@ -228,15 +234,16 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 onClick={() => onSelectArticle(story.slug)}
                 className="group cursor-pointer flex flex-col"
               >
-                <div className="aspect-[16/10] bg-neutral-100 overflow-hidden mb-2.5">
-                  <img
-                    src={story.featuredImage}
-                    alt={story.title}
-                    loading="lazy"
-                    referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-104"
-                  />
-                </div>
+                <EditorialImage
+                  src={story.featuredImage}
+                  alt={story.title}
+                  category={story.category}
+                  title={story.title}
+                  aspectRatioClass="aspect-[16/10]"
+                  loading="lazy"
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-104"
+                  containerClassName="mb-2.5"
+                />
                 <div className="text-[10px] font-mono text-neutral-500 mb-1 uppercase">
                   {story.category} · {getRelativeTime(story.publishedAt)}
                 </div>
@@ -300,10 +307,13 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                   onClick={() => onSelectArticle(story.slug)}
                   className="group cursor-pointer flex gap-4 p-3 bg-neutral-50 border border-neutral-200"
                 >
-                  <div className="w-28 aspect-[16/10] bg-neutral-200 shrink-0 overflow-hidden">
-                    <img
+                  <div className="w-28 shrink-0">
+                    <EditorialImage
                       src={story.featuredImage}
                       alt={story.title}
+                      category={story.category}
+                      title={story.title}
+                      aspectRatioClass="aspect-[16/10]"
                       loading="lazy"
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
@@ -330,14 +340,16 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 onClick={() => onSelectArticle(story.slug)}
                 className="group cursor-pointer flex flex-col"
               >
-                <div className="aspect-[16/10] bg-neutral-100 overflow-hidden mb-2.5">
-                  <img
-                    src={story.featuredImage}
-                    alt={story.title}
-                    loading="lazy"
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-104"
-                  />
-                </div>
+                <EditorialImage
+                  src={story.featuredImage}
+                  alt={story.title}
+                  category={story.category}
+                  title={story.title}
+                  aspectRatioClass="aspect-[16/10]"
+                  loading="lazy"
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-104"
+                  containerClassName="mb-2.5"
+                />
                 <div className="text-[10px] font-mono text-neutral-500 mb-1 uppercase">
                   {story.category} · {getRelativeTime(story.publishedAt)}
                 </div>
@@ -361,10 +373,13 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 onClick={() => onSelectArticle(story.slug)}
                 className="group cursor-pointer flex gap-4 p-3 bg-neutral-50 border border-neutral-200"
               >
-                <div className="w-28 sm:w-32 aspect-[16/10] bg-neutral-200 shrink-0 overflow-hidden">
-                  <img
+                <div className="w-28 sm:w-32 shrink-0">
+                  <EditorialImage
                     src={story.featuredImage}
                     alt={story.title}
+                    category={story.category}
+                    title={story.title}
+                    aspectRatioClass="aspect-[16/10]"
                     loading="lazy"
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />

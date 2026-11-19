@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Article } from '../types';
 import { formatISTDateTime, getRelativeTime } from '../utils/dateUtils';
 import { Clock } from 'lucide-react';
+import { EditorialImage } from './EditorialImage';
 
 interface ArticleCardProps {
   article: Article;
@@ -99,22 +100,16 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
         onClick={handleCardClick}
         className="group flex flex-col sm:flex-row gap-4 py-4 border-b border-neutral-200 last:border-0 cursor-pointer"
       >
-        <div className="sm:w-1/3 aspect-[16/10] bg-neutral-100 overflow-hidden relative shrink-0">
-          {!imageError ? (
-            <img
-              src={article.featuredImage}
-              alt={article.title}
-              referrerPolicy="no-referrer"
-              loading="lazy"
-              onError={() => setImageError(true)}
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-104"
-            />
-          ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center bg-neutral-900 text-white p-3 text-center">
-              <span className="text-xs uppercase tracking-widest text-[#F5B800] font-semibold">Founder Bytes</span>
-              <span className="text-[10px] text-neutral-300 mt-1 line-clamp-2">{article.category}</span>
-            </div>
-          )}
+        <div className="sm:w-1/3 shrink-0">
+          <EditorialImage
+            src={article.featuredImage}
+            alt={article.title}
+            category={article.category}
+            title={article.title}
+            aspectRatioClass="aspect-[16/10]"
+            loading="lazy"
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-104"
+          />
         </div>
         <div className="flex-1 flex flex-col justify-between">
           <div>
@@ -194,23 +189,16 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
           {article.title}
         </h2>
 
-        <div className="aspect-[16/9] bg-neutral-100 overflow-hidden relative mb-3">
-          {!imageError ? (
-            <img
-              src={article.featuredImage}
-              alt={article.title}
-              referrerPolicy="no-referrer"
-              loading="eager"
-              onError={() => setImageError(true)}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-101"
-            />
-          ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center bg-neutral-950 text-white p-6">
-              <span className="text-sm uppercase tracking-widest text-[#F5B800] font-bold">Founder Bytes Lead</span>
-              <span className="text-xs text-neutral-400 mt-2">{article.category}</span>
-            </div>
-          )}
-        </div>
+        <EditorialImage
+          src={article.featuredImage}
+          alt={article.title}
+          category={article.category}
+          title={article.title}
+          aspectRatioClass="aspect-[16/9]"
+          priority={true}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-101"
+          containerClassName="mb-3"
+        />
 
         <p className="text-sm sm:text-base text-neutral-700 leading-relaxed font-serif mb-3 line-clamp-3">
           {article.dek}
@@ -239,22 +227,16 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({
       onClick={handleCardClick}
       className="group cursor-pointer flex flex-col h-full"
     >
-      <div className="aspect-[16/10] bg-neutral-100 overflow-hidden relative mb-2.5">
-        {!imageError ? (
-          <img
-            src={article.featuredImage}
-            alt={article.title}
-            referrerPolicy="no-referrer"
-            loading="lazy"
-            onError={() => setImageError(true)}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-104"
-          />
-        ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center bg-neutral-900 text-white p-4">
-            <span className="text-xs uppercase tracking-widest text-[#F5B800] font-semibold">Founder Bytes</span>
-            <span className="text-xs text-neutral-400 mt-1">{article.category}</span>
-          </div>
-        )}
+      <div className="mb-2.5">
+        <EditorialImage
+          src={article.featuredImage}
+          alt={article.title}
+          category={article.category}
+          title={article.title}
+          aspectRatioClass="aspect-[16/10]"
+          loading="lazy"
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-104"
+        />
       </div>
 
       <div className="flex items-center gap-2 text-[10px] font-mono text-neutral-500 mb-1">
