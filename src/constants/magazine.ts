@@ -2,7 +2,7 @@ import { MagazineIssue } from '../types';
 import { CMSMagazineIssue } from '../types/cms';
 
 export const THIRTY_UNDER_THIRTY_PDF_URL =
-  '/magazines/founderbytes-30-under-30-india-2026.pdf';
+  '/magazines/30-under-30-india-2026.pdf';
 
 export const THIRTY_UNDER_THIRTY_MAGAZINE_CMS: CMSMagazineIssue = {
   id: 'founderbytes-30-under-30-india-2026',
@@ -16,7 +16,8 @@ export const THIRTY_UNDER_THIRTY_MAGAZINE_CMS: CMSMagazineIssue = {
   is_featured: true,
   is_published: true,
   pdf_link: THIRTY_UNDER_THIRTY_PDF_URL,
-  pdf_file_name: 'FounderBytes-30-Under-30-India-2026.pdf',
+  pdf_file_name: '30-under-30-india-2026.pdf',
+  pdf_size_bytes: 3550392,
   page_count: 38,
   featured_founders: [
     {
