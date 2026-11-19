@@ -54,6 +54,10 @@ export const PdfMagazineReader: React.FC<PdfMagazineReaderProps> = ({
   const rightCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const renderTasksRef = useRef<pdfjsLib.RenderTask[]>([]);
   const [stageWidth, setStageWidth] = useState<number>(900);
+  const [stageHeight, setStageHeight] = useState<number>(620);
+  const [viewportHeight, setViewportHeight] = useState<number>(() =>
+    typeof window !== 'undefined' ? window.innerHeight : 820
+  );
 
   // Automatically pick 2-page spread on wide desktop viewports in modal mode
   useEffect(() => {
@@ -62,24 +66,28 @@ export const PdfMagazineReader: React.FC<PdfMagazineReaderProps> = ({
     }
   }, [mode]);
 
-  // Observe reader stage width for responsive canvas scaling
+  // Observe reader stage width & height for responsive fit-to-screen canvas scaling
   useEffect(() => {
     const el = stageRef.current;
     if (!el) return;
 
-    const updateWidth = () => {
-      const next = el.clientWidth;
-      if (next > 0) setStageWidth(next);
+    const updateDimensions = () => {
+      if (el.clientWidth > 0) setStageWidth(el.clientWidth);
+      if (el.clientHeight > 0) setStageHeight(el.clientHeight);
+      if (typeof window !== 'undefined') setViewportHeight(window.innerHeight);
     };
-    updateWidth();
+    updateDimensions();
 
+    window.addEventListener('resize', updateDimensions);
     if (typeof ResizeObserver !== 'undefined') {
-      const observer = new ResizeObserver(updateWidth);
+      const observer = new ResizeObserver(updateDimensions);
       observer.observe(el);
-      return () => observer.disconnect();
+      return () => {
+        observer.disconnect();
+        window.removeEventListener('resize', updateDimensions);
+      };
     }
-    window.addEventListener('resize', updateWidth);
-    return () => window.removeEventListener('resize', updateWidth);
+    return () => window.removeEventListener('resize', updateDimensions);
   }, []);
 
   // Load PDF document via PDF.js
@@ -169,14 +177,17 @@ export const PdfMagazineReader: React.FC<PdfMagazineReaderProps> = ({
     const renderPageToCanvas = async (
       pageNum: number,
       canvas: HTMLCanvasElement | null,
-      maxWidth: number
+      maxWidth: number,
+      maxHeight: number
     ) => {
       if (!canvas || cancelled) return;
       const page = await pdfDoc.getPage(pageNum);
       if (cancelled) return;
 
       const baseViewport = page.getViewport({ scale: 1 });
-      const fitScale = Math.max(0.4, maxWidth / baseViewport.width);
+      const widthScale = maxWidth / baseViewport.width;
+      const heightScale = maxHeight / baseViewport.height;
+      const fitScale = Math.max(0.35, Math.min(widthScale, heightScale));
       const effectiveScale = fitScale * zoom;
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
@@ -209,16 +220,20 @@ export const PdfMagazineReader: React.FC<PdfMagazineReaderProps> = ({
     };
 
     const horizontalPadding = mode === 'modal' ? 96 : 48;
-    const availableWidth = Math.max(280, stageWidth - horizontalPadding);
+    const availableWidth = Math.max(260, stageWidth - horizontalPadding);
     const isTwoPage = visiblePages.length === 2;
     const targetPageWidth = isTwoPage
-      ? Math.min(540, Math.floor((availableWidth - 12) / 2))
-      : Math.min(mode === 'modal' ? 680 : 720, availableWidth);
+      ? Math.min(mode === 'modal' ? 480 : 420, Math.floor((availableWidth - 12) / 2))
+      : Math.min(mode === 'modal' ? 560 : 500, availableWidth);
+    const targetPageHeight =
+      mode === 'modal'
+        ? Math.max(380, stageHeight - 40)
+        : Math.min(580, Math.max(400, viewportHeight - 230));
 
     Promise.all([
-      renderPageToCanvas(visiblePages[0], leftCanvasRef.current, targetPageWidth),
+      renderPageToCanvas(visiblePages[0], leftCanvasRef.current, targetPageWidth, targetPageHeight),
       isTwoPage
-        ? renderPageToCanvas(visiblePages[1], rightCanvasRef.current, targetPageWidth)
+        ? renderPageToCanvas(visiblePages[1], rightCanvasRef.current, targetPageWidth, targetPageHeight)
         : Promise.resolve(),
     ]).finally(() => {
       if (!cancelled) {
@@ -237,7 +252,7 @@ export const PdfMagazineReader: React.FC<PdfMagazineReaderProps> = ({
       }
       renderTasksRef.current = [];
     };
-  }, [pdfDoc, visiblePages, zoom, stageWidth, mode]);
+  }, [pdfDoc, visiblePages, zoom, stageWidth, stageHeight, viewportHeight, mode]);
 
   const goToPage = useCallback(
     (target: number) => {
@@ -427,7 +442,7 @@ export const PdfMagazineReader: React.FC<PdfMagazineReaderProps> = ({
           <div className="flex items-center bg-neutral-900 border border-neutral-800 p-0.5">
             <button
               type="button"
-              onClick={() => setZoom((z) => Math.max(0.75, Number((z - 0.15).toFixed(2))))}
+              onClick={() => setZoom((z) => Math.max(0.5, Number((z - 0.1).toFixed(2))))}
               className="p-1 text-neutral-400 hover:text-white cursor-pointer"
               title="Zoom out"
               aria-label="Zoom out"
@@ -439,7 +454,7 @@ export const PdfMagazineReader: React.FC<PdfMagazineReaderProps> = ({
             </span>
             <button
               type="button"
-              onClick={() => setZoom((z) => Math.min(2, Number((z + 0.15).toFixed(2))))}
+              onClick={() => setZoom((z) => Math.min(2, Number((z + 0.1).toFixed(2))))}
               className="p-1 text-neutral-400 hover:text-white cursor-pointer"
               title="Zoom in"
               aria-label="Zoom in"
@@ -502,7 +517,7 @@ export const PdfMagazineReader: React.FC<PdfMagazineReaderProps> = ({
       <div
         ref={stageRef}
         className={`relative flex-1 flex items-center justify-center overflow-auto bg-[#0B0B0B] ${
-          mode === 'modal' ? 'p-4 sm:p-6' : 'min-h-[540px] sm:min-h-[680px] lg:min-h-[760px] p-4 sm:p-8'
+          mode === 'modal' ? 'p-3 sm:p-5' : 'min-h-[460px] sm:min-h-[540px] lg:min-h-[600px] p-4 sm:p-5'
         }`}
       >
         {/* Floating Previous Page Button */}

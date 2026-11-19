@@ -152,7 +152,7 @@ export const MagazinePage: React.FC<MagazinePageProps> = ({
                 <div className="lg:col-span-5 flex justify-center">
                   <div
                     onClick={() => setShowFlipbook(true)}
-                    className="relative max-w-sm w-full bg-black p-2 shadow-2xl border border-neutral-800 cursor-pointer group transition-transform hover:-translate-y-0.5"
+                    className="relative max-w-[260px] sm:max-w-[280px] w-full bg-black p-1.5 shadow-2xl border border-neutral-800 cursor-pointer group transition-transform hover:-translate-y-0.5"
                     title="Click to read full magazine in fullscreen"
                   >
                     <img
